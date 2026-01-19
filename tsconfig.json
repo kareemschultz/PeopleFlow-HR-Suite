@@ -1,0 +1,6 @@
+{
+  "extends": "@PeopleFlow-HR-Suite/config/tsconfig.base.json",
+  "compilerOptions": {
+    "strictNullChecks": true
+  }
+}

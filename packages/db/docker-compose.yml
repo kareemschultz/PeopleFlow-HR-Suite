@@ -1,0 +1,23 @@
+name: PeopleFlow-HR-Suite
+
+services:
+  postgres:
+    image: postgres
+    container_name: PeopleFlow-HR-Suite-postgres
+    environment:
+      POSTGRES_DB: PeopleFlow-HR-Suite
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - PeopleFlow-HR-Suite_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  PeopleFlow-HR-Suite_postgres_data:

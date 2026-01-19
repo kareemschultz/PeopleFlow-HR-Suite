@@ -1,0 +1,66 @@
+{
+  "name": "PeopleFlow-HR-Suite",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "dotenv": "^17.2.2",
+      "zod": "^4.1.13",
+      "typescript": "^5",
+      "@types/bun": "^1.3.4",
+      "hono": "^4.8.2",
+      "@orpc/server": "^1.12.2",
+      "@orpc/openapi": "^1.12.2",
+      "@orpc/zod": "^1.12.2",
+      "better-auth": "^1.4.9",
+      "@orpc/tanstack-query": "^1.12.2",
+      "@orpc/client": "^1.12.2",
+      "@tanstack/react-query": "^5.90.12",
+      "@polar-sh/better-auth": "^1.6.4",
+      "@better-auth/expo": "^1.4.9"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @PeopleFlow-HR-Suite/db db:push",
+    "db:studio": "turbo -F @PeopleFlow-HR-Suite/db db:studio",
+    "db:generate": "turbo -F @PeopleFlow-HR-Suite/db db:generate",
+    "db:migrate": "turbo -F @PeopleFlow-HR-Suite/db db:migrate",
+    "db:start": "turbo -F @PeopleFlow-HR-Suite/db db:start",
+    "db:watch": "turbo -F @PeopleFlow-HR-Suite/db db:watch",
+    "db:stop": "turbo -F @PeopleFlow-HR-Suite/db db:stop",
+    "db:down": "turbo -F @PeopleFlow-HR-Suite/db db:down",
+    "prepare": "husky",
+    "ruler:apply": "bunx @intellectronica/ruler@latest apply --local-only"
+  },
+  "dependencies": {
+    "@PeopleFlow-HR-Suite/env": "workspace:*",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@PeopleFlow-HR-Suite/config": "workspace:*",
+    "@biomejs/biome": "2.3.11",
+    "@types/bun": "catalog:",
+    "husky": "latest",
+    "lint-staged": "latest",
+    "turbo": "^2.6.3",
+    "typescript": "catalog:",
+    "ultracite": "7.0.11"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
+      "bun x ultracite fix"
+    ]
+  },
+  "packageManager": "bun@1.2.18"
+}
