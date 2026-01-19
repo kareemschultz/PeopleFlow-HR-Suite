@@ -1,58 +1,49 @@
-import { db } from "@PeopleFlow-HR-Suite/db";
-import {
-	departments,
-	type NewDepartment,
-} from "@PeopleFlow-HR-Suite/db/schema";
-import { oz } from "@orpc/zod";
+import { db, departments, type NewDepartment } from "@PeopleFlow-HR-Suite/db";
 import { and, eq, like } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure } from "../context";
+import { authedProcedure } from "..";
 
 // ============================================================================
 // INPUT SCHEMAS
 // ============================================================================
 
-const createDepartmentSchema = oz.input(
-	z.object({
-		organizationId: z.string().uuid(),
-		name: z.string().min(1).max(255),
-		code: z.string().min(1).max(50),
-		description: z.string().optional(),
-		parentDepartmentId: z.string().uuid().optional(),
-		location: z.string().optional(),
-		settings: z
-			.object({
-				annualBudget: z.number().positive().optional(),
-				budgetCurrency: z.string().length(3).optional(),
-				requiresApprovalForLeave: z.boolean().optional(),
-				requiresApprovalForExpenses: z.boolean().optional(),
-				notifyHeadOnNewEmployee: z.boolean().optional(),
-			})
-			.optional(),
-	})
-);
+const createDepartmentSchema = z.object({
+	organizationId: z.string().uuid(),
+	name: z.string().min(1).max(255),
+	code: z.string().min(1).max(50),
+	description: z.string().optional(),
+	parentDepartmentId: z.string().uuid().optional(),
+	location: z.string().optional(),
+	settings: z
+		.object({
+			annualBudget: z.number().positive().optional(),
+			budgetCurrency: z.string().length(3).optional(),
+			requiresApprovalForLeave: z.boolean().optional(),
+			requiresApprovalForExpenses: z.boolean().optional(),
+			notifyHeadOnNewEmployee: z.boolean().optional(),
+		})
+		.optional(),
+});
 
-const updateDepartmentSchema = oz.input(
-	z.object({
-		id: z.string().uuid(),
-		name: z.string().min(1).max(255).optional(),
-		code: z.string().min(1).max(50).optional(),
-		description: z.string().optional(),
-		parentDepartmentId: z.string().uuid().nullable().optional(),
-		headEmployeeId: z.string().uuid().nullable().optional(),
-		location: z.string().optional(),
-		settings: z
-			.object({
-				annualBudget: z.number().positive().optional(),
-				budgetCurrency: z.string().length(3).optional(),
-				requiresApprovalForLeave: z.boolean().optional(),
-				requiresApprovalForExpenses: z.boolean().optional(),
-				notifyHeadOnNewEmployee: z.boolean().optional(),
-			})
-			.optional(),
-		isActive: z.boolean().optional(),
-	})
-);
+const updateDepartmentSchema = z.object({
+	id: z.string().uuid(),
+	name: z.string().min(1).max(255).optional(),
+	code: z.string().min(1).max(50).optional(),
+	description: z.string().optional(),
+	parentDepartmentId: z.string().uuid().nullable().optional(),
+	headEmployeeId: z.string().uuid().nullable().optional(),
+	location: z.string().optional(),
+	settings: z
+		.object({
+			annualBudget: z.number().positive().optional(),
+			budgetCurrency: z.string().length(3).optional(),
+			requiresApprovalForLeave: z.boolean().optional(),
+			requiresApprovalForExpenses: z.boolean().optional(),
+			notifyHeadOnNewEmployee: z.boolean().optional(),
+		})
+		.optional(),
+	isActive: z.boolean().optional(),
+});
 
 // ============================================================================
 // PROCEDURES
@@ -76,7 +67,7 @@ export const createDepartment = authedProcedure
  * Get department by ID with its relationships
  */
 export const getDepartment = authedProcedure
-	.input(oz.input(z.object({ id: z.string().uuid() })))
+	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ input }) => {
 		const department = await db.query.departments.findFirst({
 			where: eq(departments.id, input.id),
@@ -99,18 +90,16 @@ export const getDepartment = authedProcedure
  */
 export const listDepartments = authedProcedure
 	.input(
-		oz.input(
-			z
-				.object({
-					organizationId: z.string().uuid(),
-					search: z.string().optional(),
-					parentDepartmentId: z.string().uuid().optional(),
-					isActive: z.boolean().optional(),
-					limit: z.number().int().positive().max(100).default(50),
-					offset: z.number().int().nonnegative().default(0),
-				})
-				.optional()
-		)
+		z
+			.object({
+				organizationId: z.string().uuid(),
+				search: z.string().optional(),
+				parentDepartmentId: z.string().uuid().optional(),
+				isActive: z.boolean().optional(),
+				limit: z.number().int().positive().max(100).default(50),
+				offset: z.number().int().nonnegative().default(0),
+			})
+			.optional()
 	)
 	.handler(async ({ input }) => {
 		if (!input?.organizationId) {
@@ -171,7 +160,7 @@ export const updateDepartment = authedProcedure
  * Delete (soft delete by marking inactive) a department
  */
 export const deleteDepartment = authedProcedure
-	.input(oz.input(z.object({ id: z.string().uuid() })))
+	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ input }) => {
 		const [deleted] = await db
 			.update(departments)

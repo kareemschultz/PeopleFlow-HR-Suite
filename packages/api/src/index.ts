@@ -18,3 +18,6 @@ const requireAuth = o.middleware(async ({ context, next }) => {
 });
 
 export const protectedProcedure = publicProcedure.use(requireAuth);
+
+// Alias for backward compatibility
+export const authedProcedure = protectedProcedure;

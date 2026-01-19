@@ -1,6 +1,5 @@
-bun test
-
 #!/bin/sh
+# bun test  # Disabled until tests are implemented
 # Exit on any error
 set -e
 

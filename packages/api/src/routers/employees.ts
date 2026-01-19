@@ -1,9 +1,7 @@
-import { db } from "@PeopleFlow-HR-Suite/db";
-import { employees, type NewEmployee } from "@PeopleFlow-HR-Suite/db/schema";
-import { oz } from "@orpc/zod";
+import { db, employees, type NewEmployee } from "@PeopleFlow-HR-Suite/db";
 import { and, eq, like, or } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure } from "../context";
+import { authedProcedure } from "..";
 
 // ============================================================================
 // INPUT SCHEMAS
@@ -54,98 +52,94 @@ const bankDetailsSchema = z.object({
 	swiftCode: z.string().optional(),
 });
 
-const createEmployeeSchema = oz.input(
-	z.object({
-		// Relationships
-		organizationId: z.string().uuid(),
-		departmentId: z.string().uuid(),
-		positionId: z.string().uuid(),
-		managerId: z.string().uuid().optional(),
-		userId: z.string().optional(),
+const createEmployeeSchema = z.object({
+	// Relationships
+	organizationId: z.string().uuid(),
+	departmentId: z.string().uuid(),
+	positionId: z.string().uuid(),
+	managerId: z.string().uuid().optional(),
+	userId: z.string().optional(),
 
-		// Personal information
-		firstName: z.string().min(1).max(100),
-		middleName: z.string().max(100).optional(),
-		lastName: z.string().min(1).max(100),
-		preferredName: z.string().max(100).optional(),
-		email: z.string().email(),
-		phone: z.string().optional(),
-		emergencyContact: emergencyContactSchema.optional(),
-		dateOfBirth: z.string().optional(), // ISO date string
-		gender: z.enum(["male", "female", "other", "prefer_not_to_say"]).optional(),
-		nationality: z.string().optional(),
-		address: addressSchema.optional(),
+	// Personal information
+	firstName: z.string().min(1).max(100),
+	middleName: z.string().max(100).optional(),
+	lastName: z.string().min(1).max(100),
+	preferredName: z.string().max(100).optional(),
+	email: z.string().email(),
+	phone: z.string().optional(),
+	emergencyContact: emergencyContactSchema.optional(),
+	dateOfBirth: z.string().optional(), // ISO date string
+	gender: z.enum(["male", "female", "other", "prefer_not_to_say"]).optional(),
+	nationality: z.string().optional(),
+	address: addressSchema.optional(),
 
-		// Identification
-		employeeNumber: z.string().min(1).max(50),
-		taxId: z.string().optional(),
-		nisNumber: z.string().optional(),
-		passportNumber: z.string().optional(),
-		nationalIdNumber: z.string().optional(),
+	// Identification
+	employeeNumber: z.string().min(1).max(50),
+	taxId: z.string().optional(),
+	nisNumber: z.string().optional(),
+	passportNumber: z.string().optional(),
+	nationalIdNumber: z.string().optional(),
 
-		// Employment details
-		hireDate: z.string(), // ISO date string
-		startDate: z.string(), // ISO date string
-		probationEndDate: z.string().optional(),
-		employmentType: z
-			.enum(["full_time", "part_time", "contract", "temporary", "intern"])
-			.default("full_time"),
-		employmentStatus: z
-			.enum(["active", "on_leave", "suspended", "terminated", "retired"])
-			.default("active"),
-		workSchedule: workScheduleSchema.optional(),
+	// Employment details
+	hireDate: z.string(), // ISO date string
+	startDate: z.string(), // ISO date string
+	probationEndDate: z.string().optional(),
+	employmentType: z
+		.enum(["full_time", "part_time", "contract", "temporary", "intern"])
+		.default("full_time"),
+	employmentStatus: z
+		.enum(["active", "on_leave", "suspended", "terminated", "retired"])
+		.default("active"),
+	workSchedule: workScheduleSchema.optional(),
 
-		// Compensation
-		baseSalary: z.number().int().nonnegative(),
-		salaryCurrency: z.string().length(3).default("GYD"),
-		salaryFrequency: z
-			.enum(["monthly", "biweekly", "weekly", "annual"])
-			.default("monthly"),
-		allowances: z.array(allowanceSchema).optional(),
-		deductions: z.array(deductionSchema).optional(),
-		bankDetails: bankDetailsSchema.optional(),
+	// Compensation
+	baseSalary: z.number().int().nonnegative(),
+	salaryCurrency: z.string().length(3).default("GYD"),
+	salaryFrequency: z
+		.enum(["monthly", "biweekly", "weekly", "annual"])
+		.default("monthly"),
+	allowances: z.array(allowanceSchema).optional(),
+	deductions: z.array(deductionSchema).optional(),
+	bankDetails: bankDetailsSchema.optional(),
 
-		// Leave balances
-		annualLeaveBalance: z.number().int().nonnegative().default(0),
-		sickLeaveBalance: z.number().int().nonnegative().default(0),
-		otherLeaveBalance: z.number().int().nonnegative().default(0),
+	// Leave balances
+	annualLeaveBalance: z.number().int().nonnegative().default(0),
+	sickLeaveBalance: z.number().int().nonnegative().default(0),
+	otherLeaveBalance: z.number().int().nonnegative().default(0),
 
-		// Other
-		avatar: z.string().url().optional(),
-		notes: z.string().optional(),
-	})
-);
+	// Other
+	avatar: z.string().url().optional(),
+	notes: z.string().optional(),
+});
 
-const updateEmployeeSchema = oz.input(
-	z.object({
-		id: z.string().uuid(),
-		departmentId: z.string().uuid().optional(),
-		positionId: z.string().uuid().optional(),
-		managerId: z.string().uuid().nullable().optional(),
-		firstName: z.string().min(1).max(100).optional(),
-		middleName: z.string().max(100).optional(),
-		lastName: z.string().min(1).max(100).optional(),
-		preferredName: z.string().max(100).optional(),
-		email: z.string().email().optional(),
-		phone: z.string().optional(),
-		emergencyContact: emergencyContactSchema.optional(),
-		address: addressSchema.optional(),
-		employmentStatus: z
-			.enum(["active", "on_leave", "suspended", "terminated", "retired"])
-			.optional(),
-		workSchedule: workScheduleSchema.optional(),
-		baseSalary: z.number().int().nonnegative().optional(),
-		allowances: z.array(allowanceSchema).optional(),
-		deductions: z.array(deductionSchema).optional(),
-		bankDetails: bankDetailsSchema.optional(),
-		annualLeaveBalance: z.number().int().nonnegative().optional(),
-		sickLeaveBalance: z.number().int().nonnegative().optional(),
-		otherLeaveBalance: z.number().int().nonnegative().optional(),
-		avatar: z.string().url().optional(),
-		notes: z.string().optional(),
-		isActive: z.boolean().optional(),
-	})
-);
+const updateEmployeeSchema = z.object({
+	id: z.string().uuid(),
+	departmentId: z.string().uuid().optional(),
+	positionId: z.string().uuid().optional(),
+	managerId: z.string().uuid().nullable().optional(),
+	firstName: z.string().min(1).max(100).optional(),
+	middleName: z.string().max(100).optional(),
+	lastName: z.string().min(1).max(100).optional(),
+	preferredName: z.string().max(100).optional(),
+	email: z.string().email().optional(),
+	phone: z.string().optional(),
+	emergencyContact: emergencyContactSchema.optional(),
+	address: addressSchema.optional(),
+	employmentStatus: z
+		.enum(["active", "on_leave", "suspended", "terminated", "retired"])
+		.optional(),
+	workSchedule: workScheduleSchema.optional(),
+	baseSalary: z.number().int().nonnegative().optional(),
+	allowances: z.array(allowanceSchema).optional(),
+	deductions: z.array(deductionSchema).optional(),
+	bankDetails: bankDetailsSchema.optional(),
+	annualLeaveBalance: z.number().int().nonnegative().optional(),
+	sickLeaveBalance: z.number().int().nonnegative().optional(),
+	otherLeaveBalance: z.number().int().nonnegative().optional(),
+	avatar: z.string().url().optional(),
+	notes: z.string().optional(),
+	isActive: z.boolean().optional(),
+});
 
 // ============================================================================
 // PROCEDURES
@@ -156,7 +150,7 @@ const updateEmployeeSchema = oz.input(
  */
 export const createEmployee = authedProcedure
 	.input(createEmployeeSchema)
-	.use(async ({ next, context, input }) => {
+	.handler(async ({ input }) => {
 		// Check if employee number already exists
 		const existing = await db.query.employees.findFirst({
 			where: and(
@@ -181,9 +175,6 @@ export const createEmployee = authedProcedure
 			throw new Error("Email already exists in organization");
 		}
 
-		return next({ context });
-	})
-	.handler(async ({ input }) => {
 		const [employee] = await db
 			.insert(employees)
 			.values(input as NewEmployee)
@@ -196,7 +187,7 @@ export const createEmployee = authedProcedure
  * Get employee by ID with relationships
  */
 export const getEmployee = authedProcedure
-	.input(oz.input(z.object({ id: z.string().uuid() })))
+	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ input }) => {
 		const employee = await db.query.employees.findFirst({
 			where: eq(employees.id, input.id),
@@ -221,23 +212,21 @@ export const getEmployee = authedProcedure
  */
 export const listEmployees = authedProcedure
 	.input(
-		oz.input(
-			z
-				.object({
-					organizationId: z.string().uuid(),
-					departmentId: z.string().uuid().optional(),
-					positionId: z.string().uuid().optional(),
-					managerId: z.string().uuid().optional(),
-					employmentStatus: z
-						.enum(["active", "on_leave", "suspended", "terminated", "retired"])
-						.optional(),
-					search: z.string().optional(),
-					isActive: z.boolean().optional(),
-					limit: z.number().int().positive().max(100).default(50),
-					offset: z.number().int().nonnegative().default(0),
-				})
-				.optional()
-		)
+		z
+			.object({
+				organizationId: z.string().uuid(),
+				departmentId: z.string().uuid().optional(),
+				positionId: z.string().uuid().optional(),
+				managerId: z.string().uuid().optional(),
+				employmentStatus: z
+					.enum(["active", "on_leave", "suspended", "terminated", "retired"])
+					.optional(),
+				search: z.string().optional(),
+				isActive: z.boolean().optional(),
+				limit: z.number().int().positive().max(100).default(50),
+				offset: z.number().int().nonnegative().default(0),
+			})
+			.optional()
 	)
 	.handler(async ({ input }) => {
 		if (!input?.organizationId) {
@@ -263,14 +252,15 @@ export const listEmployees = authedProcedure
 		}
 
 		if (input?.search) {
-			filters.push(
-				or(
-					like(employees.firstName, `%${input.search}%`),
-					like(employees.lastName, `%${input.search}%`),
-					like(employees.email, `%${input.search}%`),
-					like(employees.employeeNumber, `%${input.search}%`)
-				)
+			const searchFilter = or(
+				like(employees.firstName, `%${input.search}%`),
+				like(employees.lastName, `%${input.search}%`),
+				like(employees.email, `%${input.search}%`),
+				like(employees.employeeNumber, `%${input.search}%`)
 			);
+			if (searchFilter) {
+				filters.push(searchFilter);
+			}
 		}
 
 		if (input?.isActive !== undefined) {
@@ -315,7 +305,7 @@ export const updateEmployee = authedProcedure
  * Delete (soft delete by marking inactive) an employee
  */
 export const deleteEmployee = authedProcedure
-	.input(oz.input(z.object({ id: z.string().uuid() })))
+	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ input }) => {
 		const [deleted] = await db
 			.update(employees)

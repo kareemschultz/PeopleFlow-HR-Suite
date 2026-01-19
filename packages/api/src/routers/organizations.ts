@@ -1,83 +1,78 @@
-import { db } from "@PeopleFlow-HR-Suite/db";
 import {
+	db,
 	type NewOrganization,
 	organizations,
-} from "@PeopleFlow-HR-Suite/db/schema";
-import { oz } from "@orpc/zod";
+} from "@PeopleFlow-HR-Suite/db";
 import { and, eq, like } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure } from "../context";
+import { authedProcedure } from "..";
 
 // ============================================================================
 // INPUT SCHEMAS
 // ============================================================================
 
-const createOrganizationSchema = oz.input(
-	z.object({
-		name: z.string().min(1).max(255),
-		slug: z.string().min(1).max(100),
-		description: z.string().optional(),
-		logo: z.string().url().optional(),
-		primaryColor: z
-			.string()
-			.regex(/^#[0-9A-Fa-f]{6}$/)
-			.optional(),
-		timezone: z.string().default("America/Guyana"),
-		currency: z.string().length(3).default("GYD"),
-		currencySymbol: z.string().default("G$"),
-		fiscalYearStart: z.number().int().min(1).max(12).default(1),
-		settings: z
-			.object({
-				payrollFrequency: z
-					.enum(["weekly", "biweekly", "monthly", "semimonthly"])
-					.optional(),
-				payrollDayOfMonth: z.number().int().min(1).max(31).optional(),
-				overtimeMultiplier: z.number().positive().optional(),
-				annualLeaveDays: z.number().int().nonnegative().optional(),
-				sickLeaveDays: z.number().int().nonnegative().optional(),
-				carryoverAllowed: z.boolean().optional(),
-				requiresPayrollApproval: z.boolean().optional(),
-				requiresLeaveApproval: z.boolean().optional(),
-				notifyOnPayrollRun: z.boolean().optional(),
-				notifyOnLeaveRequest: z.boolean().optional(),
-			})
-			.optional(),
-	})
-);
+const createOrganizationSchema = z.object({
+	name: z.string().min(1).max(255),
+	slug: z.string().min(1).max(100),
+	description: z.string().optional(),
+	logo: z.string().url().optional(),
+	primaryColor: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.optional(),
+	timezone: z.string().default("America/Guyana"),
+	currency: z.string().length(3).default("GYD"),
+	currencySymbol: z.string().default("G$"),
+	fiscalYearStart: z.number().int().min(1).max(12).default(1),
+	settings: z
+		.object({
+			payrollFrequency: z
+				.enum(["weekly", "biweekly", "monthly", "semimonthly"])
+				.optional(),
+			payrollDayOfMonth: z.number().int().min(1).max(31).optional(),
+			overtimeMultiplier: z.number().positive().optional(),
+			annualLeaveDays: z.number().int().nonnegative().optional(),
+			sickLeaveDays: z.number().int().nonnegative().optional(),
+			carryoverAllowed: z.boolean().optional(),
+			requiresPayrollApproval: z.boolean().optional(),
+			requiresLeaveApproval: z.boolean().optional(),
+			notifyOnPayrollRun: z.boolean().optional(),
+			notifyOnLeaveRequest: z.boolean().optional(),
+		})
+		.optional(),
+});
 
-const updateOrganizationSchema = oz.input(
-	z.object({
-		id: z.string().uuid(),
-		name: z.string().min(1).max(255).optional(),
-		description: z.string().optional(),
-		logo: z.string().url().optional(),
-		primaryColor: z
-			.string()
-			.regex(/^#[0-9A-Fa-f]{6}$/)
-			.optional(),
-		timezone: z.string().optional(),
-		currency: z.string().length(3).optional(),
-		currencySymbol: z.string().optional(),
-		fiscalYearStart: z.number().int().min(1).max(12).optional(),
-		settings: z
-			.object({
-				payrollFrequency: z
-					.enum(["weekly", "biweekly", "monthly", "semimonthly"])
-					.optional(),
-				payrollDayOfMonth: z.number().int().min(1).max(31).optional(),
-				overtimeMultiplier: z.number().positive().optional(),
-				annualLeaveDays: z.number().int().nonnegative().optional(),
-				sickLeaveDays: z.number().int().nonnegative().optional(),
-				carryoverAllowed: z.boolean().optional(),
-				requiresPayrollApproval: z.boolean().optional(),
-				requiresLeaveApproval: z.boolean().optional(),
-				notifyOnPayrollRun: z.boolean().optional(),
-				notifyOnLeaveRequest: z.boolean().optional(),
-			})
-			.optional(),
-		isActive: z.boolean().optional(),
-	})
-);
+const updateOrganizationSchema = z.object({
+	id: z.string().uuid(),
+	name: z.string().min(1).max(255).optional(),
+	description: z.string().optional(),
+	logo: z.string().url().optional(),
+	primaryColor: z
+		.string()
+		.regex(/^#[0-9A-Fa-f]{6}$/)
+		.optional(),
+	timezone: z.string().optional(),
+	currency: z.string().length(3).optional(),
+	currencySymbol: z.string().optional(),
+	fiscalYearStart: z.number().int().min(1).max(12).optional(),
+	settings: z
+		.object({
+			payrollFrequency: z
+				.enum(["weekly", "biweekly", "monthly", "semimonthly"])
+				.optional(),
+			payrollDayOfMonth: z.number().int().min(1).max(31).optional(),
+			overtimeMultiplier: z.number().positive().optional(),
+			annualLeaveDays: z.number().int().nonnegative().optional(),
+			sickLeaveDays: z.number().int().nonnegative().optional(),
+			carryoverAllowed: z.boolean().optional(),
+			requiresPayrollApproval: z.boolean().optional(),
+			requiresLeaveApproval: z.boolean().optional(),
+			notifyOnPayrollRun: z.boolean().optional(),
+			notifyOnLeaveRequest: z.boolean().optional(),
+		})
+		.optional(),
+	isActive: z.boolean().optional(),
+});
 
 // ============================================================================
 // PROCEDURES
@@ -88,7 +83,7 @@ const updateOrganizationSchema = oz.input(
  */
 export const createOrganization = authedProcedure
 	.input(createOrganizationSchema)
-	.use(async ({ next, context, input }) => {
+	.handler(async ({ input }) => {
 		// Check if slug already exists
 		const existing = await db.query.organizations.findFirst({
 			where: eq(organizations.slug, input.slug),
@@ -98,9 +93,6 @@ export const createOrganization = authedProcedure
 			throw new Error("Organization with this slug already exists");
 		}
 
-		return next({ context });
-	})
-	.handler(async ({ input }) => {
 		const [organization] = await db
 			.insert(organizations)
 			.values(input as NewOrganization)
@@ -113,7 +105,7 @@ export const createOrganization = authedProcedure
  * Get organization by ID
  */
 export const getOrganization = authedProcedure
-	.input(oz.input(z.object({ id: z.string().uuid() })))
+	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ input }) => {
 		const organization = await db.query.organizations.findFirst({
 			where: eq(organizations.id, input.id),
@@ -131,16 +123,14 @@ export const getOrganization = authedProcedure
  */
 export const listOrganizations = authedProcedure
 	.input(
-		oz.input(
-			z
-				.object({
-					search: z.string().optional(),
-					isActive: z.boolean().optional(),
-					limit: z.number().int().positive().max(100).default(50),
-					offset: z.number().int().nonnegative().default(0),
-				})
-				.optional()
-		)
+		z
+			.object({
+				search: z.string().optional(),
+				isActive: z.boolean().optional(),
+				limit: z.number().int().positive().max(100).default(50),
+				offset: z.number().int().nonnegative().default(0),
+			})
+			.optional()
 	)
 	.handler(async ({ input }) => {
 		const filters = [];
@@ -191,7 +181,7 @@ export const updateOrganization = authedProcedure
  * Delete (soft delete by marking inactive) an organization
  */
 export const deleteOrganization = authedProcedure
-	.input(oz.input(z.object({ id: z.string().uuid() })))
+	.input(z.object({ id: z.string().uuid() }))
 	.handler(async ({ input }) => {
 		const [deleted] = await db
 			.update(organizations)
