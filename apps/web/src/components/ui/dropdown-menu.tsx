@@ -1,5 +1,8 @@
 import { Menu as MenuPrimitive } from "@base-ui/react/menu";
-import { Tick02Icon as CheckIcon, ArrowRight01Icon as ChevronRightIcon } from "hugeicons-react";
+import {
+	Tick02Icon as CheckIcon,
+	ArrowRight01Icon as ChevronRightIcon,
+} from "hugeicons-react";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";

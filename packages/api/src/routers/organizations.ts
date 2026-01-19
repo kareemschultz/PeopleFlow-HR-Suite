@@ -1,8 +1,6 @@
-import { zValidator } from "@hono/zod-validator";
 import { db } from "@PeopleFlow-HR-Suite/db";
 import {
 	type NewOrganization,
-	type Organization,
 	organizations,
 } from "@PeopleFlow-HR-Suite/db/schema";
 import { oz } from "@orpc/zod";
@@ -20,7 +18,10 @@ const createOrganizationSchema = oz.input(
 		slug: z.string().min(1).max(100),
 		description: z.string().optional(),
 		logo: z.string().url().optional(),
-		primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+		primaryColor: z
+			.string()
+			.regex(/^#[0-9A-Fa-f]{6}$/)
+			.optional(),
 		timezone: z.string().default("America/Guyana"),
 		currency: z.string().length(3).default("GYD"),
 		currencySymbol: z.string().default("G$"),
@@ -50,7 +51,10 @@ const updateOrganizationSchema = oz.input(
 		name: z.string().min(1).max(255).optional(),
 		description: z.string().optional(),
 		logo: z.string().url().optional(),
-		primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/).optional(),
+		primaryColor: z
+			.string()
+			.regex(/^#[0-9A-Fa-f]{6}$/)
+			.optional(),
 		timezone: z.string().optional(),
 		currency: z.string().length(3).optional(),
 		currencySymbol: z.string().optional(),

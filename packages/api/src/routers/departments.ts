@@ -1,7 +1,7 @@
 import { db } from "@PeopleFlow-HR-Suite/db";
 import {
-	type NewDepartment,
 	departments,
+	type NewDepartment,
 } from "@PeopleFlow-HR-Suite/db/schema";
 import { oz } from "@orpc/zod";
 import { and, eq, like } from "drizzle-orm";
@@ -124,7 +124,9 @@ export const listDepartments = authedProcedure
 		}
 
 		if (input?.parentDepartmentId !== undefined) {
-			filters.push(eq(departments.parentDepartmentId, input.parentDepartmentId));
+			filters.push(
+				eq(departments.parentDepartmentId, input.parentDepartmentId)
+			);
 		}
 
 		if (input?.isActive !== undefined) {

@@ -99,24 +99,25 @@ export const incomeTaxRules = pgTable(
 			.notNull(),
 
 		// Allowances / Exemptions
-		allowances: jsonb("allowances").$type<
-			{
-				code: string; // "OVERTIME_EXEMPT", "CHILD_ALLOWANCE"
-				name: string;
-				description: string;
-				type: "fixed" | "percentage" | "formula";
-				value: number;
-				formula?: string;
-				monthlyCap?: number;
-				annualCap?: number;
-				conditions?: {
-					field: string;
-					operator: "eq" | "ne" | "gt" | "lt" | "gte" | "lte";
-					value: unknown;
-				}[];
-				reducesTaxableIncome: boolean;
-			}[]
-		>(),
+		allowances:
+			jsonb("allowances").$type<
+				{
+					code: string; // "OVERTIME_EXEMPT", "CHILD_ALLOWANCE"
+					name: string;
+					description: string;
+					type: "fixed" | "percentage" | "formula";
+					value: number;
+					formula?: string;
+					monthlyCap?: number;
+					annualCap?: number;
+					conditions?: {
+						field: string;
+						operator: "eq" | "ne" | "gt" | "lt" | "gte" | "lte";
+						value: unknown;
+					}[];
+					reducesTaxableIncome: boolean;
+				}[]
+			>(),
 
 		// Calculation settings
 		periodization: text("periodization").notNull().default("annualized"),
@@ -182,10 +183,16 @@ export const socialSecurityRules = pgTable(
 		effectiveTo: date("effective_to"),
 
 		// Contribution rates
-		employeeRate: numeric("employee_rate", { precision: 6, scale: 4 }).notNull(),
+		employeeRate: numeric("employee_rate", {
+			precision: 6,
+			scale: 4,
+		}).notNull(),
 		// 0.0560 = 5.6%
 
-		employerRate: numeric("employer_rate", { precision: 6, scale: 4 }).notNull(),
+		employerRate: numeric("employer_rate", {
+			precision: 6,
+			scale: 4,
+		}).notNull(),
 		// 0.0840 = 8.4%
 
 		selfEmployedRate: numeric("self_employed_rate", {
@@ -259,14 +266,15 @@ export const filingRequirements = pgTable("filing_requirements", {
 	dueDaysAfterPeriod: integer("due_days_after_period"), // 15 = 15 days after period ends
 
 	// Required fields
-	requiredFields: jsonb("required_fields").$type<
-		{
-			fieldName: string;
-			source: string; // "employee.taxId", "payslip.grossEarnings"
-			label: string;
-			format: "string" | "number" | "currency" | "date";
-		}[]
-	>(),
+	requiredFields:
+		jsonb("required_fields").$type<
+			{
+				fieldName: string;
+				source: string; // "employee.taxId", "payslip.grossEarnings"
+				label: string;
+				format: "string" | "number" | "currency" | "date";
+			}[]
+		>(),
 
 	// Export format
 	exportFormats: jsonb("export_formats").$type<string[]>(),
@@ -297,15 +305,12 @@ export const taxJurisdictionsRelations = relations(
 	})
 );
 
-export const incomeTaxRulesRelations = relations(
-	incomeTaxRules,
-	({ one }) => ({
-		jurisdiction: one(taxJurisdictions, {
-			fields: [incomeTaxRules.jurisdictionId],
-			references: [taxJurisdictions.id],
-		}),
-	})
-);
+export const incomeTaxRulesRelations = relations(incomeTaxRules, ({ one }) => ({
+	jurisdiction: one(taxJurisdictions, {
+		fields: [incomeTaxRules.jurisdictionId],
+		references: [taxJurisdictions.id],
+	}),
+}));
 
 export const socialSecurityRulesRelations = relations(
 	socialSecurityRules,

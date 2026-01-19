@@ -126,24 +126,26 @@ export const employees = pgTable(
 		// "monthly", "biweekly", "weekly", "annual"
 
 		// Pay components
-		allowances: jsonb("allowances").$type<
-			{
-				code: string; // "TRANSPORT", "HOUSING", "MEAL"
-				name: string;
-				amount: number; // In cents
-				frequency: "monthly" | "per_payroll" | "annual";
-				isTaxable: boolean;
-			}[]
-		>(),
+		allowances:
+			jsonb("allowances").$type<
+				{
+					code: string; // "TRANSPORT", "HOUSING", "MEAL"
+					name: string;
+					amount: number; // In cents
+					frequency: "monthly" | "per_payroll" | "annual";
+					isTaxable: boolean;
+				}[]
+			>(),
 
-		deductions: jsonb("deductions").$type<
-			{
-				code: string; // "UNION_DUES", "LOAN_REPAYMENT"
-				name: string;
-				amount: number; // In cents
-				frequency: "monthly" | "per_payroll" | "annual";
-			}[]
-		>(),
+		deductions:
+			jsonb("deductions").$type<
+				{
+					code: string; // "UNION_DUES", "LOAN_REPAYMENT"
+					name: string;
+					amount: number; // In cents
+					frequency: "monthly" | "per_payroll" | "annual";
+				}[]
+			>(),
 
 		// Bank details
 		bankDetails: jsonb("bank_details").$type<{
@@ -193,15 +195,16 @@ export const employees = pgTable(
 		// DOCUMENTS & NOTES
 		// ============================================================================
 
-		documents: jsonb("documents").$type<
-			{
-				id: string;
-				type: string; // "contract", "id", "certificate", etc.
-				name: string;
-				url: string;
-				uploadedAt: string;
-			}[]
-		>(),
+		documents:
+			jsonb("documents").$type<
+				{
+					id: string;
+					type: string; // "contract", "id", "certificate", etc.
+					name: string;
+					url: string;
+					uploadedAt: string;
+				}[]
+			>(),
 
 		notes: text("notes"),
 
