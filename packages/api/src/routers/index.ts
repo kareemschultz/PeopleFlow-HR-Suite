@@ -3,7 +3,11 @@ import type { RouterClient } from "@orpc/server";
 import { protectedProcedure, publicProcedure } from "../index";
 import { departmentsRouter } from "./departments";
 import { employeesRouter } from "./employees";
+import { metricsRouter } from "./metrics";
 import { organizationsRouter } from "./organizations";
+import { payrollRouter } from "./payroll";
+import { retroAdjustmentsRouter } from "./retro-adjustments";
+import { taxJurisdictionsRouter } from "./tax-jurisdictions";
 
 // ============================================================================
 // APP ROUTER - Main API Router
@@ -43,9 +47,11 @@ export const appRouter = {
 	payroll: payrollRouter,
 	taxJurisdictions: taxJurisdictionsRouter,
 
+	// Retroactive Adjustments & Metrics
+	retroAdjustments: retroAdjustmentsRouter,
+	metrics: metricsRouter,
+
 	// Future routes:
-	// retroAdjustments: retroAdjustmentsRouter,
-	// metrics: metricsRouter,
 	// positions: positionsRouter,
 	// reports: reportsRouter,
 };
