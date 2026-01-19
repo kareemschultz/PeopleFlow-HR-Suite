@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Pre-push validation - runs full validation suite before pushing
+echo "🔍 Running pre-push validation suite..."
+echo ""
+
+# Run type check
+echo "[1/3] Type checking..."
+if bun run check-types; then
+  echo "  ✓ Type check passed"
+else
+  echo "  ✗ Type check failed"
+  echo "❌ Pre-push validation failed. Please fix errors before pushing."
+  exit 1
+fi
+
+echo ""
+
+# Run lint check
+echo "[2/3] Linting..."
+if bun x ultracite check; then
+  echo "  ✓ Lint check passed"
+else
+  echo "  ✗ Lint check failed"
+  echo "💡 Run 'bun x ultracite fix' to auto-fix issues"
+  exit 1
+fi
+
+echo ""
+
+# Run build
+echo "[3/3] Building..."
+if bun run build; then
+  echo "  ✓ Build successful"
+else
+  echo "  ✗ Build failed"
+  exit 1
+fi
+
+echo ""
+echo "✅ All pre-push validations passed!"

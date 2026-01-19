@@ -146,7 +146,7 @@ export async function seedSampleData(): Promise<void> {
 				description:
 					"Lead developer responsible for architecture and mentoring",
 				isActive: true,
-						},
+			},
 			{
 				organizationId: org1.id,
 				departmentId: deptEngineering!.id,
@@ -185,7 +185,7 @@ export async function seedSampleData(): Promise<void> {
 				level: "director",
 				description: "Leads sales strategy and team",
 				isActive: true,
-						},
+			},
 			{
 				organizationId: org2.id,
 				departmentId: deptSales!.id,

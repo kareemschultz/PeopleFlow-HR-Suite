@@ -66,4 +66,17 @@ if [ "$STAGED_HASH" != "$NEW_STAGED_HASH" ]; then
   echo "✨ Files formatted by Ultracite"
 fi
 
-exit $FORMAT_EXIT_CODE
+# Exit if formatting failed
+if [ $FORMAT_EXIT_CODE -ne 0 ]; then
+  exit $FORMAT_EXIT_CODE
+fi
+
+# Run type checking before commit
+echo ""
+echo "🔍 Running type check..."
+if bun run check-types; then
+  echo "✅ Type check passed"
+else
+  echo "❌ Type check failed. Please fix type errors before committing."
+  exit 1
+fi
