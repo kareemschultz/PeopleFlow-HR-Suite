@@ -39,10 +39,14 @@ export const appRouter = {
 	departments: departmentsRouter,
 	employees: employeesRouter,
 
-	// Future routes will be added here:
+	// Payroll & Tax
+	payroll: payrollRouter,
+	taxJurisdictions: taxJurisdictionsRouter,
+
+	// Future routes:
+	// retroAdjustments: retroAdjustmentsRouter,
+	// metrics: metricsRouter,
 	// positions: positionsRouter,
-	// taxJurisdictions: taxJurisdictionsRouter,
-	// payroll: payrollRouter,
 	// reports: reportsRouter,
 };
 
