@@ -35,6 +35,7 @@
     "db:studio": "turbo -F @PeopleFlow-HR-Suite/db db:studio",
     "db:generate": "turbo -F @PeopleFlow-HR-Suite/db db:generate",
     "db:migrate": "turbo -F @PeopleFlow-HR-Suite/db db:migrate",
+    "db:seed": "turbo -F @PeopleFlow-HR-Suite/db db:seed",
     "db:start": "turbo -F @PeopleFlow-HR-Suite/db db:start",
     "db:watch": "turbo -F @PeopleFlow-HR-Suite/db db:watch",
     "db:stop": "turbo -F @PeopleFlow-HR-Suite/db db:stop",
