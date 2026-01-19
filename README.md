@@ -31,6 +31,8 @@
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 
+> **📚 Documentation**: See [STACK.md](./STACK.md) for comprehensive documentation links and latest API references for all technologies used in this project.
+
 ---
 
 ## 🎯 Overview

@@ -31,7 +31,9 @@ const serverLoader = createServerFn({
 	.inputValidator((slugs: string[]) => slugs)
 	.handler(async ({ data: slugs }) => {
 		const page = source.getPage(slugs);
-		if (!page) throw notFound();
+		if (!page) {
+			throw notFound();
+		}
 
 		return {
 			path: page.path,
