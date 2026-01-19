@@ -1,5 +1,7 @@
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
+// TanStack Router plugin is incompatible with Zod v4 (expects v3.24.2)
+// import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -7,8 +9,9 @@ import { VitePWA } from "vite-plugin-pwa";
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
-		// Temporarily disabled due to zod ESM import issue in plugin's nested dependencies
-		// TODO: Re-enable when @tanstack/router-plugin fixes the nested zod dependency issue
+		// Disabled: @tanstack/router-plugin requires zod v3, but project uses zod v4
+		// Zod v4 has breaking changes (.returns() removed) that break the plugin
+		// TODO: Re-enable when plugin adds zod v4 support
 		// tanstackRouter({}),
 		react(),
 		VitePWA({

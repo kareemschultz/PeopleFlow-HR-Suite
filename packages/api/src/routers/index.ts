@@ -23,6 +23,17 @@ export const appRouter = {
 		};
 	}),
 
+	// TEMPORARY: Test endpoint to verify database connectivity (REMOVE BEFORE PRODUCTION)
+	testDbConnection: publicProcedure.handler(async () => {
+		const { db, organizations } = await import("@PeopleFlow-HR-Suite/db");
+		const orgs = await db.select().from(organizations).limit(5);
+		return {
+			connected: true,
+			organizationCount: orgs.length,
+			organizations: orgs,
+		};
+	}),
+
 	// Core HR routes
 	organizations: organizationsRouter,
 	departments: departmentsRouter,
