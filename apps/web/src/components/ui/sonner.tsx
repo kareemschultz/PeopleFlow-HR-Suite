@@ -1,10 +1,10 @@
 import {
-	CircleCheckIcon,
-	InfoIcon,
-	Loader2Icon,
-	OctagonXIcon,
-	TriangleAlertIcon,
-} from "lucide-react";
+	CheckmarkCircle02Icon as CircleCheckIcon,
+	InformationCircleIcon as InfoIcon,
+	Loading03Icon as Loader2Icon,
+	AlertCircleIcon as OctagonXIcon,
+	Alert01Icon as TriangleAlertIcon,
+} from "hugeicons-react";
 import { useTheme } from "next-themes";
 import type { ToasterProps } from "sonner";
 import { Toaster as Sonner } from "sonner";
