@@ -6,6 +6,7 @@ export const env = createEnv({
 	client: {
 		VITE_SERVER_URL: z.url(),
 	},
-	runtimeEnv: (import.meta as any).env,
+	// @ts-expect-error - import.meta.env is not typed in this context yet
+	runtimeEnv: import.meta.env,
 	emptyStringAsUndefined: true,
 });

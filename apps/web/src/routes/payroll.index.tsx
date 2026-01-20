@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Calendar, DollarCircle, Search } from "hugeicons-react";
+import {
+	Calendar01Icon as Calendar,
+	Coins01Icon as DollarCircle,
+	Search01Icon as Search,
+} from "hugeicons-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,7 +22,7 @@ function PayrollPage() {
 	// TODO: Integrate with payroll API when ready
 	const { data: payrollRuns, isLoading } = useQuery({
 		queryKey: ["payroll", "list", { organizationId, search }],
-		queryFn: async () => {
+		queryFn: () => {
 			// Placeholder - will integrate with oRPC when payroll router is ready
 			return [];
 		},

@@ -37,11 +37,10 @@ function HomeComponent() {
 							className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
 						/>
 						<span className="text-muted-foreground text-sm">
-							{healthCheck.isLoading
-								? "Checking..."
-								: healthCheck.data
-									? "Connected"
-									: "Disconnected"}
+							{(() => {
+								if (healthCheck.isLoading) return "Checking...";
+								return healthCheck.data ? "Connected" : "Disconnected";
+							})()}
 						</span>
 					</div>
 				</section>

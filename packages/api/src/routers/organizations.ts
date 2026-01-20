@@ -1,11 +1,15 @@
 import {
 	db,
 	type NewOrganization,
+	organizationMembers,
 	organizations,
 } from "@PeopleFlow-HR-Suite/db";
 import { and, eq, like } from "drizzle-orm";
 import { z } from "zod";
-import { authedProcedure } from "..";
+import { authedProcedure } from ".."; // using .. because we are in routers/organizations.ts -> routers/index.ts is not parent, generic index might be?
+
+// Actually authedProcedure is imported from ".." in the original file, which is odd if it's in routers/.
+// Let's trust the existing import: import { authedProcedure } from "..";
 
 // ============================================================================
 // INPUT SCHEMAS
@@ -72,6 +76,31 @@ const updateOrganizationSchema = z.object({
 		})
 		.optional(),
 	isActive: z.boolean().optional(),
+});
+
+const updateMemberSchema = z.object({
+	memberId: z.string().uuid(),
+	role: z
+		.enum([
+			"owner",
+			"admin",
+			"hr_manager",
+			"payroll_manager",
+			"manager",
+			"member",
+		])
+		.optional(),
+	permissions: z
+		.object({
+			canManageOrganization: z.boolean().optional(),
+			canManageEmployees: z.boolean().optional(),
+			canManageDepartments: z.boolean().optional(),
+			canManagePayroll: z.boolean().optional(),
+			canViewReports: z.boolean().optional(),
+			canApproveLeave: z.boolean().optional(),
+			canApprovePayroll: z.boolean().optional(),
+		})
+		.optional(),
 });
 
 // ============================================================================
@@ -199,6 +228,73 @@ export const deleteOrganization = authedProcedure
 		return { success: true };
 	});
 
+/**
+ * List members of an organization
+ */
+export const listMembers = authedProcedure
+	.input(
+		z.object({
+			organizationId: z.string().uuid(),
+			limit: z.number().int().positive().max(100).default(50),
+			offset: z.number().int().nonnegative().default(0),
+		})
+	)
+	.handler(async ({ input }) => {
+		const members = await db.query.organizationMembers.findMany({
+			where: eq(organizationMembers.organizationId, input.organizationId),
+			with: {
+				user: true,
+			},
+			limit: input.limit,
+			offset: input.offset,
+			orderBy: (members, { desc }) => [desc(members.joinedAt)],
+		});
+
+		return members;
+	});
+
+/**
+ * Update a member's role or permissions
+ */
+export const updateMember = authedProcedure
+	.input(updateMemberSchema)
+	.handler(async ({ input }) => {
+		const { memberId, ...updates } = input;
+
+		const [updated] = await db
+			.update(organizationMembers)
+			.set({
+				...updates,
+				updatedAt: new Date(),
+			})
+			.where(eq(organizationMembers.id, memberId))
+			.returning();
+
+		if (!updated) {
+			throw new Error("Member not found");
+		}
+
+		return updated;
+	});
+
+/**
+ * Remove a member from an organization
+ */
+export const removeMember = authedProcedure
+	.input(z.object({ memberId: z.string().uuid() }))
+	.handler(async ({ input }) => {
+		const [deleted] = await db
+			.delete(organizationMembers)
+			.where(eq(organizationMembers.id, input.memberId))
+			.returning();
+
+		if (!deleted) {
+			throw new Error("Member not found");
+		}
+
+		return { success: true };
+	});
+
 // ============================================================================
 // ROUTER
 // ============================================================================
@@ -209,4 +305,9 @@ export const organizationsRouter = {
 	list: listOrganizations,
 	update: updateOrganization,
 	delete: deleteOrganization,
+
+	// Members
+	listMembers,
+	updateMember,
+	removeMember,
 };
