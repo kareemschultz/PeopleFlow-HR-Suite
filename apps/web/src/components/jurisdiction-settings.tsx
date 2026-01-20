@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Add01Icon as Plus } from "hugeicons-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -32,21 +33,26 @@ export function JurisdictionSettings() {
 	const [currencySymbol, setCurrencySymbol] = useState("");
 	const [timezone, setTimezone] = useState("UTC");
 
-	const utils = orpc.useUtils();
-	const { data: jurisdictions, isLoading } =
-		orpc.taxJurisdictions.listJurisdictions.useQuery();
+	const queryClient = useQueryClient();
+	const { data: jurisdictions, isLoading } = useQuery(
+		orpc.taxJurisdictions.listJurisdictions.queryOptions({})
+	);
 
-	const createMutation = orpc.taxJurisdictions.createJurisdiction.useMutation({
-		onSuccess: () => {
-			utils.taxJurisdictions.listJurisdictions.invalidate();
-			setIsOpen(false);
-			toast.success("Jurisdiction created successfully");
-			resetForm();
-		},
-		onError: (error) => {
-			toast.error(`Failed to create jurisdiction: ${error.message}`);
-		},
-	});
+	const createMutation = useMutation(
+		orpc.taxJurisdictions.createJurisdiction.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpc.taxJurisdictions.listJurisdictions.key(),
+				});
+				setIsOpen(false);
+				toast.success("Jurisdiction created successfully");
+				resetForm();
+			},
+			onError: (error: Error) => {
+				toast.error(`Failed to create jurisdiction: ${error.message}`);
+			},
+		})
+	);
 
 	const resetForm = () => {
 		setName("");
@@ -60,7 +66,8 @@ export function JurisdictionSettings() {
 		e.preventDefault();
 		createMutation.mutate({
 			name,
-			countryCode,
+			code: countryCode, // jurisdiction code
+			country: countryCode, // ISO 2-letter country code
 			currency,
 			currencySymbol,
 			timezone,
@@ -201,21 +208,32 @@ export function JurisdictionSettings() {
 								</TableCell>
 							</TableRow>
 						) : (
-							jurisdictions?.map((j) => (
-								<TableRow key={j.id}>
-									<TableCell className="font-medium">{j.name}</TableCell>
-									<TableCell>{j.countryCode}</TableCell>
-									<TableCell>
-										{j.currency} ({j.currencySymbol})
-									</TableCell>
-									<TableCell>Month {j.fiscalYearStart}</TableCell>
-									<TableCell>
-										<Badge variant={j.isActive ? "default" : "secondary"}>
-											{j.isActive ? "Active" : "Inactive"}
-										</Badge>
-									</TableCell>
-								</TableRow>
-							))
+							jurisdictions?.map(
+								(j: {
+									id: string;
+									name: string;
+									code: string;
+									country: string;
+									currency: string;
+									currencySymbol: string;
+									fiscalYearStart: number;
+									isActive: boolean;
+								}) => (
+									<TableRow key={j.id}>
+										<TableCell className="font-medium">{j.name}</TableCell>
+										<TableCell>{j.country}</TableCell>
+										<TableCell>
+											{j.currency} ({j.currencySymbol})
+										</TableCell>
+										<TableCell>Month {j.fiscalYearStart}</TableCell>
+										<TableCell>
+											<Badge variant={j.isActive ? "default" : "secondary"}>
+												{j.isActive ? "Active" : "Inactive"}
+											</Badge>
+										</TableCell>
+									</TableRow>
+								)
+							)
 						)}
 					</TableBody>
 				</Table>

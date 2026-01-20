@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Building06, Search } from "hugeicons-react";
+import { Building06Icon, Search01Icon } from "hugeicons-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,7 +43,7 @@ function DepartmentsPage() {
 			{/* Search */}
 			<div className="mb-6">
 				<div className="relative">
-					<Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
+					<Search01Icon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
 					<Input
 						className="pl-10"
 						onChange={(e) => setSearch(e.target.value)}
@@ -79,7 +79,7 @@ function DepartmentsPage() {
 							<Card className="cursor-pointer p-6 transition-shadow hover:shadow-lg">
 								<div className="flex items-start gap-4">
 									<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-										<Building06 className="h-6 w-6 text-primary" />
+										<Building06Icon className="h-6 w-6 text-primary" />
 									</div>
 									<div className="min-w-0 flex-1">
 										<h3 className="truncate font-semibold">

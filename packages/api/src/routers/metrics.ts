@@ -228,7 +228,7 @@ export const updateDataFreshness = authedProcedure
 					? eq(dataFreshness.entityName, input.entityName)
 					: undefined,
 				input.periodStart
-					? eq(dataFreshness.periodStart, new Date(input.periodStart))
+					? eq(dataFreshness.periodStart, input.periodStart)
 					: undefined
 			),
 		});
@@ -239,7 +239,7 @@ export const updateDataFreshness = authedProcedure
 				.update(dataFreshness)
 				.set({
 					lastUpdatedAt: new Date(),
-					lastUpdatedBy: context.session!.user.id,
+					lastUpdatedBy: context.session?.user.id,
 					status: input.status,
 					isLocked: input.isLocked ?? existing.isLocked,
 					lockedAt:
@@ -248,7 +248,7 @@ export const updateDataFreshness = authedProcedure
 							: existing.lockedAt,
 					lockedBy:
 						input.isLocked && !existing.isLocked
-							? context.session!.user.id
+							? context.session?.user.id
 							: existing.lockedBy,
 					autoRefresh: input.autoRefresh ?? existing.autoRefresh,
 					stalenessThreshold:
@@ -267,13 +267,13 @@ export const updateDataFreshness = authedProcedure
 			dataType: input.dataType,
 			entityName: input.entityName || null,
 			lastUpdatedAt: new Date(),
-			lastUpdatedBy: context.session!.user.id,
+			lastUpdatedBy: context.session?.user.id,
 			status: input.status,
 			isLocked: input.isLocked ?? false,
 			lockedAt: input.isLocked ? new Date() : null,
-			lockedBy: input.isLocked ? context.session!.user.id : null,
-			periodStart: input.periodStart ? new Date(input.periodStart) : null,
-			periodEnd: input.periodEnd ? new Date(input.periodEnd) : null,
+			lockedBy: input.isLocked ? context.session?.user.id : null,
+			periodStart: input.periodStart ?? null,
+			periodEnd: input.periodEnd ?? null,
 			autoRefresh: input.autoRefresh ?? false,
 			stalenessThreshold: input.stalenessThreshold?.toString() ?? null,
 			updateMetadata: input.updateMetadata ?? null,
@@ -357,8 +357,8 @@ export const createMetricValue = authedProcedure
 			metricKey: input.metricKey,
 			metricName: input.metricName,
 			category: input.category || null,
-			periodStart: new Date(input.periodStart),
-			periodEnd: new Date(input.periodEnd),
+			periodStart: input.periodStart,
+			periodEnd: input.periodEnd,
 			value: input.value.toString(),
 			valueType: input.valueType,
 			unit: input.unit || null,
@@ -370,7 +370,7 @@ export const createMetricValue = authedProcedure
 			confidence: input.confidence.toString(),
 			isEstimated: input.isEstimated,
 			status: input.status,
-			calculatedBy: context.session!.user.id,
+			calculatedBy: context.session?.user.id,
 		};
 
 		const [metric] = await db
@@ -410,11 +410,11 @@ export const listMetricValues = publicProcedure
 		}
 
 		if (input?.periodStart) {
-			filters.push(gte(metricValues.periodStart, new Date(input.periodStart)));
+			filters.push(gte(metricValues.periodStart, input.periodStart));
 		}
 
 		if (input?.periodEnd) {
-			filters.push(lte(metricValues.periodEnd, new Date(input.periodEnd)));
+			filters.push(lte(metricValues.periodEnd, input.periodEnd));
 		}
 
 		const metrics = await db.query.metricValues.findMany({
@@ -453,8 +453,8 @@ export const getMetricValue = publicProcedure
 			where: and(
 				eq(metricValues.organizationId, input.organizationId),
 				eq(metricValues.metricKey, input.metricKey),
-				eq(metricValues.periodStart, new Date(input.periodStart)),
-				eq(metricValues.periodEnd, new Date(input.periodEnd))
+				eq(metricValues.periodStart, input.periodStart),
+				eq(metricValues.periodEnd, input.periodEnd)
 			),
 			with: {
 				calculator: {
@@ -484,8 +484,8 @@ export const getMetricTrend = publicProcedure
 			where: and(
 				eq(metricValues.organizationId, input.organizationId),
 				eq(metricValues.metricKey, input.metricKey),
-				gte(metricValues.periodStart, new Date(input.periodStart)),
-				lte(metricValues.periodEnd, new Date(input.periodEnd))
+				gte(metricValues.periodStart, input.periodStart),
+				lte(metricValues.periodEnd, input.periodEnd)
 			),
 			orderBy: [desc(metricValues.periodStart)],
 		});

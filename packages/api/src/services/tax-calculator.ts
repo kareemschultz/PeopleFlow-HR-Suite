@@ -64,7 +64,13 @@ export function evaluateFormula(
 			return "0";
 		}
 
-		const [condition, trueVal, falseVal] = parts;
+		const condition = parts[0];
+		const trueVal = parts[1];
+		const falseVal = parts[2];
+
+		if (!(condition && trueVal && falseVal)) {
+			return "0";
+		}
 
 		// Parse condition (e.g., "value > 100")
 		const comparisonMatch = condition.match(/(.+?)(>=|<=|>|<|==|!=)(.+)/);
@@ -72,9 +78,16 @@ export function evaluateFormula(
 			return falseVal;
 		}
 
-		const left = Number.parseFloat(comparisonMatch[1].trim());
-		const operator = comparisonMatch[2].trim();
-		const right = Number.parseFloat(comparisonMatch[3].trim());
+		const leftStr = comparisonMatch[1];
+		const operator = comparisonMatch[2];
+		const rightStr = comparisonMatch[3];
+
+		if (!(leftStr && operator && rightStr)) {
+			return falseVal;
+		}
+
+		const left = Number.parseFloat(leftStr.trim());
+		const right = Number.parseFloat(rightStr.trim());
 
 		let conditionResult = false;
 		switch (operator) {
@@ -293,7 +306,8 @@ export function calculatePAYE(
 		annualGrossSalary > 0 ? (annualTax / annualGrossSalary) * 100 : 0;
 
 	// Marginal rate is the rate of the highest band reached
-	const marginalTaxRate = taxBands.length > 0 ? taxBands.at(-1).rate * 100 : 0;
+	const lastBand = taxBands.at(-1);
+	const marginalTaxRate = lastBand ? lastBand.rate * 100 : 0;
 
 	return {
 		annualGross: annualGrossSalary,
