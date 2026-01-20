@@ -9,7 +9,12 @@ import {
 	Trigger,
 } from "@radix-ui/react-dialog";
 import { Cancel01Icon as X } from "hugeicons-react";
-import * as React from "react";
+import {
+	type ComponentPropsWithoutRef,
+	type ElementRef,
+	forwardRef,
+	type HTMLAttributes,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -21,9 +26,9 @@ const DialogPortal = Portal;
 
 const DialogClose = Close;
 
-const DialogOverlay = React.forwardRef<
-	React.ElementRef<typeof Overlay>,
-	React.ComponentPropsWithoutRef<typeof Overlay>
+const DialogOverlay = forwardRef<
+	ElementRef<typeof Overlay>,
+	ComponentPropsWithoutRef<typeof Overlay>
 >(({ className, ...props }, ref) => (
 	<Overlay
 		className={cn(
@@ -36,9 +41,9 @@ const DialogOverlay = React.forwardRef<
 ));
 DialogOverlay.displayName = Overlay.displayName;
 
-const DialogContent = React.forwardRef<
-	React.ElementRef<typeof Content>,
-	React.ComponentPropsWithoutRef<typeof Content>
+const DialogContent = forwardRef<
+	ElementRef<typeof Content>,
+	ComponentPropsWithoutRef<typeof Content>
 >(({ className, children, ...props }, ref) => (
 	<DialogPortal>
 		<DialogOverlay />
@@ -63,7 +68,7 @@ DialogContent.displayName = Content.displayName;
 const DialogHeader = ({
 	className,
 	...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: HTMLAttributes<HTMLDivElement>) => (
 	<div
 		className={cn(
 			"flex flex-col space-y-1.5 text-center sm:text-left",
@@ -77,7 +82,7 @@ DialogHeader.displayName = "DialogHeader";
 const DialogFooter = ({
 	className,
 	...props
-}: React.HTMLAttributes<HTMLDivElement>) => (
+}: HTMLAttributes<HTMLDivElement>) => (
 	<div
 		className={cn(
 			"flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
@@ -88,9 +93,9 @@ const DialogFooter = ({
 );
 DialogFooter.displayName = "DialogFooter";
 
-const DialogTitle = React.forwardRef<
-	React.ElementRef<typeof Title>,
-	React.ComponentPropsWithoutRef<typeof Title>
+const DialogTitle = forwardRef<
+	ElementRef<typeof Title>,
+	ComponentPropsWithoutRef<typeof Title>
 >(({ className, ...props }, ref) => (
 	<Title
 		className={cn(
@@ -103,9 +108,9 @@ const DialogTitle = React.forwardRef<
 ));
 DialogTitle.displayName = Title.displayName;
 
-const DialogDescription = React.forwardRef<
-	React.ElementRef<typeof Description>,
-	React.ComponentPropsWithoutRef<typeof Description>
+const DialogDescription = forwardRef<
+	ElementRef<typeof Description>,
+	ComponentPropsWithoutRef<typeof Description>
 >(({ className, ...props }, ref) => (
 	<Description
 		className={cn("text-muted-foreground text-sm", className)}

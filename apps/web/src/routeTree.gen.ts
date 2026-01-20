@@ -16,6 +16,8 @@ import { Route as SuccessRoute } from "./routes/success";
 import { Route as DepartmentsIndexRoute } from "./routes/departments.index";
 import { Route as EmployeesIndexRoute } from "./routes/employees.index";
 import { Route as PayrollIndexRoute } from "./routes/payroll.index";
+import { Route as PayrollNewRoute } from "./routes/payroll.new";
+import { Route as PayrollDetailRoute } from "./routes/payroll.$payrollRunId";
 import { Route as ReportsIndexRoute } from "./routes/reports/index";
 import { Route as SettingsOrganizationRoute } from "./routes/settings/organization";
 import { Route as SettingsJurisdictionsRoute } from "./routes/settings/jurisdictions";
@@ -51,6 +53,14 @@ declare module "@tanstack/react-router" {
 			preLoaderRoute: typeof PayrollIndexRoute;
 			parentRoute: typeof rootRoute;
 		};
+		"/payroll/new": {
+			preLoaderRoute: typeof PayrollNewRoute;
+			parentRoute: typeof rootRoute;
+		};
+		"/payroll/$payrollRunId": {
+			preLoaderRoute: typeof PayrollDetailRoute;
+			parentRoute: typeof rootRoute;
+		};
 		"/reports/": {
 			preLoaderRoute: typeof ReportsIndexRoute;
 			parentRoute: typeof rootRoute;
@@ -79,6 +89,8 @@ const rootRouteChildren = {
 	DepartmentsIndexRoute: DepartmentsIndexRoute,
 	EmployeesIndexRoute: EmployeesIndexRoute,
 	PayrollIndexRoute: PayrollIndexRoute,
+	PayrollNewRoute: PayrollNewRoute,
+	PayrollDetailRoute: PayrollDetailRoute,
 	ReportsIndexRoute: ReportsIndexRoute,
 	SettingsOrganizationRoute: SettingsOrganizationRoute,
 	SettingsJurisdictionsRoute: SettingsJurisdictionsRoute,
@@ -93,6 +105,8 @@ export const routeTree = rootRoute.addChildren([
 	DepartmentsIndexRoute,
 	EmployeesIndexRoute,
 	PayrollIndexRoute,
+	PayrollNewRoute,
+	PayrollDetailRoute,
 	ReportsIndexRoute,
 	SettingsOrganizationRoute,
 	SettingsJurisdictionsRoute,

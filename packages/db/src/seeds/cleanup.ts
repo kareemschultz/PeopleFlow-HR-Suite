@@ -26,7 +26,7 @@ async function cleanup() {
 		await db.delete(organizations);
 
 		console.log("  - Deleting Guyana jurisdiction...");
-		const result = await db
+		const _result = await db
 			.delete(taxJurisdictions)
 			.where(eq(taxJurisdictions.code, "GY"));
 
