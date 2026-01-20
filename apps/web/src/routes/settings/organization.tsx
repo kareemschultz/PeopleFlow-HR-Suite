@@ -1,6 +1,7 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,25 +22,45 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useOrganization } from "@/hooks/use-organization";
+import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/settings/organization")({
 	component: OrganizationSettingsPage,
 });
 
+type PayrollFrequency = "weekly" | "biweekly" | "monthly" | "semimonthly";
+
+interface FormData {
+	name: string;
+	slug: string;
+	timezone: string;
+	currency: string;
+	fiscalYearStart: number;
+	settings: {
+		payrollFrequency: PayrollFrequency;
+		payrollDayOfMonth: number;
+		annualLeaveDays: number;
+		sickLeaveDays: number;
+		requiresPayrollApproval: boolean;
+		requiresLeaveApproval: boolean;
+	};
+}
+
 function OrganizationSettingsPage() {
-	// Using useState instead of react-hook-form to avoid type conflicts
-	const [formData, setFormData] = useState({
-		name: "Acme Corp",
-		slug: "acme-corp",
+	const { organization, organizationId, isLoading, hasOrganization } =
+		useOrganization();
+	const queryClient = useQueryClient();
+
+	const [formData, setFormData] = useState<FormData>({
+		name: "",
+		slug: "",
 		timezone: "America/Guyana",
 		currency: "GYD",
 		fiscalYearStart: 1,
 		settings: {
-			payrollFrequency: "monthly" as
-				| "weekly"
-				| "biweekly"
-				| "monthly"
-				| "semimonthly",
+			payrollFrequency: "monthly",
 			payrollDayOfMonth: 25,
 			annualLeaveDays: 20,
 			sickLeaveDays: 10,
@@ -48,16 +69,69 @@ function OrganizationSettingsPage() {
 		},
 	});
 
-	const updateField = <K extends keyof typeof formData>(
+	// Populate form when organization loads
+	useEffect(() => {
+		if (organization) {
+			setFormData({
+				name: organization.name,
+				slug: organization.slug,
+				timezone: organization.timezone,
+				currency: organization.currency,
+				fiscalYearStart: organization.fiscalYearStart,
+				settings: {
+					payrollFrequency:
+						(organization.settings?.payrollFrequency as PayrollFrequency) ??
+						"monthly",
+					payrollDayOfMonth: organization.settings?.payrollDayOfMonth ?? 25,
+					annualLeaveDays: organization.settings?.annualLeaveDays ?? 20,
+					sickLeaveDays: organization.settings?.sickLeaveDays ?? 10,
+					requiresPayrollApproval:
+						organization.settings?.requiresPayrollApproval ?? true,
+					requiresLeaveApproval:
+						organization.settings?.requiresLeaveApproval ?? true,
+				},
+			});
+		}
+	}, [organization]);
+
+	const updateMutation = useMutation({
+		mutationFn: async (data: FormData) => {
+			const client = orpc.organizations.update;
+			return client.call({
+				id: organizationId,
+				name: data.name,
+				timezone: data.timezone,
+				currency: data.currency,
+				fiscalYearStart: data.fiscalYearStart,
+				settings: data.settings,
+			});
+		},
+		onSuccess: () => {
+			toast.success("Organization settings updated", {
+				description: "Your changes have been saved successfully.",
+			});
+			queryClient.invalidateQueries({
+				queryKey: ["organizations", "myOrganizations"],
+			});
+		},
+		onError: (error) => {
+			toast.error("Failed to update settings", {
+				description:
+					error instanceof Error ? error.message : "An error occurred",
+			});
+		},
+	});
+
+	const updateField = <K extends keyof FormData>(
 		key: K,
-		value: (typeof formData)[K]
+		value: FormData[K]
 	) => {
 		setFormData((prev) => ({ ...prev, [key]: value }));
 	};
 
-	const updateSettingsField = <K extends keyof typeof formData.settings>(
+	const updateSettingsField = <K extends keyof FormData["settings"]>(
 		key: K,
-		value: (typeof formData.settings)[K]
+		value: FormData["settings"][K]
 	) => {
 		setFormData((prev) => ({
 			...prev,
@@ -67,10 +141,11 @@ function OrganizationSettingsPage() {
 
 	function onSubmit(e: React.FormEvent) {
 		e.preventDefault();
-		toast.success("Organization settings updated", {
-			description: "Your changes have been saved successfully.",
-		});
-		console.log(formData);
+		if (!hasOrganization) {
+			toast.error("No organization selected");
+			return;
+		}
+		updateMutation.mutate(formData);
 	}
 
 	const containerVariants = {
@@ -90,6 +165,44 @@ function OrganizationSettingsPage() {
 			opacity: 1,
 		},
 	};
+
+	if (isLoading) {
+		return (
+			<div className="space-y-6 p-6">
+				<div>
+					<Skeleton className="h-8 w-64" />
+					<Skeleton className="mt-2 h-4 w-96" />
+				</div>
+				<Separator />
+				<div className="space-y-6">
+					{[1, 2, 3].map((i) => (
+						<Card key={i}>
+							<CardHeader>
+								<Skeleton className="h-6 w-48" />
+								<Skeleton className="h-4 w-64" />
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<Skeleton className="h-10 w-full" />
+								<Skeleton className="h-10 w-full" />
+							</CardContent>
+						</Card>
+					))}
+				</div>
+			</div>
+		);
+	}
+
+	if (!hasOrganization) {
+		return (
+			<div className="flex flex-col items-center justify-center p-12">
+				<h2 className="font-semibold text-xl">No Organization</h2>
+				<p className="mt-2 text-muted-foreground">
+					You are not a member of any organization. Please contact your
+					administrator.
+				</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-6 p-6">
@@ -134,13 +247,13 @@ function OrganizationSettingsPage() {
 									<div className="space-y-2">
 										<Label htmlFor="slug">URL Slug</Label>
 										<Input
+											disabled
 											id="slug"
-											onChange={(e) => updateField("slug", e.target.value)}
 											placeholder="acme-inc"
 											value={formData.slug}
 										/>
 										<p className="text-muted-foreground text-sm">
-											Your organization's unique identifier.
+											Your organization's unique identifier (read-only).
 										</p>
 									</div>
 								</div>
@@ -213,7 +326,7 @@ function OrganizationSettingsPage() {
 											onValueChange={(value) =>
 												updateSettingsField(
 													"payrollFrequency",
-													value as typeof formData.settings.payrollFrequency
+													value as PayrollFrequency
 												)
 											}
 											value={formData.settings.payrollFrequency}
@@ -277,8 +390,8 @@ function OrganizationSettingsPage() {
 					</motion.div>
 
 					<motion.div className="flex justify-end" variants={itemVariants}>
-						<Button size="lg" type="submit">
-							Save Changes
+						<Button disabled={updateMutation.isPending} size="lg" type="submit">
+							{updateMutation.isPending ? "Saving..." : "Save Changes"}
 						</Button>
 					</motion.div>
 				</motion.div>

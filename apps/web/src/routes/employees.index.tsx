@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOrganization } from "@/hooks/use-organization";
 import { orpc } from "../utils/orpc";
 
 export const Route = createFileRoute("/employees/")({
@@ -14,17 +15,24 @@ export const Route = createFileRoute("/employees/")({
 
 function EmployeesPage() {
 	const [search, setSearch] = useState("");
-	const [organizationId] = useState(""); // TODO: Get from auth context
+	const {
+		organizationId,
+		isLoading: isOrgLoading,
+		hasOrganization,
+	} = useOrganization();
 
 	// Fetch employees list
-	const { data: employees, isLoading } = useQuery(
-		orpc.employees.list.queryOptions({
+	const { data: employees, isLoading: isEmployeesLoading } = useQuery({
+		...orpc.employees.list.queryOptions({
 			organizationId,
 			search: search || undefined,
 			limit: 50,
 			offset: 0,
-		})
-	);
+		}),
+		enabled: hasOrganization,
+	});
+
+	const isLoading = isOrgLoading || isEmployeesLoading;
 
 	return (
 		<div className="container mx-auto px-4 py-8">

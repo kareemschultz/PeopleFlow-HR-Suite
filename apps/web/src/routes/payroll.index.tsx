@@ -3,31 +3,46 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
 	Calendar01Icon as Calendar,
 	Coins01Icon as DollarCircle,
-	Search01Icon as Search,
 } from "hugeicons-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useOrganization } from "@/hooks/use-organization";
+import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/payroll/")({
 	component: PayrollPage,
 });
 
 function PayrollPage() {
-	const [search, setSearch] = useState("");
-	const [organizationId] = useState(""); // TODO: Get from auth context
+	const {
+		organizationId,
+		isLoading: isOrgLoading,
+		hasOrganization,
+		organization,
+	} = useOrganization();
 
-	// TODO: Integrate with payroll API when ready
-	const { data: payrollRuns, isLoading } = useQuery({
-		queryKey: ["payroll", "list", { organizationId, search }],
-		queryFn: () => {
-			// Placeholder - will integrate with oRPC when payroll router is ready
-			return [];
-		},
-		enabled: false, // Disabled until payroll API is implemented
+	// Fetch payroll runs using the payroll API
+	const { data: payrollRuns, isLoading: isPayrollLoading } = useQuery({
+		...orpc.payroll.list.queryOptions({
+			organizationId,
+			limit: 50,
+			offset: 0,
+		}),
+		enabled: hasOrganization,
 	});
+
+	const isLoading = isOrgLoading || isPayrollLoading;
+	const currencySymbol = organization?.currencySymbol ?? "G$";
+	const currency = organization?.currency ?? "GYD";
+
+	const formatCurrency = (amount: number | null | undefined) => {
+		if (amount == null) return `${currencySymbol}0`;
+		return amount.toLocaleString("en-GY", {
+			style: "currency",
+			currency,
+		});
+	};
 
 	return (
 		<div className="container mx-auto px-4 py-8">
@@ -41,20 +56,6 @@ function PayrollPage() {
 				<Link to="/payroll/new">
 					<Button>New Payroll Run</Button>
 				</Link>
-			</div>
-
-			{/* Search and Filters */}
-			<div className="mb-6 flex gap-4">
-				<div className="relative flex-1">
-					<Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
-					<Input
-						className="pl-10"
-						onChange={(e) => setSearch(e.target.value)}
-						placeholder="Search payroll runs..."
-						type="search"
-						value={search}
-					/>
-				</div>
 			</div>
 
 			{/* Payroll Runs Grid */}
@@ -76,7 +77,7 @@ function PayrollPage() {
 						</Card>
 					))
 				) : payrollRuns && payrollRuns.length > 0 ? (
-					payrollRuns.map((run: any) => (
+					payrollRuns.map((run) => (
 						<Link
 							key={run.id}
 							params={{ payrollRunId: run.id }}
@@ -103,7 +104,7 @@ function PayrollPage() {
 															? "bg-green-100 text-green-700"
 															: run.status === "draft"
 																? "bg-gray-100 text-gray-700"
-																: run.status === "processing"
+																: run.status === "calculated"
 																	? "bg-blue-100 text-blue-700"
 																	: "bg-red-100 text-red-700"
 													}`}
@@ -115,10 +116,7 @@ function PayrollPage() {
 									</div>
 									<div className="text-right">
 										<p className="font-semibold text-2xl">
-											{run.totals?.totalNetPay?.toLocaleString("en-GY", {
-												style: "currency",
-												currency: "GYD",
-											})}
+											{formatCurrency(run.totalNetPay)}
 										</p>
 										<p className="text-muted-foreground text-sm">
 											{run.employeeCount} employees
@@ -138,9 +136,7 @@ function PayrollPage() {
 								No Payroll Runs Yet
 							</h3>
 							<p className="mt-2 text-muted-foreground">
-								{search
-									? "No payroll runs found matching your search."
-									: "Create your first payroll run to process employee payments."}
+								Create your first payroll run to process employee payments.
 							</p>
 							<Link to="/payroll/new">
 								<Button className="mt-4">Create Payroll Run</Button>
@@ -159,7 +155,7 @@ function PayrollPage() {
 						</div>
 						<div>
 							<p className="text-muted-foreground text-sm">Total Paid (YTD)</p>
-							<p className="font-semibold text-2xl">G$0</p>
+							<p className="font-semibold text-2xl">{currencySymbol}0</p>
 						</div>
 					</div>
 				</Card>
@@ -172,7 +168,7 @@ function PayrollPage() {
 							<p className="text-muted-foreground text-sm">
 								Tax Withheld (YTD)
 							</p>
-							<p className="font-semibold text-2xl">G$0</p>
+							<p className="font-semibold text-2xl">{currencySymbol}0</p>
 						</div>
 					</div>
 				</Card>
@@ -185,7 +181,7 @@ function PayrollPage() {
 							<p className="text-muted-foreground text-sm">
 								NIS Contributions (YTD)
 							</p>
-							<p className="font-semibold text-2xl">G$0</p>
+							<p className="font-semibold text-2xl">{currencySymbol}0</p>
 						</div>
 					</div>
 				</Card>

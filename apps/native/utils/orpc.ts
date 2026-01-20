@@ -9,8 +9,9 @@ import { authClient } from "@/lib/auth-client";
 
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
-		onError: (error) => {
-			console.log(error);
+		onError: (_error: unknown) => {
+			// Error handling is done at the component level via query hooks
+			// Global error tracking can be added here if needed (e.g., Sentry)
 		},
 	}),
 });

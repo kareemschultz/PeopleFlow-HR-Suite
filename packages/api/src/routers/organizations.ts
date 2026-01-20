@@ -295,6 +295,26 @@ export const removeMember = authedProcedure
 		return { success: true };
 	});
 
+/**
+ * Get current user's organization memberships
+ */
+export const myOrganizations = authedProcedure.handler(async ({ context }) => {
+	const userId = context.session.user.id;
+
+	const memberships = await db.query.organizationMembers.findMany({
+		where: and(
+			eq(organizationMembers.userId, userId),
+			eq(organizationMembers.isActive, true)
+		),
+		with: {
+			organization: true,
+		},
+		orderBy: (members, { desc }) => [desc(members.joinedAt)],
+	});
+
+	return memberships;
+});
+
 // ============================================================================
 // ROUTER
 // ============================================================================
@@ -310,4 +330,7 @@ export const organizationsRouter = {
 	listMembers,
 	updateMember,
 	removeMember,
+
+	// Current user
+	myOrganizations,
 };
