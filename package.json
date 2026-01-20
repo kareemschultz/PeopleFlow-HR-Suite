@@ -63,5 +63,13 @@
       "bun x ultracite fix"
     ]
   },
-  "packageManager": "bun@1.2.18"
+  "packageManager": "bun@1.2.18",
+  "resolutions": {
+    "react-hook-form": "^7.57.0",
+    "vite": "^6.2.2"
+  },
+  "overrides": {
+    "react-hook-form": "^7.57.0",
+    "vite": "^6.2.2"
+  }
 }

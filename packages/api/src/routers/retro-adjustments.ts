@@ -147,8 +147,8 @@ export const createRetroAdjustment = authedProcedure
 			organizationId: input.organizationId,
 			payrollRunId: input.payrollRunId,
 			employeeId: input.employeeId,
-			originalPeriodStart: new Date(input.originalPeriodStart),
-			originalPeriodEnd: new Date(input.originalPeriodEnd),
+			originalPeriodStart: input.originalPeriodStart,
+			originalPeriodEnd: input.originalPeriodEnd,
 			adjustmentType: input.adjustmentType,
 			category: input.category,
 			changeDescription: input.changeDescription,
@@ -165,11 +165,11 @@ export const createRetroAdjustment = authedProcedure
 			calculationDetails: input.calculationDetails,
 			reason: input.reason,
 			status: "pending",
-			requestedBy: context.session!.user.id,
+			requestedBy: context.session?.user.id,
 			priority: input.priority,
 			affectedTaxYear: input.affectedTaxYear,
 			requiresReFileing: input.requiresReFileing ? 1 : 0,
-			notes: input.notes || null,
+			notes: input.notes ?? null,
 		};
 
 		const [adjustment] = await db
@@ -210,14 +210,12 @@ export const listRetroAdjustments = authedProcedure
 
 		if (input?.periodStart) {
 			filters.push(
-				gte(retroAdjustments.originalPeriodStart, new Date(input.periodStart))
+				gte(retroAdjustments.originalPeriodStart, input.periodStart)
 			);
 		}
 
 		if (input?.periodEnd) {
-			filters.push(
-				lte(retroAdjustments.originalPeriodEnd, new Date(input.periodEnd))
-			);
+			filters.push(lte(retroAdjustments.originalPeriodEnd, input.periodEnd));
 		}
 
 		const adjustments = await db.query.retroAdjustments.findMany({
@@ -304,7 +302,7 @@ export const reviewRetroAdjustment = authedProcedure
 			.update(retroAdjustments)
 			.set({
 				status: newStatus,
-				reviewedBy: context.session!.user.id,
+				reviewedBy: context.session?.user.id,
 				reviewedAt: new Date(),
 				reviewNotes: input.reviewNotes || null,
 				updatedAt: new Date(),
@@ -409,8 +407,8 @@ export const getEmployeeRetroAdjustments = authedProcedure
 		const adjustments = await db.query.retroAdjustments.findMany({
 			where: and(
 				eq(retroAdjustments.employeeId, input.employeeId),
-				gte(retroAdjustments.originalPeriodStart, new Date(input.periodStart)),
-				lte(retroAdjustments.originalPeriodEnd, new Date(input.periodEnd)),
+				gte(retroAdjustments.originalPeriodStart, input.periodStart),
+				lte(retroAdjustments.originalPeriodEnd, input.periodEnd),
 				statusFilters
 			),
 			orderBy: [desc(retroAdjustments.originalPeriodStart)],

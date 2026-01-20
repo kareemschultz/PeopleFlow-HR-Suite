@@ -18,8 +18,10 @@ import { authedProcedure, publicProcedure } from "..";
 // ============================================================================
 
 const createJurisdictionSchema = z.object({
-	countryCode: z.string().length(2),
+	code: z.string().min(1).max(10), // "GY", "TT", "US-CA"
 	name: z.string().min(1).max(255),
+	country: z.string().length(2), // ISO 3166-1 alpha-2
+	region: z.string().optional(),
 	currency: z.string().length(3),
 	currencySymbol: z.string().max(10),
 	timezone: z.string(),
@@ -29,47 +31,74 @@ const createJurisdictionSchema = z.object({
 const createIncomeTaxRuleSchema = z.object({
 	jurisdictionId: z.string().uuid(),
 	taxYear: z.number().int().min(2000).max(2100),
-	bands: z.array(
+	effectiveFrom: z.string().date(),
+	effectiveTo: z.string().date().optional(),
+	taxBands: z.array(
 		z.object({
-			from: z.number().nonnegative(),
-			to: z.number().nonnegative().nullable(),
+			order: z.number().int(),
+			name: z.string(),
+			minAmount: z.number().nonnegative(),
+			maxAmount: z.number().nonnegative().nullable(),
 			rate: z.number().min(0).max(1),
+			flatAmount: z.number().optional(),
 		})
 	),
 	personalDeduction: z.object({
-		type: z.enum(["fixed", "formula"]),
-		basis: z.enum(["annual", "monthly"]),
-		amount: z.number().nonnegative().optional(),
+		type: z.enum(["fixed", "percentage", "formula"]),
+		fixedAmount: z.number().nonnegative().optional(),
+		percentage: z.number().min(0).max(1).optional(),
 		formula: z.string().optional(),
-		description: z.string().optional(),
+		minAmount: z.number().optional(),
+		maxAmount: z.number().optional(),
+		basis: z.enum(["annual", "monthly"]),
 	}),
-	roundingMode: z.enum(["nearest", "up", "down"]).default("nearest"),
+	roundingMode: z
+		.enum(["nearest", "floor", "ceil", "banker"])
+		.default("nearest"),
+	roundingPrecision: z.number().int().positive().default(1),
 	periodization: z
-		.object({
-			allowMonthly: z.boolean(),
-			allowBiweekly: z.boolean(),
-			allowWeekly: z.boolean(),
-		})
-		.optional(),
+		.enum(["annualized", "true_period", "cumulative"])
+		.default("annualized"),
 });
 
 const createSocialSecurityRuleSchema = z.object({
 	jurisdictionId: z.string().uuid(),
-	taxYear: z.number().int().min(2000).max(2100),
-	employeeRate: z.number().min(0).max(1),
-	employerRate: z.number().min(0).max(1),
-	ceiling: z.number().nonnegative().nullable(),
-	ceilingPeriod: z.enum(["annual", "monthly", "weekly"]).nullable(),
-	basis: z.enum(["gross", "taxable"]),
+	name: z.string().min(1),
+	code: z.string().min(1),
+	year: z.number().int().min(2000).max(2100),
+	effectiveFrom: z.string().date(),
+	effectiveTo: z.string().date().optional(),
+	employeeRate: z.string(), // numeric stored as string
+	employerRate: z.string(), // numeric stored as string
+	selfEmployedRate: z.string().optional(),
+	earningsFloor: z.number().int().nonnegative().optional(),
+	earningsCeiling: z.number().int().nonnegative().optional(),
+	roundingMode: z
+		.enum(["nearest", "floor", "ceil", "banker"])
+		.default("nearest"),
+	roundingPrecision: z.number().int().positive().default(1),
 });
 
 const createFilingRequirementSchema = z.object({
 	jurisdictionId: z.string().uuid(),
-	formName: z.string().min(1).max(255),
+	code: z.string().min(1),
+	name: z.string().min(1).max(255),
 	description: z.string().optional(),
+	filingType: z.string().min(1),
 	frequency: z.enum(["monthly", "quarterly", "annual"]),
-	dueDay: z.number().int().min(1).max(31),
-	requiredFields: z.record(z.string(), z.any()),
+	dueDayOfMonth: z.number().int().min(1).max(31).optional(),
+	dueDaysAfterPeriod: z.number().int().min(1).max(90).optional(),
+	requiredFields: z
+		.array(
+			z.object({
+				fieldName: z.string(),
+				source: z.string(),
+				label: z.string(),
+				format: z.enum(["string", "number", "currency", "date"]),
+			})
+		)
+		.optional(),
+	exportFormats: z.array(z.string()).optional(),
 });
 
 // ============================================================================
@@ -83,8 +112,10 @@ export const createJurisdiction = authedProcedure
 	.input(createJurisdictionSchema)
 	.handler(async ({ input }) => {
 		const newJurisdiction: NewTaxJurisdiction = {
-			countryCode: input.countryCode,
+			code: input.code,
 			name: input.name,
+			country: input.country,
+			region: input.region ?? null,
 			currency: input.currency,
 			currencySymbol: input.currencySymbol,
 			timezone: input.timezone,
@@ -138,7 +169,7 @@ export const getJurisdiction = publicProcedure
 
 		const nisRules = await db.query.socialSecurityRules.findMany({
 			where: eq(socialSecurityRules.jurisdictionId, input.id),
-			orderBy: (rules, { desc }) => [desc(rules.taxYear)],
+			orderBy: (rules, { desc }) => [desc(rules.year)],
 		});
 
 		const filings = await db.query.filingRequirements.findMany({
@@ -180,14 +211,13 @@ export const createIncomeTaxRule = authedProcedure
 		const newRule: NewIncomeTaxRule = {
 			jurisdictionId: input.jurisdictionId,
 			taxYear: input.taxYear,
-			bands: input.bands,
+			effectiveFrom: input.effectiveFrom,
+			effectiveTo: input.effectiveTo ?? null,
+			taxBands: input.taxBands,
 			personalDeduction: input.personalDeduction,
 			roundingMode: input.roundingMode,
-			periodization: input.periodization || {
-				allowMonthly: true,
-				allowBiweekly: true,
-				allowWeekly: true,
-			},
+			roundingPrecision: input.roundingPrecision,
+			periodization: input.periodization,
 		};
 
 		const [rule] = await db.insert(incomeTaxRules).values(newRule).returning();
@@ -239,24 +269,30 @@ export const createSocialSecurityRule = authedProcedure
 		const existing = await db.query.socialSecurityRules.findFirst({
 			where: and(
 				eq(socialSecurityRules.jurisdictionId, input.jurisdictionId),
-				eq(socialSecurityRules.taxYear, input.taxYear)
+				eq(socialSecurityRules.year, input.year)
 			),
 		});
 
 		if (existing) {
 			throw new Error(
-				`Social security rule already exists for ${input.taxYear}. Update the existing rule instead.`
+				`Social security rule already exists for ${input.year}. Update the existing rule instead.`
 			);
 		}
 
 		const newRule: NewSocialSecurityRule = {
 			jurisdictionId: input.jurisdictionId,
-			taxYear: input.taxYear,
+			name: input.name,
+			code: input.code,
+			year: input.year,
+			effectiveFrom: input.effectiveFrom,
+			effectiveTo: input.effectiveTo ?? null,
 			employeeRate: input.employeeRate,
 			employerRate: input.employerRate,
-			ceiling: input.ceiling,
-			ceilingPeriod: input.ceilingPeriod,
-			basis: input.basis,
+			selfEmployedRate: input.selfEmployedRate ?? null,
+			earningsFloor: input.earningsFloor ?? null,
+			earningsCeiling: input.earningsCeiling ?? null,
+			roundingMode: input.roundingMode,
+			roundingPrecision: input.roundingPrecision,
 		};
 
 		const [rule] = await db
@@ -278,20 +314,20 @@ export const getSocialSecurityRule = publicProcedure
 	.input(
 		z.object({
 			jurisdictionId: z.string().uuid(),
-			taxYear: z.number().int().min(2000).max(2100),
+			year: z.number().int().min(2000).max(2100),
 		})
 	)
 	.handler(async ({ input }) => {
 		const rule = await db.query.socialSecurityRules.findFirst({
 			where: and(
 				eq(socialSecurityRules.jurisdictionId, input.jurisdictionId),
-				eq(socialSecurityRules.taxYear, input.taxYear)
+				eq(socialSecurityRules.year, input.year)
 			),
 		});
 
 		if (!rule) {
 			throw new Error(
-				`No social security rule found for ${input.taxYear} in this jurisdiction`
+				`No social security rule found for ${input.year} in this jurisdiction`
 			);
 		}
 
@@ -310,11 +346,15 @@ export const createFilingRequirement = authedProcedure
 	.handler(async ({ input }) => {
 		const newFiling: NewFilingRequirement = {
 			jurisdictionId: input.jurisdictionId,
-			formName: input.formName,
-			description: input.description || null,
+			code: input.code,
+			name: input.name,
+			description: input.description ?? null,
+			filingType: input.filingType,
 			frequency: input.frequency,
-			dueDay: input.dueDay,
-			requiredFields: input.requiredFields,
+			dueDayOfMonth: input.dueDayOfMonth ?? null,
+			dueDaysAfterPeriod: input.dueDaysAfterPeriod ?? null,
+			requiredFields: input.requiredFields ?? null,
+			exportFormats: input.exportFormats ?? null,
 		};
 
 		const [filing] = await db

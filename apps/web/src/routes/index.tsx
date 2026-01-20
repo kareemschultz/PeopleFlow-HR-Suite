@@ -38,7 +38,9 @@ function HomeComponent() {
 						/>
 						<span className="text-muted-foreground text-sm">
 							{(() => {
-								if (healthCheck.isLoading) return "Checking...";
+								if (healthCheck.isLoading) {
+									return "Checking...";
+								}
 								return healthCheck.data ? "Connected" : "Disconnected";
 							})()}
 						</span>

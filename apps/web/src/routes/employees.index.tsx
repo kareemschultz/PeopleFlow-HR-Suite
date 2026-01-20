@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search } from "hugeicons-react";
+import { Search01Icon } from "hugeicons-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,7 +43,7 @@ function EmployeesPage() {
 			{/* Search */}
 			<div className="mb-6">
 				<div className="relative">
-					<Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
+					<Search01Icon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
 					<Input
 						className="pl-10"
 						onChange={(e) => setSearch(e.target.value)}

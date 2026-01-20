@@ -5,9 +5,15 @@ import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
 import { orpc } from "@/utils/orpc";
 
+// Type for route context
+interface DashboardContext {
+	session: Awaited<ReturnType<typeof authClient.getSession>>;
+	customerState: Awaited<ReturnType<typeof authClient.customer.state>>["data"];
+}
+
 export const Route = createFileRoute("/dashboard")({
 	component: RouteComponent,
-	beforeLoad: async () => {
+	beforeLoad: async (): Promise<DashboardContext> => {
 		const session = await authClient.getSession();
 		if (!session.data) {
 			redirect({
@@ -21,7 +27,8 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function RouteComponent() {
-	const { session, customerState } = Route.useRouteContext();
+	const { session, customerState } =
+		Route.useRouteContext() as DashboardContext;
 
 	const privateData = useQuery(orpc.privateData.queryOptions());
 

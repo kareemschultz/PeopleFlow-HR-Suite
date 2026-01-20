@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -31,7 +32,9 @@ import { orpc } from "@/utils/orpc";
 
 // Helper for initials
 function getInitials(name?: string) {
-	if (!name) return "??";
+	if (!name) {
+		return "??";
+	}
 	return name
 		.split(" ")
 		.map((n) => n[0])
@@ -48,31 +51,41 @@ export function PermissionsSettings() {
 	// Mock Organization ID for now - in real app, get from context/URL
 	const organizationId = "00000000-0000-0000-0000-000000000000"; // Placeholder
 
-	const utils = orpc.useUtils();
-	const { data: members, isLoading } = orpc.organizations.listMembers.useQuery({
-		organizationId,
-	});
+	const queryClient = useQueryClient();
+	const { data: members, isLoading } = useQuery(
+		orpc.organizations.listMembers.queryOptions({
+			input: { organizationId },
+		})
+	);
 
-	const updateMutation = orpc.organizations.updateMember.useMutation({
-		onSuccess: () => {
-			utils.organizations.listMembers.invalidate();
-			setIsEditOpen(false);
-			toast.success("Member updated successfully");
-		},
-		onError: (error) => {
-			toast.error(`Failed to update member: ${error.message}`);
-		},
-	});
+	const updateMutation = useMutation(
+		orpc.organizations.updateMember.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpc.organizations.listMembers.key(),
+				});
+				setIsEditOpen(false);
+				toast.success("Member updated successfully");
+			},
+			onError: (error: Error) => {
+				toast.error(`Failed to update member: ${error.message}`);
+			},
+		})
+	);
 
-	const removeMutation = orpc.organizations.removeMember.useMutation({
-		onSuccess: () => {
-			utils.organizations.listMembers.invalidate();
-			toast.success("Member removed successfully");
-		},
-		onError: (error) => {
-			toast.error(`Failed to remove member: ${error.message}`);
-		},
-	});
+	const removeMutation = useMutation(
+		orpc.organizations.removeMember.mutationOptions({
+			onSuccess: () => {
+				queryClient.invalidateQueries({
+					queryKey: orpc.organizations.listMembers.key(),
+				});
+				toast.success("Member removed successfully");
+			},
+			onError: (error: Error) => {
+				toast.error(`Failed to remove member: ${error.message}`);
+			},
+		})
+	);
 
 	const handleEditRole = (memberId: string, currentRole: string) => {
 		setSelectedMember(memberId);
@@ -81,7 +94,9 @@ export function PermissionsSettings() {
 	};
 
 	const saveRole = () => {
-		if (!selectedMember) return;
+		if (!selectedMember) {
+			return;
+		}
 		updateMutation.mutate({
 			memberId: selectedMember,
 			role: newRole as any, // Cast to match enum

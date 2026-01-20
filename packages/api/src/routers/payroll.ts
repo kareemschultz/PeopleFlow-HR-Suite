@@ -19,10 +19,19 @@ import { calculatePayslip } from "../services/payroll-service";
 
 const createPayrollRunSchema = z.object({
 	organizationId: z.string().uuid(),
-	periodStart: z.string().datetime(),
-	periodEnd: z.string().datetime(),
-	payDate: z.string().datetime(),
-	description: z.string().optional(),
+	periodStart: z.string().date(),
+	periodEnd: z.string().date(),
+	payDate: z.string().date(),
+	notes: z.string().optional(),
+	runType: z
+		.enum([
+			"regular",
+			"bonus",
+			"thirteenth_month",
+			"retro_adjustment",
+			"final_settlement",
+		])
+		.default("regular"),
 	departmentIds: z.array(z.string().uuid()).optional(),
 });
 
@@ -58,19 +67,19 @@ export const createPayrollRun = authedProcedure
 	.handler(async ({ input }) => {
 		const newRun: NewPayrollRun = {
 			organizationId: input.organizationId,
-			periodStart: new Date(input.periodStart),
-			periodEnd: new Date(input.periodEnd),
-			payDate: new Date(input.payDate),
-			description: input.description || null,
+			periodStart: input.periodStart,
+			periodEnd: input.periodEnd,
+			payDate: input.payDate,
+			runType: input.runType,
+			notes: input.notes ?? null,
 			status: "draft",
-			totals: {
-				employeeCount: 0,
-				totalGross: 0,
-				totalPaye: 0,
-				totalNis: 0,
-				totalDeductions: 0,
-				totalNetPay: 0,
-			},
+			employeeCount: 0,
+			totalGrossEarnings: 0,
+			totalNetPay: 0,
+			totalPaye: 0,
+			totalNisEmployee: 0,
+			totalNisEmployer: 0,
+			totalDeductions: 0,
 		};
 
 		const [run] = await db.insert(payrollRuns).values(newRun).returning();
@@ -172,9 +181,11 @@ export const processPayrollRun = authedProcedure
 		}
 
 		// Get tax rules for the jurisdiction
-		const jurisdiction = await db.query.taxJurisdictions.findFirst({
-			where: eq(taxJurisdictions.id, org.taxJurisdictionId),
-		});
+		const jurisdiction = org.jurisdictionId
+			? await db.query.taxJurisdictions.findFirst({
+					where: eq(taxJurisdictions.id, org.jurisdictionId),
+				})
+			: null;
 
 		if (!jurisdiction) {
 			throw new Error("Tax jurisdiction not configured for organization");
@@ -193,7 +204,7 @@ export const processPayrollRun = authedProcedure
 		const nisRule = await db.query.socialSecurityRules.findFirst({
 			where: and(
 				eq(socialSecurityRules.jurisdictionId, jurisdiction.id),
-				eq(socialSecurityRules.taxYear, taxYear)
+				eq(socialSecurityRules.year, taxYear)
 			),
 		});
 
@@ -237,11 +248,11 @@ export const processPayrollRun = authedProcedure
 
 			newPayslips.push(payslip);
 
-			totalGross += payslip.grossPay;
-			totalPaye += payslip.totalPaye;
-			totalNis += payslip.employeeNis;
-			totalDeductions += payslip.totalDeductions;
-			totalNetPay += payslip.netPay;
+			totalGross += payslip.grossEarnings ?? 0;
+			totalPaye += payslip.payeAmount ?? 0;
+			totalNis += payslip.nisEmployee ?? 0;
+			totalDeductions += payslip.totalDeductions ?? 0;
+			totalNetPay += payslip.netPay ?? 0;
 		}
 
 		// Insert all payslips
@@ -253,15 +264,13 @@ export const processPayrollRun = authedProcedure
 		const [updatedRun] = await db
 			.update(payrollRuns)
 			.set({
-				status: "processing",
-				totals: {
-					employeeCount: newPayslips.length,
-					totalGross,
-					totalPaye,
-					totalNis,
-					totalDeductions,
-					totalNetPay,
-				},
+				status: "calculated",
+				employeeCount: newPayslips.length,
+				totalGrossEarnings: totalGross,
+				totalNetPay,
+				totalPaye,
+				totalNisEmployee: totalNis,
+				totalDeductions,
 				updatedAt: new Date(),
 			})
 			.where(eq(payrollRuns.id, input.payrollRunId))
@@ -284,8 +293,8 @@ export const approvePayrollRun = authedProcedure
 			throw new Error("Payroll run not found");
 		}
 
-		if (run.status !== "processing") {
-			throw new Error("Can only approve payroll runs in processing status");
+		if (run.status !== "calculated") {
+			throw new Error("Can only approve payroll runs in calculated status");
 		}
 
 		const [updatedRun] = await db
@@ -307,16 +316,16 @@ export const getPayslipsForPeriod = authedProcedure
 	.input(
 		z.object({
 			employeeId: z.string().uuid(),
-			startDate: z.string().datetime(),
-			endDate: z.string().datetime(),
+			startDate: z.string().date(),
+			endDate: z.string().date(),
 		})
 	)
 	.handler(async ({ input }) => {
 		const slips = await db.query.payslips.findMany({
 			where: and(
 				eq(payslips.employeeId, input.employeeId),
-				gte(payslips.periodStart, new Date(input.startDate)),
-				lte(payslips.periodEnd, new Date(input.endDate))
+				gte(payslips.periodStart, input.startDate),
+				lte(payslips.periodEnd, input.endDate)
 			),
 			orderBy: [desc(payslips.periodStart)],
 		});
