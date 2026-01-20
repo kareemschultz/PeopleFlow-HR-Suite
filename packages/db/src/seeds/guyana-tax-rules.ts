@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import {
 	filingRequirements,
 	incomeTaxRules,
@@ -267,12 +268,13 @@ export const guyanaFilingRequirements: NewFilingRequirement[] = [
  * await seedGuyanaData(db);
  * ```
  */
+// biome-ignore lint/suspicious/noExplicitAny: Drizzle db type is complex and varies by driver
 export async function seedGuyanaData(db: any): Promise<void> {
 	// 0. Clean up existing Guyana data (foreign keys will cascade)
 	try {
 		await db.delete(taxJurisdictions).where(eq(taxJurisdictions.code, "GY"));
 		console.log("   - Removed existing Guyana jurisdiction");
-	} catch (error) {
+	} catch (_error) {
 		// No existing data or table doesn't exist yet
 	}
 

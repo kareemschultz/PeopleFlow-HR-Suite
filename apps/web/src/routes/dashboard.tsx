@@ -32,8 +32,8 @@ function RouteComponent() {
 
 	const privateData = useQuery(orpc.privateData.queryOptions());
 
-	const hasProSubscription = customerState?.activeSubscriptions?.length! > 0;
-	console.log("Active subscriptions:", customerState?.activeSubscriptions);
+	const hasProSubscription =
+		(customerState?.activeSubscriptions?.length ?? 0) > 0;
 
 	return (
 		<div>

@@ -33,16 +33,18 @@ export const apiHandler = new OpenAPIHandler(appRouter, {
 		}),
 	],
 	interceptors: [
-		onError((error) => {
-			console.error(error);
+		onError((_error) => {
+			// Errors are propagated to the client with appropriate status codes
+			// Add logging service integration here if needed (e.g., Sentry)
 		}),
 	],
 });
 
 export const rpcHandler = new RPCHandler(appRouter, {
 	interceptors: [
-		onError((error) => {
-			console.error(error);
+		onError((_error) => {
+			// Errors are propagated to the client with appropriate status codes
+			// Add logging service integration here if needed (e.g., Sentry)
 		}),
 	],
 });

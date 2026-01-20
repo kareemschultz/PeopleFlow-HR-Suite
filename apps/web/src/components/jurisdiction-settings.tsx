@@ -25,6 +25,17 @@ import {
 } from "@/components/ui/table";
 import { orpc } from "@/utils/orpc";
 
+interface Jurisdiction {
+	id: string;
+	name: string;
+	code: string;
+	country: string;
+	currency: string;
+	currencySymbol: string;
+	fiscalYearStart: number;
+	isActive: boolean;
+}
+
 export function JurisdictionSettings() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [name, setName] = useState("");
@@ -66,14 +77,77 @@ export function JurisdictionSettings() {
 		e.preventDefault();
 		createMutation.mutate({
 			name,
-			code: countryCode, // jurisdiction code
-			country: countryCode, // ISO 2-letter country code
+			code: countryCode,
+			country: countryCode,
 			currency,
 			currencySymbol,
 			timezone,
-			fiscalYearStart: 1, // Default to January
+			fiscalYearStart: 1,
 		});
 	};
+
+	function renderLoadingRows() {
+		return Array.from({ length: 3 }).map((_, i) => (
+			<TableRow key={`skeleton-${i.toString()}`}>
+				<TableCell>
+					<Skeleton className="h-4 w-[150px]" />
+				</TableCell>
+				<TableCell>
+					<Skeleton className="h-4 w-[50px]" />
+				</TableCell>
+				<TableCell>
+					<Skeleton className="h-4 w-[50px]" />
+				</TableCell>
+				<TableCell>
+					<Skeleton className="h-4 w-[100px]" />
+				</TableCell>
+				<TableCell>
+					<Skeleton className="h-4 w-[60px]" />
+				</TableCell>
+			</TableRow>
+		));
+	}
+
+	function renderEmptyRow() {
+		return (
+			<TableRow>
+				<TableCell
+					className="h-24 text-center text-muted-foreground"
+					colSpan={5}
+				>
+					No jurisdictions found. Add one to get started.
+				</TableCell>
+			</TableRow>
+		);
+	}
+
+	function renderJurisdictionRows() {
+		return (jurisdictions as Jurisdiction[])?.map((j) => (
+			<TableRow key={j.id}>
+				<TableCell className="font-medium">{j.name}</TableCell>
+				<TableCell>{j.country}</TableCell>
+				<TableCell>
+					{j.currency} ({j.currencySymbol})
+				</TableCell>
+				<TableCell>Month {j.fiscalYearStart}</TableCell>
+				<TableCell>
+					<Badge variant={j.isActive ? "default" : "secondary"}>
+						{j.isActive ? "Active" : "Inactive"}
+					</Badge>
+				</TableCell>
+			</TableRow>
+		));
+	}
+
+	function renderTableContent() {
+		if (isLoading) {
+			return renderLoadingRows();
+		}
+		if (!jurisdictions || jurisdictions.length === 0) {
+			return renderEmptyRow();
+		}
+		return renderJurisdictionRows();
+	}
 
 	return (
 		<div className="space-y-6">
@@ -177,65 +251,7 @@ export function JurisdictionSettings() {
 							<TableHead>Status</TableHead>
 						</TableRow>
 					</TableHeader>
-					<TableBody>
-						{isLoading ? (
-							Array.from({ length: 3 }).map((_, i) => (
-								<TableRow key={i}>
-									<TableCell>
-										<Skeleton className="h-4 w-[150px]" />
-									</TableCell>
-									<TableCell>
-										<Skeleton className="h-4 w-[50px]" />
-									</TableCell>
-									<TableCell>
-										<Skeleton className="h-4 w-[50px]" />
-									</TableCell>
-									<TableCell>
-										<Skeleton className="h-4 w-[100px]" />
-									</TableCell>
-									<TableCell>
-										<Skeleton className="h-4 w-[60px]" />
-									</TableCell>
-								</TableRow>
-							))
-						) : jurisdictions?.length === 0 ? (
-							<TableRow>
-								<TableCell
-									className="h-24 text-center text-muted-foreground"
-									colSpan={5}
-								>
-									No jurisdictions found. Add one to get started.
-								</TableCell>
-							</TableRow>
-						) : (
-							jurisdictions?.map(
-								(j: {
-									id: string;
-									name: string;
-									code: string;
-									country: string;
-									currency: string;
-									currencySymbol: string;
-									fiscalYearStart: number;
-									isActive: boolean;
-								}) => (
-									<TableRow key={j.id}>
-										<TableCell className="font-medium">{j.name}</TableCell>
-										<TableCell>{j.country}</TableCell>
-										<TableCell>
-											{j.currency} ({j.currencySymbol})
-										</TableCell>
-										<TableCell>Month {j.fiscalYearStart}</TableCell>
-										<TableCell>
-											<Badge variant={j.isActive ? "default" : "secondary"}>
-												{j.isActive ? "Active" : "Inactive"}
-											</Badge>
-										</TableCell>
-									</TableRow>
-								)
-							)
-						)}
-					</TableBody>
+					<TableBody>{renderTableContent()}</TableBody>
 				</Table>
 			</div>
 		</div>

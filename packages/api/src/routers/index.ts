@@ -6,6 +6,7 @@ import { employeesRouter } from "./employees";
 import { metricsRouter } from "./metrics";
 import { organizationsRouter } from "./organizations";
 import { payrollRouter } from "./payroll";
+import { reportsRouter } from "./reports";
 import { retroAdjustmentsRouter } from "./retro-adjustments";
 import { taxJurisdictionsRouter } from "./tax-jurisdictions";
 
@@ -51,9 +52,8 @@ export const appRouter = {
 	retroAdjustments: retroAdjustmentsRouter,
 	metrics: metricsRouter,
 
-	// Future routes:
-	// positions: positionsRouter,
-	// reports: reportsRouter,
+	// Reports & Compliance
+	reports: reportsRouter,
 };
 
 export type AppRouter = typeof appRouter;

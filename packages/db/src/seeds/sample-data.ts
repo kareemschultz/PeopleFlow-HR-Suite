@@ -139,7 +139,7 @@ export async function seedSampleData(): Promise<void> {
 			// Engineering positions (Org 1)
 			{
 				organizationId: org1.id,
-				departmentId: deptEngineering!.id,
+				departmentId: deptEngineering?.id,
 				title: "Senior Software Engineer",
 				code: "SSE",
 				level: "senior",
@@ -149,7 +149,7 @@ export async function seedSampleData(): Promise<void> {
 			},
 			{
 				organizationId: org1.id,
-				departmentId: deptEngineering!.id,
+				departmentId: deptEngineering?.id,
 				title: "Software Engineer",
 				code: "SE",
 				level: "mid",
@@ -159,7 +159,7 @@ export async function seedSampleData(): Promise<void> {
 			// HR positions (Org 1)
 			{
 				organizationId: org1.id,
-				departmentId: deptHR!.id,
+				departmentId: deptHR?.id,
 				title: "HR Manager",
 				code: "HRM",
 				level: "manager",
@@ -169,7 +169,7 @@ export async function seedSampleData(): Promise<void> {
 			// Finance positions (Org 1)
 			{
 				organizationId: org1.id,
-				departmentId: deptFinance!.id,
+				departmentId: deptFinance?.id,
 				title: "Financial Controller",
 				code: "FC",
 				level: "senior",
@@ -179,7 +179,7 @@ export async function seedSampleData(): Promise<void> {
 			// Sales positions (Org 2)
 			{
 				organizationId: org2.id,
-				departmentId: deptSales!.id,
+				departmentId: deptSales?.id,
 				title: "Sales Director",
 				code: "SD",
 				level: "director",
@@ -188,7 +188,7 @@ export async function seedSampleData(): Promise<void> {
 			},
 			{
 				organizationId: org2.id,
-				departmentId: deptSales!.id,
+				departmentId: deptSales?.id,
 				title: "Account Manager",
 				code: "AM",
 				level: "mid",
@@ -198,7 +198,7 @@ export async function seedSampleData(): Promise<void> {
 			// Operations positions (Org 2)
 			{
 				organizationId: org2.id,
-				departmentId: deptOps!.id,
+				departmentId: deptOps?.id,
 				title: "Operations Coordinator",
 				code: "OC",
 				level: "junior",
@@ -208,7 +208,7 @@ export async function seedSampleData(): Promise<void> {
 			// IT positions (Org 2)
 			{
 				organizationId: org2.id,
-				departmentId: deptIT!.id,
+				departmentId: deptIT?.id,
 				title: "IT Support Specialist",
 				code: "ITS",
 				level: "mid",
@@ -228,8 +228,8 @@ export async function seedSampleData(): Promise<void> {
 			// Guyana Tech Solutions - Engineering
 			{
 				organizationId: org1.id,
-				departmentId: deptEngineering!.id,
-				positionId: positionsList[0]!.id, // Senior Software Engineer
+				departmentId: deptEngineering?.id,
+				positionId: positionsList[0]?.id, // Senior Software Engineer
 				employeeNumber: "GTS-001",
 				firstName: "Rajesh",
 				lastName: "Kumar",
@@ -257,8 +257,8 @@ export async function seedSampleData(): Promise<void> {
 			},
 			{
 				organizationId: org1.id,
-				departmentId: deptEngineering!.id,
-				positionId: positionsList[1]!.id, // Software Engineer
+				departmentId: deptEngineering?.id,
+				positionId: positionsList[1]?.id, // Software Engineer
 				employeeNumber: "GTS-002",
 				firstName: "Maria",
 				lastName: "Singh",
@@ -285,8 +285,8 @@ export async function seedSampleData(): Promise<void> {
 			},
 			{
 				organizationId: org1.id,
-				departmentId: deptEngineering!.id,
-				positionId: positionsList[1]!.id, // Software Engineer
+				departmentId: deptEngineering?.id,
+				positionId: positionsList[1]?.id, // Software Engineer
 				employeeNumber: "GTS-003",
 				firstName: "David",
 				lastName: "Chen",
@@ -311,8 +311,8 @@ export async function seedSampleData(): Promise<void> {
 			// Guyana Tech Solutions - HR
 			{
 				organizationId: org1.id,
-				departmentId: deptHR!.id,
-				positionId: positionsList[2]!.id, // HR Manager
+				departmentId: deptHR?.id,
+				positionId: positionsList[2]?.id, // HR Manager
 				employeeNumber: "GTS-004",
 				firstName: "Priya",
 				lastName: "Ramjattan",
@@ -340,8 +340,8 @@ export async function seedSampleData(): Promise<void> {
 			// Guyana Tech Solutions - Finance
 			{
 				organizationId: org1.id,
-				departmentId: deptFinance!.id,
-				positionId: positionsList[3]!.id, // Financial Controller
+				departmentId: deptFinance?.id,
+				positionId: positionsList[3]?.id, // Financial Controller
 				employeeNumber: "GTS-005",
 				firstName: "Michael",
 				lastName: "Persaud",
@@ -370,8 +370,8 @@ export async function seedSampleData(): Promise<void> {
 			// Caribbean HR Services - Sales
 			{
 				organizationId: org2.id,
-				departmentId: deptSales!.id,
-				positionId: positionsList[4]!.id, // Sales Director
+				departmentId: deptSales?.id,
+				positionId: positionsList[4]?.id, // Sales Director
 				employeeNumber: "CHS-001",
 				firstName: "Sarah",
 				lastName: "Thompson",
@@ -399,8 +399,8 @@ export async function seedSampleData(): Promise<void> {
 			},
 			{
 				organizationId: org2.id,
-				departmentId: deptSales!.id,
-				positionId: positionsList[5]!.id, // Account Manager
+				departmentId: deptSales?.id,
+				positionId: positionsList[5]?.id, // Account Manager
 				employeeNumber: "CHS-002",
 				firstName: "Kevin",
 				lastName: "Lall",
@@ -428,8 +428,8 @@ export async function seedSampleData(): Promise<void> {
 			},
 			{
 				organizationId: org2.id,
-				departmentId: deptSales!.id,
-				positionId: positionsList[5]!.id, // Account Manager
+				departmentId: deptSales?.id,
+				positionId: positionsList[5]?.id, // Account Manager
 				employeeNumber: "CHS-003",
 				firstName: "Lisa",
 				lastName: "Mohammed",
@@ -457,8 +457,8 @@ export async function seedSampleData(): Promise<void> {
 			// Caribbean HR Services - Operations
 			{
 				organizationId: org2.id,
-				departmentId: deptOps!.id,
-				positionId: positionsList[6]!.id, // Operations Coordinator
+				departmentId: deptOps?.id,
+				positionId: positionsList[6]?.id, // Operations Coordinator
 				employeeNumber: "CHS-004",
 				firstName: "Ryan",
 				lastName: "Griffith",
@@ -482,8 +482,8 @@ export async function seedSampleData(): Promise<void> {
 			},
 			{
 				organizationId: org2.id,
-				departmentId: deptOps!.id,
-				positionId: positionsList[6]!.id, // Operations Coordinator
+				departmentId: deptOps?.id,
+				positionId: positionsList[6]?.id, // Operations Coordinator
 				employeeNumber: "CHS-005",
 				firstName: "Amanda",
 				lastName: "Williams",
@@ -508,8 +508,8 @@ export async function seedSampleData(): Promise<void> {
 			// Caribbean HR Services - IT
 			{
 				organizationId: org2.id,
-				departmentId: deptIT!.id,
-				positionId: positionsList[7]!.id, // IT Support Specialist
+				departmentId: deptIT?.id,
+				positionId: positionsList[7]?.id, // IT Support Specialist
 				employeeNumber: "CHS-006",
 				firstName: "Jason",
 				lastName: "Rampersaud",
@@ -537,8 +537,8 @@ export async function seedSampleData(): Promise<void> {
 			// Part-time employee for variety
 			{
 				organizationId: org1.id,
-				departmentId: deptEngineering!.id,
-				positionId: positionsList[1]!.id, // Software Engineer
+				departmentId: deptEngineering?.id,
+				positionId: positionsList[1]?.id, // Software Engineer
 				employeeNumber: "GTS-006",
 				firstName: "Sophia",
 				lastName: "Chang",
@@ -563,8 +563,8 @@ export async function seedSampleData(): Promise<void> {
 			// Contractor for variety
 			{
 				organizationId: org2.id,
-				departmentId: deptIT!.id,
-				positionId: positionsList[7]!.id, // IT Support Specialist
+				departmentId: deptIT?.id,
+				positionId: positionsList[7]?.id, // IT Support Specialist
 				employeeNumber: "CHS-007",
 				firstName: "Marcus",
 				lastName: "Jones",
@@ -589,8 +589,8 @@ export async function seedSampleData(): Promise<void> {
 			// Inactive employee (terminated)
 			{
 				organizationId: org1.id,
-				departmentId: deptFinance!.id,
-				positionId: positionsList[3]!.id, // Financial Controller
+				departmentId: deptFinance?.id,
+				positionId: positionsList[3]?.id, // Financial Controller
 				employeeNumber: "GTS-007",
 				firstName: "Robert",
 				lastName: "Davies",
@@ -616,8 +616,8 @@ export async function seedSampleData(): Promise<void> {
 			// On leave employee
 			{
 				organizationId: org2.id,
-				departmentId: deptSales!.id,
-				positionId: positionsList[5]!.id, // Account Manager
+				departmentId: deptSales?.id,
+				positionId: positionsList[5]?.id, // Account Manager
 				employeeNumber: "CHS-008",
 				firstName: "Jennifer",
 				lastName: "Phillips",

@@ -9,6 +9,20 @@ import { SignUp } from "@/components/sign-up";
 import { authClient } from "@/lib/auth-client";
 import { orpc, queryClient } from "@/utils/orpc";
 
+// Helper to avoid nested ternary
+function getConnectionStatus(
+	isLoading: boolean | undefined,
+	isConnected: boolean
+): string {
+	if (isLoading) {
+		return "Checking connection...";
+	}
+	if (isConnected) {
+		return "Connected to API";
+	}
+	return "API Disconnected";
+}
+
 export default function Home() {
 	const healthCheck = useQuery(orpc.healthCheck.queryOptions());
 	const privateData = useQuery(orpc.privateData.queryOptions());
@@ -69,11 +83,7 @@ export default function Home() {
 								ORPC Backend
 							</Text>
 							<Card.Description>
-								{isLoading
-									? "Checking connection..."
-									: isConnected
-										? "Connected to API"
-										: "API Disconnected"}
+								{getConnectionStatus(isLoading, isConnected)}
 							</Card.Description>
 						</View>
 						{isLoading && (
