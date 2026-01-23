@@ -107,6 +107,56 @@ The project uses a set of hooks and validators in `.claude/hooks/validators/`.
 
 ---
 
+## 🔧 Refactoring Patterns & Common Fixes
+
+### Cognitive Complexity (Max: 20)
+
+**Refactoring Strategies:**
+1. **Extract Helper Functions** - Separate complex logic
+2. **Extract Sub-Components** - Break large React components
+3. **Reusable UI Patterns** - Create components like `EditableField`, `ApprovalCheckbox`
+4. **State Management Helpers** - Centralize updates (`handleFieldChange`, `handleSettingChange`)
+
+### Common TypeScript Fixes
+
+**Missing Function Parameters:**
+```typescript
+// ❌ {formatCurrency(amount)}
+// ✅ {formatCurrency(amount, currency)}
+```
+
+**Union Type Casts:**
+```typescript
+gender: formData.gender as "male" | "female" | "other" | undefined
+employmentType: formData.employmentType as "full_time" | "part_time"
+```
+
+**Complex Query Types:**
+```typescript
+// biome-ignore lint/suspicious/noExplicitAny: Complex query result from orpc
+department: any
+```
+
+**JSX Comments:**
+```typescript
+{/* biome-ignore lint/suspicious/noExplicitAny: explanation */}
+```
+
+**TanStack Router:**
+```typescript
+// ✅ import from "@tanstack/react-router" (not "@tanstack/router")
+```
+
+### Pre-Commit Checklist
+
+- [ ] `bun x ultracite check` - complexity < 20
+- [ ] `bun run check-types` - no TypeScript errors
+- [ ] All functions have correct parameter counts
+- [ ] Union types have type casts
+- [ ] JSX comments use `{/* */}` syntax
+
+---
+
 ## 📝 Documentation
 
 - `STACK.md`: Detailed tech stack docs.

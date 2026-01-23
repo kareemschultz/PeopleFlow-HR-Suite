@@ -1081,6 +1081,273 @@ Typical validation times:
 
 ---
 
-**Last Updated**: 2025-01-19
+## 🔧 Refactoring Patterns & Common Fixes
+
+### Cognitive Complexity Reduction (Max: 20)
+
+When Biome reports cognitive complexity > 20, use these proven refactoring patterns:
+
+#### 1. **Extract Helper Functions**
+
+Move complex logic into separate functions with descriptive names:
+
+```typescript
+// ❌ BAD: Inline complex logic (complexity: 24)
+function calculatePAYE(gross: number, deduction: number) {
+	let personalDeduction = 0;
+	if (taxRule.personalDeduction) {
+		const { type, basis } = taxRule.personalDeduction;
+		switch (type) {
+			case "fixed":
+				personalDeduction = taxRule.personalDeduction.fixedAmount ?? 0;
+				break;
+			case "percentage":
+				personalDeduction = gross * (taxRule.personalDeduction.percentage ?? 0);
+				break;
+			// ... more cases
+		}
+	}
+	// ... more logic
+}
+
+// ✅ GOOD: Extract helpers (complexity: 12)
+function calculatePersonalDeduction(taxRule, gross, dependents) {
+	// Extracted logic here
+}
+
+function calculateProgressiveTax(taxableIncome, taxBands) {
+	// Extracted logic here
+}
+
+function calculatePAYE(gross: number, deduction: number) {
+	const personalDeduction = calculatePersonalDeduction(taxRule, gross, dependents);
+	const { taxBands, totalTax } = calculateProgressiveTax(taxableIncome, taxRule.taxBands);
+	// Clean, simple flow
+}
+```
+
+#### 2. **Extract Sub-Components**
+
+Break large React components into focused sub-components:
+
+```typescript
+// ❌ BAD: 700-line component (complexity: 45)
+function DepartmentRoute() {
+	return (
+		<div>
+			{/* 200 lines of header JSX */}
+			{/* 300 lines of overview tab JSX */}
+			{/* 200 lines of budget tab JSX */}
+		</div>
+	);
+}
+
+// ✅ GOOD: Extracted sub-components (complexity: <20 each)
+function DepartmentHeader({ department, onEdit, onSave }) { /* ... */ }
+function OverviewTab({ department, isEditing }) { /* ... */ }
+function BudgetSettingsTab({ department, handleSettingChange }) { /* ... */ }
+
+function DepartmentRoute() {
+	return (
+		<div>
+			<DepartmentHeader {...props} />
+			<Tabs>
+				<OverviewTab {...props} />
+				<BudgetSettingsTab {...props} />
+			</Tabs>
+		</div>
+	);
+}
+```
+
+#### 3. **Create Reusable UI Patterns**
+
+Extract repeated UI patterns into components:
+
+```typescript
+// ✅ Reusable editable field component
+function EditableField({ label, value, isEditing, onChange, fieldKey }) {
+	return (
+		<div>
+			<Label>{label}</Label>
+			{isEditing ? (
+				<Input value={value} onChange={(e) => onChange(fieldKey, e.target.value)} />
+			) : (
+				<p>{value}</p>
+			)}
+		</div>
+	);
+}
+
+// Now use it everywhere instead of duplicating JSX
+<EditableField label="Name" value={data.name} isEditing={editing} onChange={handleChange} fieldKey="name" />
+```
+
+#### 4. **Extract State Management Helpers**
+
+Simplify state updates with helper functions:
+
+```typescript
+// ✅ Centralized state update helpers
+const handleFieldChange = (key: string, value: string) => {
+	setEditData((prev) => ({ ...prev, [key]: value }));
+};
+
+const handleSettingChange = (key: string, value: unknown) => {
+	setEditData((prev) => ({
+		...prev,
+		settings: {
+			...(typeof prev.settings === "object" && prev.settings !== null ? prev.settings : {}),
+			[key]: value,
+		},
+	}));
+};
+```
+
+### Common TypeScript Fixes
+
+#### 1. **formatCurrency Missing Parameters**
+
+**Problem**: Functions expecting multiple parameters but only receiving one
+
+```typescript
+// ❌ ERROR: Expected 2 arguments, but got 1
+{formatCurrency(payslip.grossEarnings)}
+
+// ✅ FIX: Always pass all required parameters
+{formatCurrency(payslip.grossEarnings, currency)}
+```
+
+**Solution**: Search and replace all instances:
+```bash
+sed -i 's/formatCurrency(\([^,)]*\))}/formatCurrency(\1, currency)}/g' file.tsx
+```
+
+#### 2. **Union Type Mismatches**
+
+**Problem**: String values not matching expected union types
+
+```typescript
+// ❌ ERROR: Type 'string' is not assignable to type '"male" | "female" | "other"'
+gender: formData.gender || undefined,
+employmentType: formData.employmentType,
+
+// ✅ FIX: Add type casts for union types
+gender: (formData.gender || undefined) as "male" | "female" | "other" | "prefer_not_to_say" | undefined,
+employmentType: formData.employmentType as "full_time" | "part_time" | "contract" | "temporary" | "intern",
+employmentStatus: formData.employmentStatus as "active" | "on_leave" | "suspended" | "terminated" | "retired",
+salaryFrequency: formData.salaryFrequency as "weekly" | "biweekly" | "monthly" | "annual",
+```
+
+#### 3. **Complex Query Result Types**
+
+**Problem**: TypeScript can't infer types from `ReturnType<typeof useQuery>["data"]`
+
+```typescript
+// ❌ ERROR: Property 'name' does not exist on type '{}'
+department: NonNullable<ReturnType<typeof useQuery>["data"]>
+
+// ✅ FIX: Use `any` with biome-ignore for complex orpc query results
+// biome-ignore lint/suspicious/noExplicitAny: Complex query result type from orpc with nested relations
+department: any
+```
+
+#### 4. **JSX Comments in Children**
+
+**Problem**: Regular comments inside JSX children must use `{/* */}` syntax
+
+```typescript
+// ❌ ERROR: Wrap comments inside children within braces
+<div>
+	// biome-ignore lint/suspicious/noExplicitAny: explanation
+	{items.map((item: any) => ...)}
+</div>
+
+// ✅ FIX: Use JSX comment syntax
+<div>
+	{/* biome-ignore lint/suspicious/noExplicitAny: explanation */}
+	{items.map((item: any) => ...)}
+</div>
+```
+
+#### 5. **TanStack Router Import**
+
+**Problem**: Wrong import package for TanStack Router
+
+```typescript
+// ❌ ERROR: Cannot find module '@tanstack/router'
+import { createFileRoute } from "@tanstack/router";
+
+// ✅ FIX: Use correct package name
+import { createFileRoute } from "@tanstack/react-router";
+```
+
+### Drizzle SQL Helper Best Practices
+
+**Problem**: `or()` and `and()` can return `undefined` when given empty arrays
+
+```typescript
+// ❌ ERROR: Argument of type 'undefined' is not assignable to parameter
+const filters = [eq(employees.organizationId, orgId)];
+if (input?.search) {
+	filters.push(
+		or(
+			like(employees.firstName, `%${input.search}%`),
+			like(employees.lastName, `%${input.search}%`)
+		)
+	); // Type error: or() can return undefined
+}
+
+// ✅ FIX: Check for undefined before pushing
+const filters = [eq(employees.organizationId, orgId)];
+if (input?.search) {
+	const searchFilter = or(
+		like(employees.firstName, `%${input.search}%`),
+		like(employees.lastName, `%${input.search}%`)
+	);
+	if (searchFilter) {
+		filters.push(searchFilter);
+	}
+}
+```
+
+### Refactoring Checklist
+
+Before committing complex component refactoring:
+
+- [ ] Run `bun x ultracite check` - verify complexity < 20
+- [ ] Run `bun run check-types` - verify no TypeScript errors
+- [ ] Check all function calls have correct number of parameters
+- [ ] Verify all union type properties have type casts
+- [ ] Ensure JSX comments use `{/* */}` syntax
+- [ ] Test that extracted components receive all required props
+- [ ] Add biome-ignore comments for legitimate `any` types
+- [ ] Run full build to catch any runtime issues
+
+### Pre-Commit Validation
+
+The project has Husky hooks that run:
+1. **Ultracite format + check** - Auto-fixes and validates code style
+2. **TypeScript type check** - Ensures no type errors
+3. **Commit is blocked if either fails**
+
+Always fix errors before committing. Common fixes:
+- `bun x ultracite fix` - Auto-fix formatting
+- Add type casts for union types
+- Check function parameter counts
+- Add biome-ignore for complex query types
+
+### Performance Tips
+
+When refactoring for complexity:
+- **Extract early** - Don't wait until complexity is 40+
+- **Test incrementally** - Fix one complexity error at a time
+- **Use patterns** - Reuse EditableField, ApprovalCheckbox, etc.
+- **Keep it simple** - Don't over-engineer, just reduce complexity
+
+---
+
+**Last Updated**: 2025-01-23
 **Validation System Version**: 1.0.0
+**Refactoring Patterns Added**: 2025-01-23
 
