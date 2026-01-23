@@ -1,6 +1,6 @@
 import { db, departments, employees, organizations, positions } from "../index";
-import { seedGuyanaData } from "./guyana-tax-rules";
 import { seedOnboardingOffboarding } from "../seed-onboarding-offboarding";
+import { seedGuyanaData } from "./guyana-tax-rules";
 
 /**
  * Seed comprehensive sample data for development and testing

@@ -63,6 +63,7 @@ export function trapFocus(element: HTMLElement): () => void {
 	);
 
 	const firstFocusable = focusableElements[0];
+	// biome-ignore lint/style/useAtIndex: NodeListOf doesn't have .at() method in TypeScript DOM types
 	const lastFocusable = focusableElements[focusableElements.length - 1];
 
 	function handleKeyDown(e: KeyboardEvent) {
@@ -70,18 +71,14 @@ export function trapFocus(element: HTMLElement): () => void {
 			return;
 		}
 
-		if (e.shiftKey) {
-			// Shift+Tab
-			if (document.activeElement === firstFocusable) {
-				e.preventDefault();
-				lastFocusable?.focus();
-			}
-		} else {
-			// Tab
-			if (document.activeElement === lastFocusable) {
-				e.preventDefault();
-				firstFocusable?.focus();
-			}
+		if (e.shiftKey && document.activeElement === firstFocusable) {
+			// Shift+Tab at first element
+			e.preventDefault();
+			lastFocusable?.focus();
+		} else if (document.activeElement === lastFocusable) {
+			// Tab at last element
+			e.preventDefault();
+			firstFocusable?.focus();
 		}
 	}
 

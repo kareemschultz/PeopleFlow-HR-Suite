@@ -22,8 +22,8 @@ interface SendInvitationEmailParams {
 /**
  * Send OTP email for two-factor authentication
  * TODO: Replace with your email service (Resend, SendGrid, etc.)
-// biome-ignore lint/suspicious/useAwait: Email service integration will add await in production
  */
+// biome-ignore lint/suspicious/useAwait: Email service integration will add await in production
 export async function sendOTPEmail({
 	to,
 	userName,
@@ -68,8 +68,8 @@ Valid for: 5 minutes
 /**
  * Send organization invitation email
  * TODO: Replace with your email service
-// biome-ignore lint/suspicious/useAwait: Email service integration will add await in production
  */
+// biome-ignore lint/suspicious/useAwait: Email service integration will add await in production
 export async function sendInvitationEmail({
 	email,
 	inviterName,

@@ -18,6 +18,8 @@ import { Route as IndexRouteImport } from "./routes/index"
 import { Route as SettingsIndexRouteImport } from "./routes/settings/index"
 import { Route as ReportsIndexRouteImport } from "./routes/reports/index"
 import { Route as PayrollIndexRouteImport } from "./routes/payroll.index"
+import { Route as OnboardingIndexRouteImport } from "./routes/onboarding.index"
+import { Route as OffboardingIndexRouteImport } from "./routes/offboarding.index"
 import { Route as EmployeesIndexRouteImport } from "./routes/employees.index"
 import { Route as DepartmentsIndexRouteImport } from "./routes/departments.index"
 import { Route as SettingsSecurityRouteImport } from "./routes/settings/security"
@@ -75,6 +77,16 @@ const ReportsIndexRoute = ReportsIndexRouteImport.update({
 const PayrollIndexRoute = PayrollIndexRouteImport.update({
   id: "/payroll/",
   path: "/payroll/",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
+  id: "/onboarding/",
+  path: "/onboarding/",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffboardingIndexRoute = OffboardingIndexRouteImport.update({
+  id: "/offboarding/",
+  path: "/offboarding/",
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmployeesIndexRoute = EmployeesIndexRouteImport.update({
@@ -163,6 +175,8 @@ export interface FileRoutesByFullPath {
   "/settings/security": typeof SettingsSecurityRoute
   "/departments/": typeof DepartmentsIndexRoute
   "/employees/": typeof EmployeesIndexRoute
+  "/offboarding/": typeof OffboardingIndexRoute
+  "/onboarding/": typeof OnboardingIndexRoute
   "/payroll/": typeof PayrollIndexRoute
   "/reports/": typeof ReportsIndexRoute
   "/settings/": typeof SettingsIndexRoute
@@ -187,6 +201,8 @@ export interface FileRoutesByTo {
   "/settings/security": typeof SettingsSecurityRoute
   "/departments": typeof DepartmentsIndexRoute
   "/employees": typeof EmployeesIndexRoute
+  "/offboarding": typeof OffboardingIndexRoute
+  "/onboarding": typeof OnboardingIndexRoute
   "/payroll": typeof PayrollIndexRoute
   "/reports": typeof ReportsIndexRoute
   "/settings": typeof SettingsIndexRoute
@@ -212,6 +228,8 @@ export interface FileRoutesById {
   "/settings/security": typeof SettingsSecurityRoute
   "/departments/": typeof DepartmentsIndexRoute
   "/employees/": typeof EmployeesIndexRoute
+  "/offboarding/": typeof OffboardingIndexRoute
+  "/onboarding/": typeof OnboardingIndexRoute
   "/payroll/": typeof PayrollIndexRoute
   "/reports/": typeof ReportsIndexRoute
   "/settings/": typeof SettingsIndexRoute
@@ -238,6 +256,8 @@ export interface FileRouteTypes {
     | "/settings/security"
     | "/departments/"
     | "/employees/"
+    | "/offboarding/"
+    | "/onboarding/"
     | "/payroll/"
     | "/reports/"
     | "/settings/"
@@ -262,6 +282,8 @@ export interface FileRouteTypes {
     | "/settings/security"
     | "/departments"
     | "/employees"
+    | "/offboarding"
+    | "/onboarding"
     | "/payroll"
     | "/reports"
     | "/settings"
@@ -286,6 +308,8 @@ export interface FileRouteTypes {
     | "/settings/security"
     | "/departments/"
     | "/employees/"
+    | "/offboarding/"
+    | "/onboarding/"
     | "/payroll/"
     | "/reports/"
     | "/settings/"
@@ -311,6 +335,8 @@ export interface RootRouteChildren {
   SettingsSecurityRoute: typeof SettingsSecurityRoute
   DepartmentsIndexRoute: typeof DepartmentsIndexRoute
   EmployeesIndexRoute: typeof EmployeesIndexRoute
+  OffboardingIndexRoute: typeof OffboardingIndexRoute
+  OnboardingIndexRoute: typeof OnboardingIndexRoute
   PayrollIndexRoute: typeof PayrollIndexRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
@@ -379,6 +405,20 @@ declare module "@tanstack/react-router" {
       path: "/payroll"
       fullPath: "/payroll/"
       preLoaderRoute: typeof PayrollIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/onboarding/": {
+      id: "/onboarding/"
+      path: "/onboarding"
+      fullPath: "/onboarding/"
+      preLoaderRoute: typeof OnboardingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/offboarding/": {
+      id: "/offboarding/"
+      path: "/offboarding"
+      fullPath: "/offboarding/"
+      preLoaderRoute: typeof OffboardingIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/employees/": {
@@ -495,6 +535,8 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsSecurityRoute: SettingsSecurityRoute,
   DepartmentsIndexRoute: DepartmentsIndexRoute,
   EmployeesIndexRoute: EmployeesIndexRoute,
+  OffboardingIndexRoute: OffboardingIndexRoute,
+  OnboardingIndexRoute: OnboardingIndexRoute,
   PayrollIndexRoute: PayrollIndexRoute,
   ReportsIndexRoute: ReportsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,

@@ -312,14 +312,15 @@ function SecuritySettingsPage() {
 								</Button>
 							</div>
 							<div className="grid grid-cols-2 gap-2">
-								{backupCodes.map((code, index) => (
-									<div
-										className="cursor-pointer rounded bg-muted p-2 font-mono text-sm hover:bg-muted/80"
-										key={index}
+								{backupCodes.map((code) => (
+									<button
+										className="cursor-pointer rounded bg-muted p-2 text-left font-mono text-sm hover:bg-muted/80"
+										key={code}
 										onClick={() => copyToClipboard(code)}
+										type="button"
 									>
 										{code}
-									</div>
+									</button>
 								))}
 							</div>
 							<p className="mt-4 text-muted-foreground text-xs">

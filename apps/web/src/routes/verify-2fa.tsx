@@ -161,13 +161,15 @@ function Verify2FAPage() {
 				</CardHeader>
 
 				<form
-					onSubmit={
-						method === "totp"
-							? handleVerifyTOTP
-							: method === "otp"
-								? handleVerifyOTP
-								: handleVerifyBackupCode
-					}
+					onSubmit={(e) => {
+						if (method === "totp") {
+							return handleVerifyTOTP(e);
+						}
+						if (method === "otp") {
+							return handleVerifyOTP(e);
+						}
+						return handleVerifyBackupCode(e);
+					}}
 				>
 					<CardContent className="space-y-4">
 						{error && (

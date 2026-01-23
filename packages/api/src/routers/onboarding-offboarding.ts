@@ -32,13 +32,14 @@ export const workflowTemplatesRouter = {
 	list: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				type: z.enum(["onboarding", "offboarding"]).optional(),
 				isActive: z.boolean().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<WorkflowTemplate[]> => {
+		.handler(async ({ input }): Promise<WorkflowTemplate[]> => {
 			const filters = [
-				eq(workflowTemplates.organizationId, context.user.organizationId),
+				eq(workflowTemplates.organizationId, input.organizationId),
 			];
 
 			if (input.type) {
@@ -61,12 +62,17 @@ export const workflowTemplatesRouter = {
 		}),
 
 	get: authedProcedure
-		.input(z.object({ id: z.string().uuid() }))
-		.handler(async ({ input, context }): Promise<WorkflowTemplate> => {
+		.input(
+			z.object({
+				id: z.string().uuid(),
+				organizationId: z.string().uuid(),
+			})
+		)
+		.handler(async ({ input }): Promise<WorkflowTemplate> => {
 			const template = await db.query.workflowTemplates.findFirst({
 				where: and(
 					eq(workflowTemplates.id, input.id),
-					eq(workflowTemplates.organizationId, context.user.organizationId)
+					eq(workflowTemplates.organizationId, input.organizationId)
 				),
 			});
 
@@ -80,6 +86,7 @@ export const workflowTemplatesRouter = {
 	create: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				name: z.string().min(1),
 				type: z.enum(["onboarding", "offboarding"]),
 				description: z.string().optional(),
@@ -87,10 +94,10 @@ export const workflowTemplatesRouter = {
 				isDefault: z.boolean().default(false),
 			})
 		)
-		.handler(async ({ input, context }): Promise<WorkflowTemplate> => {
+		.handler(async ({ input }): Promise<WorkflowTemplate> => {
 			const newTemplate: NewWorkflowTemplate = {
 				...input,
-				organizationId: context.user.organizationId,
+				organizationId: input.organizationId,
 			};
 
 			const [template] = await db
@@ -108,6 +115,7 @@ export const workflowTemplatesRouter = {
 	update: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				id: z.string().uuid(),
 				name: z.string().min(1).optional(),
 				description: z.string().optional(),
@@ -116,7 +124,7 @@ export const workflowTemplatesRouter = {
 				isDefault: z.boolean().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<WorkflowTemplate> => {
+		.handler(async ({ input }): Promise<WorkflowTemplate> => {
 			const { id, ...updates } = input;
 
 			const [template] = await db
@@ -125,7 +133,7 @@ export const workflowTemplatesRouter = {
 				.where(
 					and(
 						eq(workflowTemplates.id, id),
-						eq(workflowTemplates.organizationId, context.user.organizationId)
+						eq(workflowTemplates.organizationId, input.organizationId)
 					)
 				)
 				.returning();
@@ -138,18 +146,23 @@ export const workflowTemplatesRouter = {
 		}),
 
 	delete: authedProcedure
-		.input(z.object({ id: z.string().uuid() }))
-		.handler(async ({ input, context }): Promise<{ success: boolean }> => {
+		.input(
+			z.object({
+				organizationId: z.string().uuid(),
+				id: z.string().uuid(),
+			})
+		)
+		.handler(async ({ input }): Promise<{ success: boolean }> => {
 			const result = await db
 				.delete(workflowTemplates)
 				.where(
 					and(
 						eq(workflowTemplates.id, input.id),
-						eq(workflowTemplates.organizationId, context.user.organizationId)
+						eq(workflowTemplates.organizationId, input.organizationId)
 					)
 				);
 
-			return { success: result.rowCount > 0 };
+			return { success: (result.rowCount ?? 0) > 0 };
 		}),
 };
 
@@ -161,15 +174,14 @@ export const workflowsRouter = {
 	list: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				type: z.enum(["onboarding", "offboarding"]).optional(),
 				status: z.enum(["in_progress", "completed", "cancelled"]).optional(),
 				employeeId: z.string().uuid().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<Workflow[]> => {
-			const filters = [
-				eq(workflows.organizationId, context.user.organizationId),
-			];
+		.handler(async ({ input }): Promise<Workflow[]> => {
+			const filters = [eq(workflows.organizationId, input.organizationId)];
 
 			if (input.type) {
 				filters.push(eq(workflows.type, input.type));
@@ -199,12 +211,17 @@ export const workflowsRouter = {
 		}),
 
 	get: authedProcedure
-		.input(z.object({ id: z.string().uuid() }))
-		.handler(async ({ input, context }) => {
+		.input(
+			z.object({
+				organizationId: z.string().uuid(),
+				id: z.string().uuid(),
+			})
+		)
+		.handler(async ({ input }) => {
 			const workflow = await db.query.workflows.findFirst({
 				where: and(
 					eq(workflows.id, input.id),
-					eq(workflows.organizationId, context.user.organizationId)
+					eq(workflows.organizationId, input.organizationId)
 				),
 				with: {
 					employee: true,
@@ -229,18 +246,19 @@ export const workflowsRouter = {
 	create: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				employeeId: z.string().uuid(),
 				templateId: z.string().uuid(),
 				type: z.enum(["onboarding", "offboarding"]),
 				startDate: z.string(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<Workflow> => {
+		.handler(async ({ input }): Promise<Workflow> => {
 			// Verify employee exists
 			const employee = await db.query.employees.findFirst({
 				where: and(
 					eq(employees.id, input.employeeId),
-					eq(employees.organizationId, context.user.organizationId)
+					eq(employees.organizationId, input.organizationId)
 				),
 			});
 
@@ -252,7 +270,7 @@ export const workflowsRouter = {
 			const template = await db.query.workflowTemplates.findFirst({
 				where: and(
 					eq(workflowTemplates.id, input.templateId),
-					eq(workflowTemplates.organizationId, context.user.organizationId)
+					eq(workflowTemplates.organizationId, input.organizationId)
 				),
 			});
 
@@ -270,7 +288,7 @@ export const workflowsRouter = {
 			const newWorkflow: NewWorkflow = {
 				employeeId: input.employeeId,
 				templateId: input.templateId,
-				organizationId: context.user.organizationId,
+				organizationId: input.organizationId,
 				type: input.type,
 				startDate: input.startDate,
 				targetCompletionDate: targetCompletionDate
@@ -294,11 +312,12 @@ export const workflowsRouter = {
 	updateStatus: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				id: z.string().uuid(),
 				status: z.enum(["in_progress", "completed", "cancelled"]),
 			})
 		)
-		.handler(async ({ input, context }): Promise<Workflow> => {
+		.handler(async ({ input }): Promise<Workflow> => {
 			const updates: Partial<Workflow> = {
 				status: input.status,
 			};
@@ -315,7 +334,7 @@ export const workflowsRouter = {
 				.where(
 					and(
 						eq(workflows.id, input.id),
-						eq(workflows.organizationId, context.user.organizationId)
+						eq(workflows.organizationId, input.organizationId)
 					)
 				)
 				.returning();
@@ -336,6 +355,7 @@ export const workflowTasksRouter = {
 	list: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				workflowId: z.string().uuid(),
 				status: z
 					.enum(["pending", "in_progress", "completed", "skipped"])
@@ -343,10 +363,10 @@ export const workflowTasksRouter = {
 				assigneeId: z.string().uuid().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<WorkflowTask[]> => {
+		.handler(async ({ input }): Promise<WorkflowTask[]> => {
 			const filters = [
 				eq(workflowTasks.workflowId, input.workflowId),
-				eq(workflowTasks.organizationId, context.user.organizationId),
+				eq(workflowTasks.organizationId, input.organizationId),
 			];
 
 			if (input.status) {
@@ -375,6 +395,7 @@ export const workflowTasksRouter = {
 	create: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				workflowId: z.string().uuid(),
 				title: z.string().min(1),
 				description: z.string().optional(),
@@ -391,10 +412,10 @@ export const workflowTasksRouter = {
 				isRequired: z.boolean().default(true),
 			})
 		)
-		.handler(async ({ input, context }): Promise<WorkflowTask> => {
+		.handler(async ({ input }): Promise<WorkflowTask> => {
 			const newTask: NewWorkflowTask = {
 				...input,
-				organizationId: context.user.organizationId,
+				organizationId: input.organizationId,
 			};
 
 			const [task] = await db.insert(workflowTasks).values(newTask).returning();
@@ -409,6 +430,7 @@ export const workflowTasksRouter = {
 	updateStatus: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				id: z.string().uuid(),
 				status: z.enum(["pending", "in_progress", "completed", "skipped"]),
 				notes: z.string().optional(),
@@ -422,7 +444,7 @@ export const workflowTasksRouter = {
 
 			if (input.status === "completed") {
 				updates.completedAt = new Date();
-				updates.completedBy = context.user.id;
+				updates.completedBy = context.session.user.id;
 			}
 
 			const [task] = await db
@@ -431,7 +453,7 @@ export const workflowTasksRouter = {
 				.where(
 					and(
 						eq(workflowTasks.id, input.id),
-						eq(workflowTasks.organizationId, context.user.organizationId)
+						eq(workflowTasks.organizationId, input.organizationId)
 					)
 				)
 				.returning();
@@ -444,18 +466,23 @@ export const workflowTasksRouter = {
 		}),
 
 	approve: authedProcedure
-		.input(z.object({ id: z.string().uuid() }))
+		.input(
+			z.object({
+				organizationId: z.string().uuid(),
+				id: z.string().uuid(),
+			})
+		)
 		.handler(async ({ input, context }): Promise<WorkflowTask> => {
 			const [task] = await db
 				.update(workflowTasks)
 				.set({
-					approvedBy: context.user.id,
+					approvedBy: context.session.user.id,
 					approvedAt: new Date(),
 				})
 				.where(
 					and(
 						eq(workflowTasks.id, input.id),
-						eq(workflowTasks.organizationId, context.user.organizationId)
+						eq(workflowTasks.organizationId, input.organizationId)
 					)
 				)
 				.returning();
@@ -476,6 +503,7 @@ export const documentsRouter = {
 	list: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				employeeId: z.string().uuid().optional(),
 				workflowId: z.string().uuid().optional(),
 				type: z.string().optional(),
@@ -484,10 +512,8 @@ export const documentsRouter = {
 					.optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<Document[]> => {
-			const filters = [
-				eq(documents.organizationId, context.user.organizationId),
-			];
+		.handler(async ({ input }): Promise<Document[]> => {
+			const filters = [eq(documents.organizationId, input.organizationId)];
 
 			if (input.employeeId) {
 				filters.push(eq(documents.employeeId, input.employeeId));
@@ -524,6 +550,7 @@ export const documentsRouter = {
 	create: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				employeeId: z.string().uuid(),
 				workflowId: z.string().uuid().optional(),
 				name: z.string().min(1),
@@ -535,10 +562,10 @@ export const documentsRouter = {
 				mimeType: z.string().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<Document> => {
+		.handler(async ({ input }): Promise<Document> => {
 			const newDocument: NewDocument = {
 				...input,
-				organizationId: context.user.organizationId,
+				organizationId: input.organizationId,
 			};
 
 			const [document] = await db
@@ -556,6 +583,7 @@ export const documentsRouter = {
 	updateStatus: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				id: z.string().uuid(),
 				status: z.enum(["pending", "signed", "approved", "rejected"]),
 			})
@@ -567,12 +595,12 @@ export const documentsRouter = {
 
 			if (input.status === "signed") {
 				updates.signedAt = new Date();
-				updates.signedBy = context.user.id;
+				updates.signedBy = context.session.user.id;
 			}
 
 			if (input.status === "approved") {
 				updates.approvedAt = new Date();
-				updates.approvedBy = context.user.id;
+				updates.approvedBy = context.session.user.id;
 			}
 
 			const [document] = await db
@@ -581,7 +609,7 @@ export const documentsRouter = {
 				.where(
 					and(
 						eq(documents.id, input.id),
-						eq(documents.organizationId, context.user.organizationId)
+						eq(documents.organizationId, input.organizationId)
 					)
 				)
 				.returning();
@@ -602,6 +630,7 @@ export const equipmentRouter = {
 	list: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				assignedTo: z.string().uuid().optional(),
 				status: z
 					.enum(["available", "assigned", "maintenance", "retired"])
@@ -609,10 +638,8 @@ export const equipmentRouter = {
 				type: z.string().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<Equipment[]> => {
-			const filters = [
-				eq(equipment.organizationId, context.user.organizationId),
-			];
+		.handler(async ({ input }): Promise<Equipment[]> => {
+			const filters = [eq(equipment.organizationId, input.organizationId)];
 
 			if (input.assignedTo) {
 				filters.push(eq(equipment.assignedTo, input.assignedTo));
@@ -643,6 +670,7 @@ export const equipmentRouter = {
 	create: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				name: z.string().min(1),
 				type: z.string(),
 				brand: z.string().optional(),
@@ -653,10 +681,10 @@ export const equipmentRouter = {
 				purchasePrice: z.number().int().positive().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<Equipment> => {
+		.handler(async ({ input }): Promise<Equipment> => {
 			const newEquipment: NewEquipment = {
 				...input,
-				organizationId: context.user.organizationId,
+				organizationId: input.organizationId,
 			};
 
 			const [equip] = await db
@@ -674,11 +702,12 @@ export const equipmentRouter = {
 	assign: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				id: z.string().uuid(),
 				employeeId: z.string().uuid(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<Equipment> => {
+		.handler(async ({ input }): Promise<Equipment> => {
 			const [equip] = await db
 				.update(equipment)
 				.set({
@@ -689,7 +718,7 @@ export const equipmentRouter = {
 				.where(
 					and(
 						eq(equipment.id, input.id),
-						eq(equipment.organizationId, context.user.organizationId)
+						eq(equipment.organizationId, input.organizationId)
 					)
 				)
 				.returning();
@@ -702,8 +731,13 @@ export const equipmentRouter = {
 		}),
 
 	return: authedProcedure
-		.input(z.object({ id: z.string().uuid() }))
-		.handler(async ({ input, context }): Promise<Equipment> => {
+		.input(
+			z.object({
+				organizationId: z.string().uuid(),
+				id: z.string().uuid(),
+			})
+		)
+		.handler(async ({ input }): Promise<Equipment> => {
 			const [equip] = await db
 				.update(equipment)
 				.set({
@@ -713,7 +747,7 @@ export const equipmentRouter = {
 				.where(
 					and(
 						eq(equipment.id, input.id),
-						eq(equipment.organizationId, context.user.organizationId)
+						eq(equipment.organizationId, input.organizationId)
 					)
 				)
 				.returning();
@@ -734,6 +768,7 @@ export const trainingSessionsRouter = {
 	list: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				employeeId: z.string().uuid().optional(),
 				workflowId: z.string().uuid().optional(),
 				status: z
@@ -741,9 +776,9 @@ export const trainingSessionsRouter = {
 					.optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<TrainingSession[]> => {
+		.handler(async ({ input }): Promise<TrainingSession[]> => {
 			const filters = [
-				eq(trainingSessions.organizationId, context.user.organizationId),
+				eq(trainingSessions.organizationId, input.organizationId),
 			];
 
 			if (input.employeeId) {
@@ -776,6 +811,7 @@ export const trainingSessionsRouter = {
 	create: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				employeeId: z.string().uuid(),
 				workflowId: z.string().uuid().optional(),
 				title: z.string().min(1),
@@ -786,10 +822,10 @@ export const trainingSessionsRouter = {
 				durationMinutes: z.number().int().positive().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<TrainingSession> => {
+		.handler(async ({ input }): Promise<TrainingSession> => {
 			const newSession: NewTrainingSession = {
 				...input,
-				organizationId: context.user.organizationId,
+				organizationId: input.organizationId,
 			};
 
 			const [session] = await db
@@ -807,13 +843,14 @@ export const trainingSessionsRouter = {
 	complete: authedProcedure
 		.input(
 			z.object({
+				organizationId: z.string().uuid(),
 				id: z.string().uuid(),
 				score: z.number().int().min(0).max(100).optional(),
 				passed: z.boolean().optional(),
 				certificateUrl: z.string().url().optional(),
 			})
 		)
-		.handler(async ({ input, context }): Promise<TrainingSession> => {
+		.handler(async ({ input }): Promise<TrainingSession> => {
 			const { id, ...updates } = input;
 
 			const [session] = await db
@@ -826,7 +863,7 @@ export const trainingSessionsRouter = {
 				.where(
 					and(
 						eq(trainingSessions.id, id),
-						eq(trainingSessions.organizationId, context.user.organizationId)
+						eq(trainingSessions.organizationId, input.organizationId)
 					)
 				)
 				.returning();
@@ -844,43 +881,49 @@ export const trainingSessionsRouter = {
  * Get workflow and task statistics
  */
 export const onboardingOffboardingStatsRouter = {
-	getWorkflowStats: authedProcedure.handler(async ({ context }) => {
-		const [activeOnboardingCount] = await db
-			.select({ count: count() })
-			.from(workflows)
-			.where(
-				and(
-					eq(workflows.organizationId, context.user.organizationId),
-					eq(workflows.type, "onboarding"),
-					eq(workflows.status, "in_progress")
-				)
-			);
+	getWorkflowStats: authedProcedure
+		.input(
+			z.object({
+				organizationId: z.string().uuid(),
+			})
+		)
+		.handler(async ({ input }) => {
+			const [activeOnboardingCount] = await db
+				.select({ count: count() })
+				.from(workflows)
+				.where(
+					and(
+						eq(workflows.organizationId, input.organizationId),
+						eq(workflows.type, "onboarding"),
+						eq(workflows.status, "in_progress")
+					)
+				);
 
-		const [activeOffboardingCount] = await db
-			.select({ count: count() })
-			.from(workflows)
-			.where(
-				and(
-					eq(workflows.organizationId, context.user.organizationId),
-					eq(workflows.type, "offboarding"),
-					eq(workflows.status, "in_progress")
-				)
-			);
+			const [activeOffboardingCount] = await db
+				.select({ count: count() })
+				.from(workflows)
+				.where(
+					and(
+						eq(workflows.organizationId, input.organizationId),
+						eq(workflows.type, "offboarding"),
+						eq(workflows.status, "in_progress")
+					)
+				);
 
-		const [pendingTasksCount] = await db
-			.select({ count: count() })
-			.from(workflowTasks)
-			.where(
-				and(
-					eq(workflowTasks.organizationId, context.user.organizationId),
-					eq(workflowTasks.status, "pending")
-				)
-			);
+			const [pendingTasksCount] = await db
+				.select({ count: count() })
+				.from(workflowTasks)
+				.where(
+					and(
+						eq(workflowTasks.organizationId, input.organizationId),
+						eq(workflowTasks.status, "pending")
+					)
+				);
 
-		return {
-			activeOnboarding: activeOnboardingCount?.count || 0,
-			activeOffboarding: activeOffboardingCount?.count || 0,
-			pendingTasks: pendingTasksCount?.count || 0,
-		};
-	}),
+			return {
+				activeOnboarding: activeOnboardingCount?.count || 0,
+				activeOffboarding: activeOffboardingCount?.count || 0,
+				pendingTasks: pendingTasksCount?.count || 0,
+			};
+		}),
 };

@@ -183,8 +183,8 @@ export const biometricClockIn = authedProcedure
 		// Check if employee already clocked in
 		const existingEntry = await db.query.timeEntries.findFirst({
 			where: and(
-				// biome-ignore lint/suspicious/noExplicitAny: Drizzle query requires null as any for nullable comparisons
 				eq(timeEntries.employeeId, enrollment.employeeId),
+				// biome-ignore lint/suspicious/noExplicitAny: Drizzle query requires null as any for nullable comparisons
 				eq(timeEntries.clockOut, null as any)
 			),
 		});
@@ -250,8 +250,8 @@ export const clockIn = authedProcedure
 		// Check if employee already clocked in
 		const existingEntry = await db.query.timeEntries.findFirst({
 			where: and(
-				// biome-ignore lint/suspicious/noExplicitAny: Drizzle query requires null as any for nullable comparisons
 				eq(timeEntries.employeeId, input.employeeId),
+				// biome-ignore lint/suspicious/noExplicitAny: Drizzle query requires null as any for nullable comparisons
 				eq(timeEntries.clockOut, null as any)
 			),
 		});
@@ -370,8 +370,8 @@ export const biometricClockOut = authedProcedure
 		// Get active time entry
 		const entry = await db.query.timeEntries.findFirst({
 			where: and(
-				// biome-ignore lint/suspicious/noExplicitAny: Drizzle query requires null as any for nullable comparisons
 				eq(timeEntries.employeeId, enrollment.employeeId),
+				// biome-ignore lint/suspicious/noExplicitAny: Drizzle query requires null as any for nullable comparisons
 				eq(timeEntries.clockOut, null as any)
 			),
 		});

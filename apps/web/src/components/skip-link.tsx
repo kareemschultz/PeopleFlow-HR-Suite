@@ -6,6 +6,7 @@
 
 export default function SkipLink() {
 	return (
+		// biome-ignore lint/a11y/useValidAnchor: Skip links must use anchor with href for keyboard navigation
 		<a
 			className="skip-link"
 			href="#main-content"
