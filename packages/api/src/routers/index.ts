@@ -11,9 +11,9 @@ import {
 	equipmentRouter,
 	onboardingOffboardingStatsRouter,
 	trainingSessionsRouter,
+	workflowsRouter,
 	workflowTasksRouter,
 	workflowTemplatesRouter,
-	workflowsRouter,
 } from "./onboarding-offboarding";
 import { organizationsRouter } from "./organizations";
 import { payrollRouter } from "./payroll";

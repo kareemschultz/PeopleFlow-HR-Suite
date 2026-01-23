@@ -1,5 +1,6 @@
 import { db, departments, employees, organizations, positions } from "../index";
 import { seedGuyanaData } from "./guyana-tax-rules";
+import { seedOnboardingOffboarding } from "../seed-onboarding-offboarding";
 
 /**
  * Seed comprehensive sample data for development and testing
@@ -643,6 +644,10 @@ export async function seedSampleData(): Promise<void> {
 		.returning();
 
 	console.log(`✅ Created ${employeesList.length} employees`);
+
+	// 6. Seed Onboarding & Offboarding Workflows
+	console.log("\n📝 Seeding onboarding & offboarding workflows...");
+	await seedOnboardingOffboarding();
 
 	// Summary
 	console.log("\n✨ Sample data seed completed successfully!");

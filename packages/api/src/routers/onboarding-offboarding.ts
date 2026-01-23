@@ -1,8 +1,10 @@
-import { and, count, desc, eq, gte, lte, or, sql } from "drizzle-orm";
-import { z } from "zod";
 import {
 	type Document,
+	db,
+	documents,
 	type Equipment,
+	employees,
+	equipment,
 	type NewDocument,
 	type NewEquipment,
 	type NewTrainingSession,
@@ -10,18 +12,16 @@ import {
 	type NewWorkflowTask,
 	type NewWorkflowTemplate,
 	type TrainingSession,
+	trainingSessions,
 	type Workflow,
 	type WorkflowTask,
 	type WorkflowTemplate,
-	db,
-	documents,
-	employees,
-	equipment,
-	trainingSessions,
+	workflows,
 	workflowTasks,
 	workflowTemplates,
-	workflows,
 } from "@PeopleFlow-HR-Suite/db";
+import { and, count, desc, eq } from "drizzle-orm";
+import { z } from "zod";
 import { authedProcedure } from "..";
 
 /**
@@ -37,7 +37,9 @@ export const workflowTemplatesRouter = {
 			})
 		)
 		.handler(async ({ input, context }): Promise<WorkflowTemplate[]> => {
-			const filters = [eq(workflowTemplates.organizationId, context.user.organizationId)];
+			const filters = [
+				eq(workflowTemplates.organizationId, context.user.organizationId),
+			];
 
 			if (input.type) {
 				filters.push(eq(workflowTemplates.type, input.type));
@@ -165,7 +167,9 @@ export const workflowsRouter = {
 			})
 		)
 		.handler(async ({ input, context }): Promise<Workflow[]> => {
-			const filters = [eq(workflows.organizationId, context.user.organizationId)];
+			const filters = [
+				eq(workflows.organizationId, context.user.organizationId),
+			];
 
 			if (input.type) {
 				filters.push(eq(workflows.type, input.type));
@@ -269,11 +273,16 @@ export const workflowsRouter = {
 				organizationId: context.user.organizationId,
 				type: input.type,
 				startDate: input.startDate,
-				targetCompletionDate: targetCompletionDate.toISOString().split("T")[0] as string,
+				targetCompletionDate: targetCompletionDate
+					.toISOString()
+					.split("T")[0] as string,
 				status: "in_progress",
 			};
 
-			const [workflow] = await db.insert(workflows).values(newWorkflow).returning();
+			const [workflow] = await db
+				.insert(workflows)
+				.values(newWorkflow)
+				.returning();
 
 			if (!workflow) {
 				throw new Error("Failed to create workflow");
@@ -295,7 +304,9 @@ export const workflowsRouter = {
 			};
 
 			if (input.status === "completed") {
-				updates.actualCompletionDate = new Date().toISOString().split("T")[0] as string;
+				updates.actualCompletionDate = new Date()
+					.toISOString()
+					.split("T")[0] as string;
 			}
 
 			const [workflow] = await db
@@ -326,7 +337,9 @@ export const workflowTasksRouter = {
 		.input(
 			z.object({
 				workflowId: z.string().uuid(),
-				status: z.enum(["pending", "in_progress", "completed", "skipped"]).optional(),
+				status: z
+					.enum(["pending", "in_progress", "completed", "skipped"])
+					.optional(),
 				assigneeId: z.string().uuid().optional(),
 			})
 		)
@@ -466,11 +479,15 @@ export const documentsRouter = {
 				employeeId: z.string().uuid().optional(),
 				workflowId: z.string().uuid().optional(),
 				type: z.string().optional(),
-				status: z.enum(["pending", "signed", "approved", "rejected"]).optional(),
+				status: z
+					.enum(["pending", "signed", "approved", "rejected"])
+					.optional(),
 			})
 		)
 		.handler(async ({ input, context }): Promise<Document[]> => {
-			const filters = [eq(documents.organizationId, context.user.organizationId)];
+			const filters = [
+				eq(documents.organizationId, context.user.organizationId),
+			];
 
 			if (input.employeeId) {
 				filters.push(eq(documents.employeeId, input.employeeId));
@@ -524,7 +541,10 @@ export const documentsRouter = {
 				organizationId: context.user.organizationId,
 			};
 
-			const [document] = await db.insert(documents).values(newDocument).returning();
+			const [document] = await db
+				.insert(documents)
+				.values(newDocument)
+				.returning();
 
 			if (!document) {
 				throw new Error("Failed to create document");
@@ -583,12 +603,16 @@ export const equipmentRouter = {
 		.input(
 			z.object({
 				assignedTo: z.string().uuid().optional(),
-				status: z.enum(["available", "assigned", "maintenance", "retired"]).optional(),
+				status: z
+					.enum(["available", "assigned", "maintenance", "retired"])
+					.optional(),
 				type: z.string().optional(),
 			})
 		)
 		.handler(async ({ input, context }): Promise<Equipment[]> => {
-			const filters = [eq(equipment.organizationId, context.user.organizationId)];
+			const filters = [
+				eq(equipment.organizationId, context.user.organizationId),
+			];
 
 			if (input.assignedTo) {
 				filters.push(eq(equipment.assignedTo, input.assignedTo));
@@ -635,7 +659,10 @@ export const equipmentRouter = {
 				organizationId: context.user.organizationId,
 			};
 
-			const [equip] = await db.insert(equipment).values(newEquipment).returning();
+			const [equip] = await db
+				.insert(equipment)
+				.values(newEquipment)
+				.returning();
 
 			if (!equip) {
 				throw new Error("Failed to create equipment");
@@ -715,7 +742,9 @@ export const trainingSessionsRouter = {
 			})
 		)
 		.handler(async ({ input, context }): Promise<TrainingSession[]> => {
-			const filters = [eq(trainingSessions.organizationId, context.user.organizationId)];
+			const filters = [
+				eq(trainingSessions.organizationId, context.user.organizationId),
+			];
 
 			if (input.employeeId) {
 				filters.push(eq(trainingSessions.employeeId, input.employeeId));
@@ -763,7 +792,10 @@ export const trainingSessionsRouter = {
 				organizationId: context.user.organizationId,
 			};
 
-			const [session] = await db.insert(trainingSessions).values(newSession).returning();
+			const [session] = await db
+				.insert(trainingSessions)
+				.values(newSession)
+				.returning();
 
 			if (!session) {
 				throw new Error("Failed to create training session");
