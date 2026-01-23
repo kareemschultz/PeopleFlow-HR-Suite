@@ -70,26 +70,30 @@ function RouteComponent() {
 	const currencySymbol = organization?.currencySymbol ?? "$";
 
 	return (
-		<div className="space-y-6 p-6">
+		<div className="container-padding section-spacing py-4 md:py-6 lg:py-8">
 			{/* Header */}
-			<div className="flex items-center justify-between">
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="font-bold text-3xl">Dashboard</h1>
-					<p className="text-muted-foreground">
+					<h1 className="font-bold text-responsive-2xl">Dashboard</h1>
+					<p className="text-muted-foreground text-responsive-sm">
 						Welcome back, {session.data?.user.name}
 					</p>
 				</div>
-				<div>
+				<div className="flex-shrink-0">
 					{hasProSubscription ? (
 						<Button
+							className="w-full sm:w-auto"
 							onClick={async () => await authClient.customer.portal()}
+							size="sm"
 							variant="outline"
 						>
 							Manage Subscription
 						</Button>
 					) : (
 						<Button
+							className="w-full sm:w-auto"
 							onClick={async () => await authClient.checkout({ slug: "pro" })}
+							size="sm"
 						>
 							Upgrade to Pro
 						</Button>
@@ -245,21 +249,21 @@ function RouteComponent() {
 			</Card>
 
 			{/* Quick Actions */}
-			<Card className="p-6">
-				<h2 className="mb-4 font-semibold text-xl">Quick Actions</h2>
-				<div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+			<Card className="p-4 sm:p-6">
+				<h2 className="mb-4 font-semibold text-responsive-xl">Quick Actions</h2>
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 					<Link to="/employees/new">
-						<Button className="w-full" variant="outline">
+						<Button className="tap-target w-full" variant="outline">
 							Add Employee
 						</Button>
 					</Link>
 					<Link to="/departments/new">
-						<Button className="w-full" variant="outline">
+						<Button className="tap-target w-full" variant="outline">
 							Create Department
 						</Button>
 					</Link>
 					<Link to="/payroll/new">
-						<Button className="w-full" variant="outline">
+						<Button className="tap-target w-full" variant="outline">
 							Run Payroll
 						</Button>
 					</Link>

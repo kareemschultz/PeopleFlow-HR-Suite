@@ -12,6 +12,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useState } from "react";
 
 import Header from "@/components/header";
+import SkipLink from "@/components/skip-link";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { link, type orpc } from "@/utils/orpc";
@@ -57,9 +58,16 @@ function RootComponent() {
 				disableTransitionOnChange
 				storageKey="vite-ui-theme"
 			>
-				<div className="grid h-svh grid-rows-[auto_1fr]">
+				<SkipLink />
+				<div className="grid h-svh grid-rows-[auto_1fr] overflow-hidden">
 					<Header />
-					<Outlet />
+					<main
+						className="overflow-y-auto overflow-x-hidden"
+						id="main-content"
+						tabIndex={-1}
+					>
+						<Outlet />
+					</main>
 				</div>
 				<Toaster richColors />
 			</ThemeProvider>

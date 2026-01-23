@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from "./routes/__root"
+import { Route as Verify2faRouteImport } from "./routes/verify-2fa"
 import { Route as SuccessRouteImport } from "./routes/success"
 import { Route as PricingRouteImport } from "./routes/pricing"
 import { Route as LoginRouteImport } from "./routes/login"
@@ -19,6 +20,7 @@ import { Route as ReportsIndexRouteImport } from "./routes/reports/index"
 import { Route as PayrollIndexRouteImport } from "./routes/payroll.index"
 import { Route as EmployeesIndexRouteImport } from "./routes/employees.index"
 import { Route as DepartmentsIndexRouteImport } from "./routes/departments.index"
+import { Route as SettingsSecurityRouteImport } from "./routes/settings/security"
 import { Route as SettingsPermissionsRouteImport } from "./routes/settings/permissions"
 import { Route as SettingsOrganizationRouteImport } from "./routes/settings/organization"
 import { Route as SettingsLicenseRouteImport } from "./routes/settings/license"
@@ -30,6 +32,11 @@ import { Route as EmployeesEmployeeIdRouteImport } from "./routes/employees.$emp
 import { Route as DepartmentsNewRouteImport } from "./routes/departments.new"
 import { Route as DepartmentsDepartmentIdRouteImport } from "./routes/departments.$departmentId"
 
+const Verify2faRoute = Verify2faRouteImport.update({
+  id: "/verify-2fa",
+  path: "/verify-2fa",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuccessRoute = SuccessRouteImport.update({
   id: "/success",
   path: "/success",
@@ -78,6 +85,11 @@ const EmployeesIndexRoute = EmployeesIndexRouteImport.update({
 const DepartmentsIndexRoute = DepartmentsIndexRouteImport.update({
   id: "/departments/",
   path: "/departments/",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsSecurityRoute = SettingsSecurityRouteImport.update({
+  id: "/settings/security",
+  path: "/settings/security",
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsPermissionsRoute = SettingsPermissionsRouteImport.update({
@@ -137,6 +149,7 @@ export interface FileRoutesByFullPath {
   "/login": typeof LoginRoute
   "/pricing": typeof PricingRoute
   "/success": typeof SuccessRoute
+  "/verify-2fa": typeof Verify2faRoute
   "/departments/$departmentId": typeof DepartmentsDepartmentIdRoute
   "/departments/new": typeof DepartmentsNewRoute
   "/employees/$employeeId": typeof EmployeesEmployeeIdRoute
@@ -147,6 +160,7 @@ export interface FileRoutesByFullPath {
   "/settings/license": typeof SettingsLicenseRoute
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
+  "/settings/security": typeof SettingsSecurityRoute
   "/departments/": typeof DepartmentsIndexRoute
   "/employees/": typeof EmployeesIndexRoute
   "/payroll/": typeof PayrollIndexRoute
@@ -159,6 +173,7 @@ export interface FileRoutesByTo {
   "/login": typeof LoginRoute
   "/pricing": typeof PricingRoute
   "/success": typeof SuccessRoute
+  "/verify-2fa": typeof Verify2faRoute
   "/departments/$departmentId": typeof DepartmentsDepartmentIdRoute
   "/departments/new": typeof DepartmentsNewRoute
   "/employees/$employeeId": typeof EmployeesEmployeeIdRoute
@@ -169,6 +184,7 @@ export interface FileRoutesByTo {
   "/settings/license": typeof SettingsLicenseRoute
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
+  "/settings/security": typeof SettingsSecurityRoute
   "/departments": typeof DepartmentsIndexRoute
   "/employees": typeof EmployeesIndexRoute
   "/payroll": typeof PayrollIndexRoute
@@ -182,6 +198,7 @@ export interface FileRoutesById {
   "/login": typeof LoginRoute
   "/pricing": typeof PricingRoute
   "/success": typeof SuccessRoute
+  "/verify-2fa": typeof Verify2faRoute
   "/departments/$departmentId": typeof DepartmentsDepartmentIdRoute
   "/departments/new": typeof DepartmentsNewRoute
   "/employees/$employeeId": typeof EmployeesEmployeeIdRoute
@@ -192,6 +209,7 @@ export interface FileRoutesById {
   "/settings/license": typeof SettingsLicenseRoute
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
+  "/settings/security": typeof SettingsSecurityRoute
   "/departments/": typeof DepartmentsIndexRoute
   "/employees/": typeof EmployeesIndexRoute
   "/payroll/": typeof PayrollIndexRoute
@@ -206,6 +224,7 @@ export interface FileRouteTypes {
     | "/login"
     | "/pricing"
     | "/success"
+    | "/verify-2fa"
     | "/departments/$departmentId"
     | "/departments/new"
     | "/employees/$employeeId"
@@ -216,6 +235,7 @@ export interface FileRouteTypes {
     | "/settings/license"
     | "/settings/organization"
     | "/settings/permissions"
+    | "/settings/security"
     | "/departments/"
     | "/employees/"
     | "/payroll/"
@@ -228,6 +248,7 @@ export interface FileRouteTypes {
     | "/login"
     | "/pricing"
     | "/success"
+    | "/verify-2fa"
     | "/departments/$departmentId"
     | "/departments/new"
     | "/employees/$employeeId"
@@ -238,6 +259,7 @@ export interface FileRouteTypes {
     | "/settings/license"
     | "/settings/organization"
     | "/settings/permissions"
+    | "/settings/security"
     | "/departments"
     | "/employees"
     | "/payroll"
@@ -250,6 +272,7 @@ export interface FileRouteTypes {
     | "/login"
     | "/pricing"
     | "/success"
+    | "/verify-2fa"
     | "/departments/$departmentId"
     | "/departments/new"
     | "/employees/$employeeId"
@@ -260,6 +283,7 @@ export interface FileRouteTypes {
     | "/settings/license"
     | "/settings/organization"
     | "/settings/permissions"
+    | "/settings/security"
     | "/departments/"
     | "/employees/"
     | "/payroll/"
@@ -273,6 +297,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   PricingRoute: typeof PricingRoute
   SuccessRoute: typeof SuccessRoute
+  Verify2faRoute: typeof Verify2faRoute
   DepartmentsDepartmentIdRoute: typeof DepartmentsDepartmentIdRoute
   DepartmentsNewRoute: typeof DepartmentsNewRoute
   EmployeesEmployeeIdRoute: typeof EmployeesEmployeeIdRoute
@@ -283,6 +308,7 @@ export interface RootRouteChildren {
   SettingsLicenseRoute: typeof SettingsLicenseRoute
   SettingsOrganizationRoute: typeof SettingsOrganizationRoute
   SettingsPermissionsRoute: typeof SettingsPermissionsRoute
+  SettingsSecurityRoute: typeof SettingsSecurityRoute
   DepartmentsIndexRoute: typeof DepartmentsIndexRoute
   EmployeesIndexRoute: typeof EmployeesIndexRoute
   PayrollIndexRoute: typeof PayrollIndexRoute
@@ -292,6 +318,13 @@ export interface RootRouteChildren {
 
 declare module "@tanstack/react-router" {
   interface FileRoutesByPath {
+    "/verify-2fa": {
+      id: "/verify-2fa"
+      path: "/verify-2fa"
+      fullPath: "/verify-2fa"
+      preLoaderRoute: typeof Verify2faRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/success": {
       id: "/success"
       path: "/success"
@@ -360,6 +393,13 @@ declare module "@tanstack/react-router" {
       path: "/departments"
       fullPath: "/departments/"
       preLoaderRoute: typeof DepartmentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/settings/security": {
+      id: "/settings/security"
+      path: "/settings/security"
+      fullPath: "/settings/security"
+      preLoaderRoute: typeof SettingsSecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/settings/permissions": {
@@ -441,6 +481,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   PricingRoute: PricingRoute,
   SuccessRoute: SuccessRoute,
+  Verify2faRoute: Verify2faRoute,
   DepartmentsDepartmentIdRoute: DepartmentsDepartmentIdRoute,
   DepartmentsNewRoute: DepartmentsNewRoute,
   EmployeesEmployeeIdRoute: EmployeesEmployeeIdRoute,
@@ -451,6 +492,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsLicenseRoute: SettingsLicenseRoute,
   SettingsOrganizationRoute: SettingsOrganizationRoute,
   SettingsPermissionsRoute: SettingsPermissionsRoute,
+  SettingsSecurityRoute: SettingsSecurityRoute,
   DepartmentsIndexRoute: DepartmentsIndexRoute,
   EmployeesIndexRoute: EmployeesIndexRoute,
   PayrollIndexRoute: PayrollIndexRoute,

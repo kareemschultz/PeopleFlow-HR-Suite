@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
+import { GoogleIcon } from "hugeicons-react";
 import { toast } from "sonner";
 import z from "zod";
 
@@ -9,6 +10,7 @@ import Loader from "./loader";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { Separator } from "./ui/separator";
 
 export default function SignInForm({
 	onSwitchToSignUp,
@@ -32,11 +34,19 @@ export default function SignInForm({
 					password: value.password,
 				},
 				{
-					onSuccess: () => {
-						navigate({
-							to: "/dashboard",
-						});
-						toast.success("Sign in successful");
+					onSuccess: (context) => {
+						// Check if 2FA verification is required
+						if (
+							context.data &&
+							"twoFactorRedirect" in context.data &&
+							context.data.twoFactorRedirect
+						) {
+							navigate({ to: "/verify-2fa" });
+							toast.info("Please verify your two-factor authentication code");
+						} else {
+							navigate({ to: "/dashboard" });
+							toast.success("Sign in successful");
+						}
 					},
 					onError: (error) => {
 						toast.error(error.error.message || error.error.statusText);
@@ -52,6 +62,17 @@ export default function SignInForm({
 		},
 	});
 
+	const handleGoogleSignIn = async () => {
+		try {
+			await authClient.signIn.social({
+				provider: "google",
+				callbackURL: "/dashboard",
+			});
+		} catch (_error) {
+			toast.error("Failed to sign in with Google");
+		}
+	};
+
 	if (isPending) {
 		return <Loader />;
 	}
@@ -59,6 +80,27 @@ export default function SignInForm({
 	return (
 		<div className="mx-auto mt-10 w-full max-w-md p-6">
 			<h1 className="mb-6 text-center font-bold text-3xl">Welcome Back</h1>
+
+			<Button
+				className="mb-4 w-full"
+				onClick={handleGoogleSignIn}
+				type="button"
+				variant="outline"
+			>
+				<GoogleIcon className="mr-2 h-5 w-5" />
+				Continue with Google
+			</Button>
+
+			<div className="relative mb-4">
+				<div className="absolute inset-0 flex items-center">
+					<Separator />
+				</div>
+				<div className="relative flex justify-center text-xs uppercase">
+					<span className="bg-background px-2 text-muted-foreground">
+						Or continue with email
+					</span>
+				</div>
+			</div>
 
 			<form
 				className="space-y-4"

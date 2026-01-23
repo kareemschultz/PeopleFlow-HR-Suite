@@ -140,25 +140,25 @@ function EmployeesPage() {
 	}
 
 	return (
-		<div className="container mx-auto px-4 py-8">
-			<div className="mb-6 flex items-center justify-between">
+		<div className="container-padding section-spacing py-4 md:py-8">
+			<div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between md:mb-6">
 				<div>
-					<h1 className="font-bold text-3xl">Employees</h1>
-					<p className="text-muted-foreground">
+					<h1 className="font-bold text-responsive-2xl">Employees</h1>
+					<p className="text-muted-foreground text-responsive-sm">
 						Manage your organization's employees
 					</p>
 				</div>
-				<Link to="/employees/new">
-					<Button>Add Employee</Button>
+				<Link className="self-start sm:self-auto" to="/employees/new">
+					<Button className="tap-target w-full sm:w-auto">Add Employee</Button>
 				</Link>
 			</div>
 
 			{/* Search */}
-			<div className="mb-6">
+			<div className="mb-4 md:mb-6">
 				<div className="relative">
 					<Search01Icon className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-muted-foreground" />
 					<Input
-						className="pl-10"
+						className="h-10 pl-10 text-sm sm:h-11 sm:text-base"
 						onChange={(e) => setSearch(e.target.value)}
 						placeholder="Search by name, email, or employee number..."
 						type="search"
@@ -168,9 +168,7 @@ function EmployeesPage() {
 			</div>
 
 			{/* Employees Grid */}
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-				{renderContent()}
-			</div>
+			<div className="grid-responsive-3 gap-3 sm:gap-4">{renderContent()}</div>
 		</div>
 	);
 }

@@ -90,18 +90,18 @@ function PayrollRunCard({
 			params={{ payrollRunId: run.id }}
 			to="/payroll/$payrollRunId"
 		>
-			<Card className="cursor-pointer p-6 transition-shadow hover:shadow-lg">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-4">
-						<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-							<DollarCircle className="h-6 w-6 text-primary" />
+			<Card className="cursor-pointer p-4 transition-shadow hover:shadow-lg sm:p-6">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div className="flex items-start gap-3 sm:gap-4">
+						<div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 sm:h-12 sm:w-12">
+							<DollarCircle className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
 						</div>
-						<div>
-							<h3 className="font-semibold">
+						<div className="min-w-0 flex-1">
+							<h3 className="truncate font-semibold text-responsive-base">
 								Payroll {run.periodStart} - {run.periodEnd}
 							</h3>
-							<div className="mt-1 flex items-center gap-2 text-muted-foreground text-sm">
-								<Calendar className="h-4 w-4" />
+							<div className="mt-1 flex items-center gap-2 text-muted-foreground text-xs sm:text-sm">
+								<Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
 								<span>Pay Date: {run.payDate}</span>
 							</div>
 							<div className="mt-2 flex items-center gap-2">
@@ -113,11 +113,11 @@ function PayrollRunCard({
 							</div>
 						</div>
 					</div>
-					<div className="text-right">
-						<p className="font-semibold text-2xl">
+					<div className="flex items-center justify-between border-border border-t pt-3 sm:block sm:border-0 sm:pt-0 sm:text-right">
+						<p className="font-semibold text-responsive-lg">
 							{formatCurrency(run.totalNetPay)}
 						</p>
-						<p className="text-muted-foreground text-sm">
+						<p className="text-muted-foreground text-responsive-xs">
 							{run.employeeCount ?? 0} employees
 						</p>
 					</div>
@@ -190,62 +190,66 @@ function PayrollPage() {
 	}
 
 	return (
-		<div className="container mx-auto px-4 py-8">
-			<div className="mb-6 flex items-center justify-between">
+		<div className="container-padding section-spacing py-4 md:py-8">
+			<div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between md:mb-6">
 				<div>
-					<h1 className="font-bold text-3xl">Payroll</h1>
-					<p className="text-muted-foreground">
+					<h1 className="font-bold text-responsive-2xl">Payroll</h1>
+					<p className="text-muted-foreground text-responsive-sm">
 						Manage payroll runs and employee payslips
 					</p>
 				</div>
-				<Link to="/payroll/new">
-					<Button>New Payroll Run</Button>
+				<Link className="self-start sm:self-auto" to="/payroll/new">
+					<Button className="tap-target w-full sm:w-auto">
+						New Payroll Run
+					</Button>
 				</Link>
 			</div>
 
 			{/* Payroll Runs Grid */}
-			<div className="grid grid-cols-1 gap-4">{renderContent()}</div>
+			<div className="grid grid-cols-1 gap-3 sm:gap-4">{renderContent()}</div>
 
 			{/* Quick Stats */}
-			<div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-				<Card className="p-6">
-					<div className="flex items-center gap-4">
-						<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
-							<DollarCircle className="h-6 w-6 text-green-600" />
+			<div className="mt-6 grid grid-cols-1 gap-3 sm:gap-4 md:mt-8 md:grid-cols-3">
+				<Card className="p-4 sm:p-6">
+					<div className="flex items-center gap-3 sm:gap-4">
+						<div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-green-100 sm:h-12 sm:w-12">
+							<DollarCircle className="h-5 w-5 text-green-600 sm:h-6 sm:w-6" />
 						</div>
-						<div>
-							<p className="text-muted-foreground text-sm">Total Paid (YTD)</p>
-							<p className="font-semibold text-2xl">
+						<div className="min-w-0 flex-1">
+							<p className="text-muted-foreground text-responsive-xs">
+								Total Paid (YTD)
+							</p>
+							<p className="truncate font-semibold text-responsive-xl">
 								{formatCurrency(ytdStats?.totalNetPay ?? 0)}
 							</p>
 						</div>
 					</div>
 				</Card>
-				<Card className="p-6">
-					<div className="flex items-center gap-4">
-						<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
-							<DollarCircle className="h-6 w-6 text-blue-600" />
+				<Card className="p-4 sm:p-6">
+					<div className="flex items-center gap-3 sm:gap-4">
+						<div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-blue-100 sm:h-12 sm:w-12">
+							<DollarCircle className="h-5 w-5 text-blue-600 sm:h-6 sm:w-6" />
 						</div>
-						<div>
-							<p className="text-muted-foreground text-sm">
+						<div className="min-w-0 flex-1">
+							<p className="text-muted-foreground text-responsive-xs">
 								Tax Withheld (YTD)
 							</p>
-							<p className="font-semibold text-2xl">
+							<p className="truncate font-semibold text-responsive-xl">
 								{formatCurrency(ytdStats?.totalPaye ?? 0)}
 							</p>
 						</div>
 					</div>
 				</Card>
-				<Card className="p-6">
-					<div className="flex items-center gap-4">
-						<div className="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100">
-							<DollarCircle className="h-6 w-6 text-purple-600" />
+				<Card className="p-4 sm:p-6">
+					<div className="flex items-center gap-3 sm:gap-4">
+						<div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-100 sm:h-12 sm:w-12">
+							<DollarCircle className="h-5 w-5 text-purple-600 sm:h-6 sm:w-6" />
 						</div>
-						<div>
-							<p className="text-muted-foreground text-sm">
+						<div className="min-w-0 flex-1">
+							<p className="text-muted-foreground text-responsive-xs">
 								NIS Contributions (YTD)
 							</p>
-							<p className="font-semibold text-2xl">
+							<p className="truncate font-semibold text-responsive-xl">
 								{formatCurrency(
 									(ytdStats?.totalNisEmployee ?? 0) +
 										(ytdStats?.totalNisEmployer ?? 0)

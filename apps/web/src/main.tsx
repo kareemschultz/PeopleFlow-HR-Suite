@@ -3,6 +3,7 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import ReactDOM from "react-dom/client";
 
 import Loader from "./components/loader";
+import { registerServiceWorker } from "./lib/sw-registration";
 import { routeTree } from "./routeTree.gen";
 import { orpc, queryClient } from "./utils/orpc";
 
@@ -34,3 +35,6 @@ if (!rootElement.innerHTML) {
 	const root = ReactDOM.createRoot(rootElement);
 	root.render(<RouterProvider router={router} />);
 }
+
+// Register service worker for PWA support
+registerServiceWorker();

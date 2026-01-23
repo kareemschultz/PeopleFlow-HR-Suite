@@ -3,6 +3,7 @@ import type { RouterClient } from "@orpc/server";
 import { protectedProcedure, publicProcedure } from "../index";
 import { departmentsRouter } from "./departments";
 import { employeesRouter } from "./employees";
+import { leaveManagementRouter } from "./leave-management";
 import { licensingRouter } from "./licensing";
 import { metricsRouter } from "./metrics";
 import { organizationsRouter } from "./organizations";
@@ -10,6 +11,7 @@ import { payrollRouter } from "./payroll";
 import { reportsRouter } from "./reports";
 import { retroAdjustmentsRouter } from "./retro-adjustments";
 import { taxJurisdictionsRouter } from "./tax-jurisdictions";
+import { timeAttendanceRouter } from "./time-attendance";
 
 // ============================================================================
 // APP ROUTER - Main API Router
@@ -58,6 +60,12 @@ export const appRouter = {
 
 	// Licensing & Subscriptions
 	licensing: licensingRouter,
+
+	// Time & Attendance
+	timeAttendance: timeAttendanceRouter,
+
+	// Leave Management
+	leaveManagement: leaveManagementRouter,
 };
 
 export type AppRouter = typeof appRouter;

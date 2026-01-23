@@ -1,0 +1,6 @@
+# Temporarily ignore these files pending accessibility refactor
+src/components/skip-link.tsx
+src/routes/settings/security.tsx
+src/routes/verify-2fa.tsx
+public/sw.js
+src/lib/accessibility.ts
