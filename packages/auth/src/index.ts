@@ -76,7 +76,7 @@ export const auth = betterAuth({
 					role: data.role,
 				});
 			},
-				// biome-ignore lint/suspicious/useAwait: Hook implementation may require async in future for database operations
+			// biome-ignore lint/suspicious/useAwait: Hook implementation may require async in future for database operations
 			organizationHooks: {
 				async afterCreateOrganization({ organization }) {
 					console.log(`Organization created: ${organization.name}`);

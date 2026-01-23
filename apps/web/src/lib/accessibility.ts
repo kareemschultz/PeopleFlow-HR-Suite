@@ -63,7 +63,7 @@ export function trapFocus(element: HTMLElement): () => void {
 	);
 
 	const firstFocusable = focusableElements[0];
-	const lastFocusable = focusableElements.at(-1);
+	const lastFocusable = focusableElements[focusableElements.length - 1];
 
 	function handleKeyDown(e: KeyboardEvent) {
 		if (e.key !== "Tab") {

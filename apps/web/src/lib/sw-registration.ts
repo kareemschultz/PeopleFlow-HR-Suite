@@ -50,7 +50,7 @@ export async function registerServiceWorker(): Promise<void> {
 					// New service worker available
 					console.log(
 						"New service worker available. Refresh to update the app."
-				// biome-ignore lint/suspicious/noAlert: User confirmation required for app update
+						// biome-ignore lint/suspicious/noAlert: User confirmation required for app update
 					);
 
 					// Optionally show a notification to the user
