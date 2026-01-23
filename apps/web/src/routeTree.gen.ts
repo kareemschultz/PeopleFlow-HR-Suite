@@ -15,13 +15,13 @@ import { Route as PricingRouteImport } from "./routes/pricing"
 import { Route as LoginRouteImport } from "./routes/login"
 import { Route as DashboardRouteImport } from "./routes/dashboard"
 import { Route as IndexRouteImport } from "./routes/index"
+import { Route as TimeAttendanceIndexRouteImport } from "./routes/time-attendance.index"
 import { Route as SettingsIndexRouteImport } from "./routes/settings/index"
 import { Route as ReportsIndexRouteImport } from "./routes/reports/index"
 import { Route as PayrollIndexRouteImport } from "./routes/payroll.index"
-import { Route as OnboardingIndexRouteImport } from "./routes/onboarding.index"
-import { Route as OffboardingIndexRouteImport } from "./routes/offboarding.index"
 import { Route as EmployeesIndexRouteImport } from "./routes/employees.index"
 import { Route as DepartmentsIndexRouteImport } from "./routes/departments.index"
+import { Route as TimeAttendanceClockRouteImport } from "./routes/time-attendance.clock"
 import { Route as SettingsSecurityRouteImport } from "./routes/settings/security"
 import { Route as SettingsPermissionsRouteImport } from "./routes/settings/permissions"
 import { Route as SettingsOrganizationRouteImport } from "./routes/settings/organization"
@@ -64,6 +64,11 @@ const IndexRoute = IndexRouteImport.update({
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any)
+const TimeAttendanceIndexRoute = TimeAttendanceIndexRouteImport.update({
+  id: "/time-attendance/",
+  path: "/time-attendance/",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
   id: "/settings/",
   path: "/settings/",
@@ -79,16 +84,6 @@ const PayrollIndexRoute = PayrollIndexRouteImport.update({
   path: "/payroll/",
   getParentRoute: () => rootRouteImport,
 } as any)
-const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
-  id: "/onboarding/",
-  path: "/onboarding/",
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OffboardingIndexRoute = OffboardingIndexRouteImport.update({
-  id: "/offboarding/",
-  path: "/offboarding/",
-  getParentRoute: () => rootRouteImport,
-} as any)
 const EmployeesIndexRoute = EmployeesIndexRouteImport.update({
   id: "/employees/",
   path: "/employees/",
@@ -97,6 +92,11 @@ const EmployeesIndexRoute = EmployeesIndexRouteImport.update({
 const DepartmentsIndexRoute = DepartmentsIndexRouteImport.update({
   id: "/departments/",
   path: "/departments/",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TimeAttendanceClockRoute = TimeAttendanceClockRouteImport.update({
+  id: "/time-attendance/clock",
+  path: "/time-attendance/clock",
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsSecurityRoute = SettingsSecurityRouteImport.update({
@@ -173,13 +173,13 @@ export interface FileRoutesByFullPath {
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
   "/settings/security": typeof SettingsSecurityRoute
+  "/time-attendance/clock": typeof TimeAttendanceClockRoute
   "/departments/": typeof DepartmentsIndexRoute
   "/employees/": typeof EmployeesIndexRoute
-  "/offboarding/": typeof OffboardingIndexRoute
-  "/onboarding/": typeof OnboardingIndexRoute
   "/payroll/": typeof PayrollIndexRoute
   "/reports/": typeof ReportsIndexRoute
   "/settings/": typeof SettingsIndexRoute
+  "/time-attendance/": typeof TimeAttendanceIndexRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
@@ -199,13 +199,13 @@ export interface FileRoutesByTo {
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
   "/settings/security": typeof SettingsSecurityRoute
+  "/time-attendance/clock": typeof TimeAttendanceClockRoute
   "/departments": typeof DepartmentsIndexRoute
   "/employees": typeof EmployeesIndexRoute
-  "/offboarding": typeof OffboardingIndexRoute
-  "/onboarding": typeof OnboardingIndexRoute
   "/payroll": typeof PayrollIndexRoute
   "/reports": typeof ReportsIndexRoute
   "/settings": typeof SettingsIndexRoute
+  "/time-attendance": typeof TimeAttendanceIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -226,13 +226,13 @@ export interface FileRoutesById {
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
   "/settings/security": typeof SettingsSecurityRoute
+  "/time-attendance/clock": typeof TimeAttendanceClockRoute
   "/departments/": typeof DepartmentsIndexRoute
   "/employees/": typeof EmployeesIndexRoute
-  "/offboarding/": typeof OffboardingIndexRoute
-  "/onboarding/": typeof OnboardingIndexRoute
   "/payroll/": typeof PayrollIndexRoute
   "/reports/": typeof ReportsIndexRoute
   "/settings/": typeof SettingsIndexRoute
+  "/time-attendance/": typeof TimeAttendanceIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -254,13 +254,13 @@ export interface FileRouteTypes {
     | "/settings/organization"
     | "/settings/permissions"
     | "/settings/security"
+    | "/time-attendance/clock"
     | "/departments/"
     | "/employees/"
-    | "/offboarding/"
-    | "/onboarding/"
     | "/payroll/"
     | "/reports/"
     | "/settings/"
+    | "/time-attendance/"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -280,13 +280,13 @@ export interface FileRouteTypes {
     | "/settings/organization"
     | "/settings/permissions"
     | "/settings/security"
+    | "/time-attendance/clock"
     | "/departments"
     | "/employees"
-    | "/offboarding"
-    | "/onboarding"
     | "/payroll"
     | "/reports"
     | "/settings"
+    | "/time-attendance"
   id:
     | "__root__"
     | "/"
@@ -306,13 +306,13 @@ export interface FileRouteTypes {
     | "/settings/organization"
     | "/settings/permissions"
     | "/settings/security"
+    | "/time-attendance/clock"
     | "/departments/"
     | "/employees/"
-    | "/offboarding/"
-    | "/onboarding/"
     | "/payroll/"
     | "/reports/"
     | "/settings/"
+    | "/time-attendance/"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -333,13 +333,13 @@ export interface RootRouteChildren {
   SettingsOrganizationRoute: typeof SettingsOrganizationRoute
   SettingsPermissionsRoute: typeof SettingsPermissionsRoute
   SettingsSecurityRoute: typeof SettingsSecurityRoute
+  TimeAttendanceClockRoute: typeof TimeAttendanceClockRoute
   DepartmentsIndexRoute: typeof DepartmentsIndexRoute
   EmployeesIndexRoute: typeof EmployeesIndexRoute
-  OffboardingIndexRoute: typeof OffboardingIndexRoute
-  OnboardingIndexRoute: typeof OnboardingIndexRoute
   PayrollIndexRoute: typeof PayrollIndexRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
+  TimeAttendanceIndexRoute: typeof TimeAttendanceIndexRoute
 }
 
 declare module "@tanstack/react-router" {
@@ -386,6 +386,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/time-attendance/": {
+      id: "/time-attendance/"
+      path: "/time-attendance"
+      fullPath: "/time-attendance/"
+      preLoaderRoute: typeof TimeAttendanceIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/settings/": {
       id: "/settings/"
       path: "/settings"
@@ -407,20 +414,6 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PayrollIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/onboarding/": {
-      id: "/onboarding/"
-      path: "/onboarding"
-      fullPath: "/onboarding/"
-      preLoaderRoute: typeof OnboardingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    "/offboarding/": {
-      id: "/offboarding/"
-      path: "/offboarding"
-      fullPath: "/offboarding/"
-      preLoaderRoute: typeof OffboardingIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     "/employees/": {
       id: "/employees/"
       path: "/employees"
@@ -433,6 +426,13 @@ declare module "@tanstack/react-router" {
       path: "/departments"
       fullPath: "/departments/"
       preLoaderRoute: typeof DepartmentsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/time-attendance/clock": {
+      id: "/time-attendance/clock"
+      path: "/time-attendance/clock"
+      fullPath: "/time-attendance/clock"
+      preLoaderRoute: typeof TimeAttendanceClockRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/settings/security": {
@@ -533,13 +533,13 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsOrganizationRoute: SettingsOrganizationRoute,
   SettingsPermissionsRoute: SettingsPermissionsRoute,
   SettingsSecurityRoute: SettingsSecurityRoute,
+  TimeAttendanceClockRoute: TimeAttendanceClockRoute,
   DepartmentsIndexRoute: DepartmentsIndexRoute,
   EmployeesIndexRoute: EmployeesIndexRoute,
-  OffboardingIndexRoute: OffboardingIndexRoute,
-  OnboardingIndexRoute: OnboardingIndexRoute,
   PayrollIndexRoute: PayrollIndexRoute,
   ReportsIndexRoute: ReportsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
+  TimeAttendanceIndexRoute: TimeAttendanceIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
