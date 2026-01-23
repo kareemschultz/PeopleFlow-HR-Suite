@@ -7,6 +7,11 @@ import type {
 // TAX CALCULATION SERVICE
 // ============================================================================
 
+// Regex for parsing comparison conditions
+const COMPARISON_REGEX = /(.+?)(>=|<=|>|<|==|!=)(.+)/;
+
+// ============================================================================
+
 /**
  * Comprehensive tax calculation service for PAYE (income tax) and NIS (social security).
  * Supports multi-jurisdiction tax rules with configurable formulas.
@@ -73,7 +78,7 @@ export function evaluateFormula(
 		}
 
 		// Parse condition (e.g., "value > 100")
-		const comparisonMatch = condition.match(/(.+?)(>=|<=|>|<|==|!=)(.+)/);
+		const comparisonMatch = condition.match(COMPARISON_REGEX);
 		if (!comparisonMatch) {
 			return falseVal;
 		}
@@ -108,6 +113,9 @@ export function evaluateFormula(
 				break;
 			case "!=":
 				conditionResult = left !== right;
+				break;
+			default:
+				conditionResult = false;
 				break;
 		}
 
@@ -190,17 +198,13 @@ export interface PayeCalculationResult {
 	taxYear: number;
 }
 
-export function calculatePAYE(
-	input: PayeCalculationInput
-): PayeCalculationResult {
-	const {
-		annualGrossSalary,
-		taxRule,
-		dependents = 0,
-		customDeduction = 0,
-	} = input;
-
-	// Calculate personal deduction
+// Helper function to calculate personal deduction
+function calculatePersonalDeduction(
+	taxRule: IncomeTaxRule,
+	annualGrossSalary: number,
+	dependents: number,
+	customDeduction: number
+): number {
 	let personalDeduction = 0;
 
 	if (taxRule.personalDeduction) {
@@ -229,6 +233,9 @@ export function calculatePAYE(
 					);
 				}
 				break;
+			default:
+				personalDeduction = 0;
+				break;
 		}
 
 		// Apply min/max caps
@@ -252,17 +259,19 @@ export function calculatePAYE(
 	}
 
 	// Add custom deduction
-	personalDeduction += customDeduction;
+	return personalDeduction + customDeduction;
+}
 
-	// Calculate taxable income
-	const taxableIncome = Math.max(0, annualGrossSalary - personalDeduction);
-
-	// Calculate tax using progressive bands
-	const taxBands: PayeCalculationResult["taxBands"] = [];
+// Helper function to calculate progressive tax
+function calculateProgressiveTax(
+	taxableIncome: number,
+	taxBands: IncomeTaxRule["taxBands"]
+): { taxBands: PayeCalculationResult["taxBands"]; totalTax: number } {
+	const resultBands: PayeCalculationResult["taxBands"] = [];
 	let remainingIncome = taxableIncome;
 	let totalTax = 0;
 
-	for (const band of taxRule.taxBands) {
+	for (const band of taxBands) {
 		if (remainingIncome <= 0) {
 			break;
 		}
@@ -277,7 +286,7 @@ export function calculatePAYE(
 		// Calculate tax for this band
 		const bandTax = amountInBand * band.rate;
 
-		taxBands.push({
+		resultBands.push({
 			bandName: band.name,
 			amount: amountInBand,
 			rate: band.rate,
@@ -287,6 +296,36 @@ export function calculatePAYE(
 		totalTax += bandTax;
 		remainingIncome -= amountInBand;
 	}
+
+	return { taxBands: resultBands, totalTax };
+}
+
+export function calculatePAYE(
+	input: PayeCalculationInput
+): PayeCalculationResult {
+	const {
+		annualGrossSalary,
+		taxRule,
+		dependents = 0,
+		customDeduction = 0,
+	} = input;
+
+	// Calculate personal deduction
+	const personalDeduction = calculatePersonalDeduction(
+		taxRule,
+		annualGrossSalary,
+		dependents,
+		customDeduction
+	);
+
+	// Calculate taxable income
+	const taxableIncome = Math.max(0, annualGrossSalary - personalDeduction);
+
+	// Calculate tax using progressive bands
+	const { taxBands, totalTax } = calculateProgressiveTax(
+		taxableIncome,
+		taxRule.taxBands
+	);
 
 	// Round annual tax
 	const roundingMode =

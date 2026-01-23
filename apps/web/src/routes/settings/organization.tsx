@@ -95,7 +95,7 @@ function OrganizationSettingsPage() {
 	}, [organization]);
 
 	const updateMutation = useMutation({
-		mutationFn: async (data: FormData) => {
+		mutationFn: (data: FormData) => {
 			const client = orpc.organizations.update;
 			return client.call({
 				id: organizationId,

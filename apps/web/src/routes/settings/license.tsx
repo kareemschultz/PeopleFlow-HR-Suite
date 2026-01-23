@@ -44,11 +44,12 @@ function LicenseSettingsPage() {
 				</p>
 			</div>
 
-			{isLoading ? (
+			{isLoading && (
 				<Card className="p-6">
 					<Skeleton className="h-40 w-full" />
 				</Card>
-			) : license ? (
+			)}
+			{!isLoading && license && (
 				<Card className="p-6">
 					<div className="flex items-start justify-between">
 						<div>
@@ -101,7 +102,8 @@ function LicenseSettingsPage() {
 						</div>
 					)}
 				</Card>
-			) : (
+			)}
+			{!(isLoading || license) && (
 				<Card className="p-12 text-center">
 					<h2 className="font-semibold text-xl">No Active License</h2>
 					<p className="mt-2 text-muted-foreground">

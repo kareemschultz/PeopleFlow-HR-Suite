@@ -1,3 +1,4 @@
+// biome-ignore lint/performance/noBarrelFile: Schema aggregation point for database package
 export * from "./anomalies";
 export * from "./audit";
 export * from "./auth";

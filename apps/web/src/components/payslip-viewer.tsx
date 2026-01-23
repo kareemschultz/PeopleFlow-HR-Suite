@@ -115,141 +115,258 @@ interface PayslipViewerProps {
 	className?: string;
 }
 
+// Helper function for currency formatting
+function formatCurrency(
+	amount: number | null | undefined,
+	currency: string
+): string {
+	if (amount === null || amount === undefined) {
+		return "—";
+	}
+	const value = amount / 100; // Convert cents to dollars
+	return new Intl.NumberFormat("en-GY", {
+		style: "currency",
+		currency,
+	}).format(value);
+}
+
+// Helper function for date formatting
+function formatDate(date: string | Date): string {
+	return new Date(date).toLocaleDateString("en-GY", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+}
+
+// Helper function for payment status badge
+function getPaymentStatusBadge(status: string | undefined) {
+	switch (status) {
+		case "paid":
+			return <Badge className="bg-green-100 text-green-700">Paid</Badge>;
+		case "pending":
+			return <Badge variant="secondary">Pending</Badge>;
+		case "failed":
+			return <Badge variant="destructive">Failed</Badge>;
+		case "cancelled":
+			return <Badge variant="secondary">Cancelled</Badge>;
+		default:
+			return <Badge variant="outline">Unknown</Badge>;
+	}
+}
+
+// Subcomponent for earnings table rows
+function EarningsTableRows({
+	payslip,
+	currency,
+}: {
+	payslip: Payslip;
+	currency: string;
+}) {
+	if (payslip.earningsBreakdown && payslip.earningsBreakdown.length > 0) {
+		return (
+			<>
+				{payslip.earningsBreakdown.map((item) => (
+					<TableRow key={item.code}>
+						<TableCell>
+							<div>
+								<p className="font-medium">{item.name}</p>
+								<p className="text-muted-foreground text-xs">
+									{item.isTaxable && "Taxable"}
+									{item.isTaxable && item.isNisable && " • "}
+									{item.isNisable && "NISable"}
+								</p>
+							</div>
+						</TableCell>
+						<TableCell className="text-right">
+							{formatCurrency(item.amount, currency)}
+						</TableCell>
+					</TableRow>
+				))}
+			</>
+		);
+	}
+
+	// Fallback to individual fields
+	return (
+		<>
+			<TableRow>
+				<TableCell>Base Pay</TableCell>
+				<TableCell className="text-right">
+					{formatCurrency(payslip.basePay, currency)}
+				</TableCell>
+			</TableRow>
+			{payslip.overtimePay && payslip.overtimePay > 0 && (
+				<TableRow>
+					<TableCell>Overtime Pay</TableCell>
+					<TableCell className="text-right">
+						{formatCurrency(payslip.overtimePay, currency)}
+					</TableCell>
+				</TableRow>
+			)}
+			{payslip.allowances && payslip.allowances > 0 && (
+				<TableRow>
+					<TableCell>Allowances</TableCell>
+					<TableCell className="text-right">
+						{formatCurrency(payslip.allowances, currency)}
+					</TableCell>
+				</TableRow>
+			)}
+			{payslip.bonuses && payslip.bonuses > 0 && (
+				<TableRow>
+					<TableCell>Bonuses</TableCell>
+					<TableCell className="text-right">
+						{formatCurrency(payslip.bonuses, currency)}
+					</TableCell>
+				</TableRow>
+			)}
+			{payslip.commissions && payslip.commissions > 0 && (
+				<TableRow>
+					<TableCell>Commissions</TableCell>
+					<TableCell className="text-right">
+						{formatCurrency(payslip.commissions, currency)}
+					</TableCell>
+				</TableRow>
+			)}
+			{payslip.otherEarnings && payslip.otherEarnings > 0 && (
+				<TableRow>
+					<TableCell>Other Earnings</TableCell>
+					<TableCell className="text-right">
+						{formatCurrency(payslip.otherEarnings, currency)}
+					</TableCell>
+				</TableRow>
+			)}
+		</>
+	);
+}
+
+// Subcomponent for retro adjustment alert
+function PayslipRetroAlert({
+	payslip,
+	currency,
+}: {
+	payslip: Payslip;
+	currency: string;
+}) {
+	if (!payslip.hasRetroAdjustments || payslip.hasRetroAdjustments === 0) {
+		return null;
+	}
+
+	return (
+		<div className="rounded-lg border-yellow-200 bg-yellow-50 p-4">
+			<div className="flex items-start gap-3">
+				<AlertCircleIcon className="h-5 w-5 text-yellow-600" />
+				<div>
+					<h4 className="font-semibold text-sm text-yellow-900">
+						Retroactive Adjustment Included
+					</h4>
+					<p className="mt-1 text-xs text-yellow-800">
+						This payslip includes a retroactive adjustment of{" "}
+						{formatCurrency(payslip.retroAdjustmentAmount, currency)}
+					</p>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+// Subcomponent for payslip header
+function PayslipHeader({
+	payslip,
+	onDownload,
+}: {
+	payslip: Payslip;
+	onDownload?: () => void;
+}) {
+	return (
+		<Card className="p-6">
+			<div className="flex items-start justify-between">
+				<div className="flex items-start gap-4">
+					<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
+						<UserIcon className="h-6 w-6 text-primary" />
+					</div>
+					<div>
+						<h2 className="font-bold text-2xl">
+							{payslip.employee
+								? `${payslip.employee.firstName} ${payslip.employee.lastName}`
+								: "Payslip"}
+						</h2>
+						{payslip.employee && (
+							<div className="mt-1 space-y-1 text-muted-foreground text-sm">
+								<p>Employee #: {payslip.employee.employeeNumber}</p>
+								{payslip.employee.position && (
+									<p>Position: {payslip.employee.position.title}</p>
+								)}
+								{payslip.employee.department && (
+									<p>Department: {payslip.employee.department.name}</p>
+								)}
+							</div>
+						)}
+					</div>
+				</div>
+
+				<div className="flex items-start gap-3">
+					{getPaymentStatusBadge(payslip.paymentStatus)}
+					{onDownload && (
+						<Button onClick={onDownload} size="sm" variant="outline">
+							<Download04Icon className="mr-2 h-4 w-4" />
+							Download PDF
+						</Button>
+					)}
+				</div>
+			</div>
+
+			<Separator className="my-4" />
+
+			<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+				<div className="flex items-center gap-3">
+					<Calendar03Icon className="h-5 w-5 text-muted-foreground" />
+					<div>
+						<p className="text-muted-foreground text-xs">Pay Period</p>
+						<p className="font-medium text-sm">
+							{formatDate(payslip.periodStart)} -{" "}
+							{formatDate(payslip.periodEnd)}
+						</p>
+					</div>
+				</div>
+
+				<div className="flex items-center gap-3">
+					<Calendar03Icon className="h-5 w-5 text-muted-foreground" />
+					<div>
+						<p className="text-muted-foreground text-xs">Pay Date</p>
+						<p className="font-medium text-sm">{formatDate(payslip.payDate)}</p>
+					</div>
+				</div>
+
+				{payslip.paymentMethod && (
+					<div className="flex items-center gap-3">
+						<BankIcon className="h-5 w-5 text-muted-foreground" />
+						<div>
+							<p className="text-muted-foreground text-xs">Payment Method</p>
+							<p className="font-medium text-sm capitalize">
+								{payslip.paymentMethod.replace(/_/g, " ")}
+							</p>
+						</div>
+					</div>
+				)}
+			</div>
+		</Card>
+	);
+}
+
 export function PayslipViewer({
 	payslip,
 	currency = "GYD",
 	onDownload,
 	className,
 }: PayslipViewerProps) {
-	const formatCurrency = (amount: number | null | undefined) => {
-		if (amount === null || amount === undefined) {
-			return "—";
-		}
-		const value = amount / 100; // Convert cents to dollars
-		return new Intl.NumberFormat("en-GY", {
-			style: "currency",
-			currency,
-		}).format(value);
-	};
-
-	const formatDate = (date: string | Date) => {
-		return new Date(date).toLocaleDateString("en-GY", {
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-		});
-	};
-
-	const getPaymentStatusBadge = (status: string | undefined) => {
-		switch (status) {
-			case "paid":
-				return <Badge className="bg-green-100 text-green-700">Paid</Badge>;
-			case "pending":
-				return <Badge variant="secondary">Pending</Badge>;
-			case "failed":
-				return <Badge variant="destructive">Failed</Badge>;
-			case "cancelled":
-				return <Badge variant="secondary">Cancelled</Badge>;
-			default:
-				return <Badge variant="outline">Unknown</Badge>;
-		}
-	};
-
 	return (
 		<div className={cn("space-y-6", className)}>
 			{/* Header */}
-			<Card className="p-6">
-				<div className="flex items-start justify-between">
-					<div className="flex items-start gap-4">
-						<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-							<UserIcon className="h-6 w-6 text-primary" />
-						</div>
-						<div>
-							<h2 className="font-bold text-2xl">
-								{payslip.employee
-									? `${payslip.employee.firstName} ${payslip.employee.lastName}`
-									: "Payslip"}
-							</h2>
-							{payslip.employee && (
-								<div className="mt-1 space-y-1 text-muted-foreground text-sm">
-									<p>Employee #: {payslip.employee.employeeNumber}</p>
-									{payslip.employee.position && (
-										<p>Position: {payslip.employee.position.title}</p>
-									)}
-									{payslip.employee.department && (
-										<p>Department: {payslip.employee.department.name}</p>
-									)}
-								</div>
-							)}
-						</div>
-					</div>
-
-					<div className="flex items-start gap-3">
-						{getPaymentStatusBadge(payslip.paymentStatus)}
-						{onDownload && (
-							<Button onClick={onDownload} size="sm" variant="outline">
-								<Download04Icon className="mr-2 h-4 w-4" />
-								Download PDF
-							</Button>
-						)}
-					</div>
-				</div>
-
-				<Separator className="my-4" />
-
-				<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-					<div className="flex items-center gap-3">
-						<Calendar03Icon className="h-5 w-5 text-muted-foreground" />
-						<div>
-							<p className="text-muted-foreground text-xs">Pay Period</p>
-							<p className="font-medium text-sm">
-								{formatDate(payslip.periodStart)} -{" "}
-								{formatDate(payslip.periodEnd)}
-							</p>
-						</div>
-					</div>
-
-					<div className="flex items-center gap-3">
-						<Calendar03Icon className="h-5 w-5 text-muted-foreground" />
-						<div>
-							<p className="text-muted-foreground text-xs">Pay Date</p>
-							<p className="font-medium text-sm">
-								{formatDate(payslip.payDate)}
-							</p>
-						</div>
-					</div>
-
-					{payslip.paymentMethod && (
-						<div className="flex items-center gap-3">
-							<BankIcon className="h-5 w-5 text-muted-foreground" />
-							<div>
-								<p className="text-muted-foreground text-xs">Payment Method</p>
-								<p className="font-medium text-sm capitalize">
-									{payslip.paymentMethod.replace(/_/g, " ")}
-								</p>
-							</div>
-						</div>
-					)}
-				</div>
-			</Card>
+			<PayslipHeader onDownload={onDownload} payslip={payslip} />
 
 			{/* Retro Adjustments Alert */}
-			{payslip.hasRetroAdjustments && payslip.hasRetroAdjustments > 0 && (
-				<div className="rounded-lg border-yellow-200 bg-yellow-50 p-4">
-					<div className="flex items-start gap-3">
-						<AlertCircleIcon className="h-5 w-5 text-yellow-600" />
-						<div>
-							<h4 className="font-semibold text-sm text-yellow-900">
-								Retroactive Adjustment Included
-							</h4>
-							<p className="mt-1 text-xs text-yellow-800">
-								This payslip includes a retroactive adjustment of{" "}
-								{formatCurrency(payslip.retroAdjustmentAmount)}
-							</p>
-						</div>
-					</div>
-				</div>
-			)}
+			<PayslipRetroAlert currency={currency} payslip={payslip} />
 
 			{/* Earnings */}
 			<Card className="p-6">
@@ -262,79 +379,11 @@ export function PayslipViewer({
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{payslip.earningsBreakdown &&
-						payslip.earningsBreakdown.length > 0 ? (
-							payslip.earningsBreakdown.map((item) => (
-								<TableRow key={item.code}>
-									<TableCell>
-										<div>
-											<p className="font-medium">{item.name}</p>
-											<p className="text-muted-foreground text-xs">
-												{item.isTaxable && "Taxable"}
-												{item.isTaxable && item.isNisable && " • "}
-												{item.isNisable && "NISable"}
-											</p>
-										</div>
-									</TableCell>
-									<TableCell className="text-right">
-										{formatCurrency(item.amount)}
-									</TableCell>
-								</TableRow>
-							))
-						) : (
-							<>
-								<TableRow>
-									<TableCell>Base Pay</TableCell>
-									<TableCell className="text-right">
-										{formatCurrency(payslip.basePay)}
-									</TableCell>
-								</TableRow>
-								{payslip.overtimePay && payslip.overtimePay > 0 && (
-									<TableRow>
-										<TableCell>Overtime Pay</TableCell>
-										<TableCell className="text-right">
-											{formatCurrency(payslip.overtimePay)}
-										</TableCell>
-									</TableRow>
-								)}
-								{payslip.allowances && payslip.allowances > 0 && (
-									<TableRow>
-										<TableCell>Allowances</TableCell>
-										<TableCell className="text-right">
-											{formatCurrency(payslip.allowances)}
-										</TableCell>
-									</TableRow>
-								)}
-								{payslip.bonuses && payslip.bonuses > 0 && (
-									<TableRow>
-										<TableCell>Bonuses</TableCell>
-										<TableCell className="text-right">
-											{formatCurrency(payslip.bonuses)}
-										</TableCell>
-									</TableRow>
-								)}
-								{payslip.commissions && payslip.commissions > 0 && (
-									<TableRow>
-										<TableCell>Commissions</TableCell>
-										<TableCell className="text-right">
-											{formatCurrency(payslip.commissions)}
-										</TableCell>
-									</TableRow>
-								)}
-								{payslip.otherEarnings && payslip.otherEarnings > 0 && (
-									<TableRow>
-										<TableCell>Other Earnings</TableCell>
-										<TableCell className="text-right">
-											{formatCurrency(payslip.otherEarnings)}
-										</TableCell>
-									</TableRow>
-								)}
-							</>
-						)}
+						<EarningsTableRows currency={currency} payslip={payslip} />
 						<TableRow className="bg-muted/50 font-semibold">
 							<TableCell>Gross Earnings</TableCell>
 							<TableCell className="text-right">
-								{formatCurrency(payslip.grossEarnings)}
+								{formatCurrency(payslip.grossEarnings, currency)}
 							</TableCell>
 						</TableRow>
 					</TableBody>
@@ -358,12 +407,13 @@ export function PayslipViewer({
 								<div>
 									<p className="font-medium">PAYE (Income Tax)</p>
 									<p className="text-muted-foreground text-xs">
-										Taxable Income: {formatCurrency(payslip.taxableIncome)}
+										Taxable Income:{" "}
+										{formatCurrency(payslip.taxableIncome, currency)}
 									</p>
 								</div>
 							</TableCell>
 							<TableCell className="text-right">
-								{formatCurrency(payslip.payeAmount)}
+								{formatCurrency(payslip.payeAmount, currency)}
 							</TableCell>
 						</TableRow>
 
@@ -372,12 +422,13 @@ export function PayslipViewer({
 								<div>
 									<p className="font-medium">NIS (Employee Contribution)</p>
 									<p className="text-muted-foreground text-xs">
-										NISable Earnings: {formatCurrency(payslip.nisableEarnings)}
+										NISable Earnings:{" "}
+										{formatCurrency(payslip.nisableEarnings, currency)}
 									</p>
 								</div>
 							</TableCell>
 							<TableCell className="text-right">
-								{formatCurrency(payslip.nisEmployee)}
+								{formatCurrency(payslip.nisEmployee, currency)}
 							</TableCell>
 						</TableRow>
 
@@ -388,7 +439,7 @@ export function PayslipViewer({
 								<TableRow key={item.code}>
 									<TableCell>{item.name}</TableCell>
 									<TableCell className="text-right">
-										{formatCurrency(item.amount)}
+										{formatCurrency(item.amount, currency)}
 									</TableCell>
 								</TableRow>
 							))
@@ -398,7 +449,7 @@ export function PayslipViewer({
 									<TableRow>
 										<TableCell>Union Dues</TableCell>
 										<TableCell className="text-right">
-											{formatCurrency(payslip.unionDues)}
+											{formatCurrency(payslip.unionDues, currency)}
 										</TableCell>
 									</TableRow>
 								)}
@@ -406,7 +457,7 @@ export function PayslipViewer({
 									<TableRow>
 										<TableCell>Loan Repayments</TableCell>
 										<TableCell className="text-right">
-											{formatCurrency(payslip.loanRepayments)}
+											{formatCurrency(payslip.loanRepayments, currency)}
 										</TableCell>
 									</TableRow>
 								)}
@@ -414,7 +465,7 @@ export function PayslipViewer({
 									<TableRow>
 										<TableCell>Advance Deductions</TableCell>
 										<TableCell className="text-right">
-											{formatCurrency(payslip.advanceDeductions)}
+											{formatCurrency(payslip.advanceDeductions, currency)}
 										</TableCell>
 									</TableRow>
 								)}
@@ -422,7 +473,7 @@ export function PayslipViewer({
 									<TableRow>
 										<TableCell>Other Deductions</TableCell>
 										<TableCell className="text-right">
-											{formatCurrency(payslip.otherDeductions)}
+											{formatCurrency(payslip.otherDeductions, currency)}
 										</TableCell>
 									</TableRow>
 								)}
@@ -432,7 +483,7 @@ export function PayslipViewer({
 						<TableRow className="bg-muted/50 font-semibold">
 							<TableCell>Total Deductions</TableCell>
 							<TableCell className="text-right">
-								{formatCurrency(payslip.totalDeductions)}
+								{formatCurrency(payslip.totalDeductions, currency)}
 							</TableCell>
 						</TableRow>
 					</TableBody>
@@ -447,7 +498,7 @@ export function PayslipViewer({
 						<p className="text-muted-foreground text-sm">Amount to be paid</p>
 					</div>
 					<div className="font-bold text-4xl">
-						{formatCurrency(payslip.netPay)}
+						{formatCurrency(payslip.netPay, currency)}
 					</div>
 				</div>
 			</Card>
@@ -461,7 +512,7 @@ export function PayslipViewer({
 							<div>
 								<p className="text-muted-foreground text-xs">YTD Gross</p>
 								<p className="mt-1 font-semibold text-lg">
-									{formatCurrency(payslip.ytdGrossEarnings)}
+									{formatCurrency(payslip.ytdGrossEarnings, currency)}
 								</p>
 							</div>
 						)}
@@ -469,7 +520,7 @@ export function PayslipViewer({
 							<div>
 								<p className="text-muted-foreground text-xs">YTD Net Pay</p>
 								<p className="mt-1 font-semibold text-lg">
-									{formatCurrency(payslip.ytdNetPay)}
+									{formatCurrency(payslip.ytdNetPay, currency)}
 								</p>
 							</div>
 						)}
@@ -477,7 +528,7 @@ export function PayslipViewer({
 							<div>
 								<p className="text-muted-foreground text-xs">YTD PAYE</p>
 								<p className="mt-1 font-semibold text-lg">
-									{formatCurrency(payslip.ytdPaye)}
+									{formatCurrency(payslip.ytdPaye, currency)}
 								</p>
 							</div>
 						)}
@@ -485,7 +536,7 @@ export function PayslipViewer({
 							<div>
 								<p className="text-muted-foreground text-xs">YTD NIS</p>
 								<p className="mt-1 font-semibold text-lg">
-									{formatCurrency(payslip.ytdNis)}
+									{formatCurrency(payslip.ytdNis, currency)}
 								</p>
 							</div>
 						)}
@@ -504,7 +555,7 @@ export function PayslipViewer({
 							<div>
 								<p className="text-muted-foreground text-xs">Annual Gross</p>
 								<p className="mt-1 font-medium">
-									{formatCurrency(payslip.taxDetails.annualGross)}
+									{formatCurrency(payslip.taxDetails.annualGross, currency)}
 								</p>
 							</div>
 						)}
@@ -514,7 +565,10 @@ export function PayslipViewer({
 									Personal Deduction
 								</p>
 								<p className="mt-1 font-medium">
-									{formatCurrency(payslip.taxDetails.personalDeduction)}
+									{formatCurrency(
+										payslip.taxDetails.personalDeduction,
+										currency
+									)}
 								</p>
 							</div>
 						)}
@@ -522,7 +576,7 @@ export function PayslipViewer({
 							<div>
 								<p className="text-muted-foreground text-xs">Annual Tax</p>
 								<p className="mt-1 font-medium">
-									{formatCurrency(payslip.taxDetails.annualTax)}
+									{formatCurrency(payslip.taxDetails.annualTax, currency)}
 								</p>
 							</div>
 						)}
@@ -530,7 +584,7 @@ export function PayslipViewer({
 							<div>
 								<p className="text-muted-foreground text-xs">Monthly Tax</p>
 								<p className="mt-1 font-medium">
-									{formatCurrency(payslip.taxDetails.monthlyTax)}
+									{formatCurrency(payslip.taxDetails.monthlyTax, currency)}
 								</p>
 							</div>
 						)}
@@ -546,17 +600,17 @@ export function PayslipViewer({
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{payslip.taxDetails.taxableBands.map((band, index) => (
-								<TableRow key={index}>
+							{payslip.taxDetails.taxableBands.map((band) => (
+								<TableRow key={band.bandName}>
 									<TableCell>{band.bandName}</TableCell>
 									<TableCell className="text-right">
-										{formatCurrency(band.amount)}
+										{formatCurrency(band.amount, currency)}
 									</TableCell>
 									<TableCell className="text-right">
 										{(band.rate * 100).toFixed(2)}%
 									</TableCell>
 									<TableCell className="text-right">
-										{formatCurrency(band.tax)}
+										{formatCurrency(band.tax, currency)}
 									</TableCell>
 								</TableRow>
 							))}
@@ -572,7 +626,7 @@ export function PayslipViewer({
 					<div className="flex items-center justify-between rounded-lg bg-muted/50 p-3">
 						<span className="font-medium">NIS (Employer Contribution)</span>
 						<span className="font-semibold">
-							{formatCurrency(payslip.nisEmployer)}
+							{formatCurrency(payslip.nisEmployer, currency)}
 						</span>
 					</div>
 					<p className="text-muted-foreground text-xs">

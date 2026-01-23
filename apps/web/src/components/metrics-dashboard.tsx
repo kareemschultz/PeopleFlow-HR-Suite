@@ -231,8 +231,8 @@ export function MetricsDashboard({
 					className
 				)}
 			>
-				{Array.from({ length: 4 }).map((_, i) => (
-					<Card className="p-6" key={i}>
+				{[1, 2, 3, 4].map((id) => (
+					<Card className="p-6" key={`skeleton-${id}`}>
 						<Skeleton className="h-20 w-full" />
 					</Card>
 				))}

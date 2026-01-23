@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useFilenamingConvention: TanStack Router requires $ syntax for catch-all routes
 import browserCollections from "fumadocs-mdx:collections/browser";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";

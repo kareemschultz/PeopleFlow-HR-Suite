@@ -239,8 +239,8 @@ export function DataFreshness({
 							<div className="col-span-2">
 								<p className="text-destructive text-xs">Errors</p>
 								<ul className="mt-1 list-inside list-disc text-xs">
-									{freshness.updateMetadata.errors.map((error, index) => (
-										<li className="text-destructive" key={index}>
+									{freshness.updateMetadata.errors.map((error) => (
+										<li className="text-destructive" key={error}>
 											{error}
 										</li>
 									))}

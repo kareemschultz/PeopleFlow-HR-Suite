@@ -4,7 +4,7 @@ import {
 	organizationMembers,
 	organizations,
 } from "@PeopleFlow-HR-Suite/db";
-import { and, eq, like } from "drizzle-orm";
+import { and, eq, like, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure } from ".."; // using .. because we are in routers/organizations.ts -> routers/index.ts is not parent, generic index might be?
 
@@ -162,7 +162,7 @@ export const listOrganizations = authedProcedure
 			.optional()
 	)
 	.handler(async ({ input }) => {
-		const filters = [];
+		const filters: SQL[] = [];
 
 		if (input?.search) {
 			filters.push(like(organizations.name, `%${input.search}%`));

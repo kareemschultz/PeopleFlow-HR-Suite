@@ -152,13 +152,17 @@ function RouteComponent() {
 			{/* Department Breakdown */}
 			<Card className="p-6">
 				<h2 className="mb-4 font-semibold text-xl">Employees by Department</h2>
-				{isEmployeeLoading ? (
+				{isEmployeeLoading && (
 					<div className="space-y-2">
-						{Array.from({ length: 3 }).map((_, i) => (
-							<Skeleton className="h-10 w-full" key={i} />
+						{[1, 2, 3].map((id) => (
+							<Skeleton
+								className="h-10 w-full"
+								key={`employee-skeleton-${id}`}
+							/>
 						))}
 					</div>
-				) : employeeSummary?.byDepartment?.length ? (
+				)}
+				{!isEmployeeLoading && employeeSummary?.byDepartment?.length && (
 					<div className="space-y-2">
 						{employeeSummary.byDepartment.map((dept) => (
 							<div
@@ -172,7 +176,8 @@ function RouteComponent() {
 							</div>
 						))}
 					</div>
-				) : (
+				)}
+				{!(isEmployeeLoading || employeeSummary?.byDepartment?.length) && (
 					<p className="text-muted-foreground">No departments yet</p>
 				)}
 			</Card>
@@ -187,13 +192,17 @@ function RouteComponent() {
 						</Button>
 					</Link>
 				</div>
-				{isPayrollLoading ? (
+				{isPayrollLoading && (
 					<div className="space-y-2">
-						{Array.from({ length: 3 }).map((_, i) => (
-							<Skeleton className="h-16 w-full" key={i} />
+						{[1, 2, 3].map((id) => (
+							<Skeleton
+								className="h-16 w-full"
+								key={`payroll-skeleton-${id}`}
+							/>
 						))}
 					</div>
-				) : recentPayrollRuns?.length ? (
+				)}
+				{!isPayrollLoading && recentPayrollRuns?.length && (
 					<div className="space-y-2">
 						{recentPayrollRuns.map((run) => (
 							<Link
@@ -229,7 +238,8 @@ function RouteComponent() {
 							</Link>
 						))}
 					</div>
-				) : (
+				)}
+				{!(isPayrollLoading || recentPayrollRuns?.length) && (
 					<p className="text-muted-foreground">No payroll runs yet</p>
 				)}
 			</Card>

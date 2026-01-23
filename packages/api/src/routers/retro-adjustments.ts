@@ -3,7 +3,7 @@ import {
 	type NewRetroAdjustment,
 	retroAdjustments,
 } from "@PeopleFlow-HR-Suite/db";
-import { and, desc, eq, gte, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, lte, or, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure } from "..";
 
@@ -190,7 +190,7 @@ export const createRetroAdjustment = authedProcedure
 export const listRetroAdjustments = authedProcedure
 	.input(listRetroAdjustmentsSchema)
 	.handler(async ({ input }) => {
-		const filters = [];
+		const filters: SQL[] = [];
 
 		if (input?.organizationId) {
 			filters.push(eq(retroAdjustments.organizationId, input.organizationId));

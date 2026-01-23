@@ -3,12 +3,13 @@ import {
 	employees,
 	incomeTaxRules,
 	type NewPayrollRun,
+	type NewPayslip,
 	payrollRuns,
 	payslips,
 	socialSecurityRules,
 	taxJurisdictions,
 } from "@PeopleFlow-HR-Suite/db";
-import { and, desc, eq, gte, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, lte, or, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure } from "..";
 import { calculatePayslip } from "../services/payroll-service";
@@ -97,7 +98,7 @@ export const createPayrollRun = authedProcedure
 export const listPayrollRuns = authedProcedure
 	.input(listPayrollRunsSchema)
 	.handler(async ({ input }) => {
-		const filters = [];
+		const filters: SQL[] = [];
 
 		if (input?.organizationId) {
 			filters.push(eq(payrollRuns.organizationId, input.organizationId));
@@ -221,9 +222,12 @@ export const processPayrollRun = authedProcedure
 		];
 
 		if (input.departmentIds && input.departmentIds.length > 0) {
-			filters.push(
-				or(...input.departmentIds.map((id) => eq(employees.departmentId, id)))!
+			const departmentFilter = or(
+				...input.departmentIds.map((id) => eq(employees.departmentId, id))
 			);
+			if (departmentFilter !== undefined) {
+				filters.push(departmentFilter);
+			}
 		}
 
 		const activeEmployees = await db.query.employees.findMany({
@@ -231,7 +235,7 @@ export const processPayrollRun = authedProcedure
 		});
 
 		// Calculate payslips for all employees
-		const newPayslips = [];
+		const newPayslips: NewPayslip[] = [];
 		let totalGross = 0;
 		let totalPaye = 0;
 		let totalNis = 0;

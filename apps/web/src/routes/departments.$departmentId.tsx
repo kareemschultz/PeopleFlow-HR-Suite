@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useFilenamingConvention: TanStack Router requires $param syntax for dynamic routes
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -40,6 +41,519 @@ export const Route = createFileRoute("/departments/$departmentId")({
 	component: DepartmentRoute,
 });
 
+// Helper component for loading state
+function LoadingState() {
+	return (
+		<div className="container mx-auto max-w-6xl space-y-6 p-6">
+			<Skeleton className="h-32 w-full" />
+			<Skeleton className="h-96 w-full" />
+		</div>
+	);
+}
+
+// Helper component for not found state
+function NotFoundState({ onBack }: { onBack: () => void }) {
+	return (
+		<div className="container mx-auto max-w-6xl p-6">
+			<Card className="p-12 text-center">
+				<h2 className="font-semibold text-xl">Department not found</h2>
+				<Button className="mt-4" onClick={onBack}>
+					Back to Departments
+				</Button>
+			</Card>
+		</div>
+	);
+}
+
+// Helper to get status badge
+function getStatusBadge(isActive: boolean) {
+	return isActive ? (
+		<Badge className="bg-green-100 text-green-700">Active</Badge>
+	) : (
+		<Badge variant="destructive">Inactive</Badge>
+	);
+}
+
+// Helper component for editable text field
+function EditableField({
+	label,
+	value,
+	isEditing,
+	fieldKey,
+	onChange,
+	type = "text",
+	placeholder,
+}: {
+	label: string;
+	value: string | number | null | undefined;
+	isEditing: boolean;
+	fieldKey: string;
+	onChange: (key: string, value: string) => void;
+	type?: string;
+	placeholder?: string;
+}) {
+	return (
+		<div>
+			<Label className="text-muted-foreground text-sm">{label}</Label>
+			{isEditing ? (
+				<Input
+					className="mt-1"
+					onChange={(e) => onChange(fieldKey, e.target.value)}
+					placeholder={placeholder}
+					type={type}
+					value={value ?? ""}
+				/>
+			) : (
+				<p className="mt-1 font-medium">{value || placeholder || "—"}</p>
+			)}
+		</div>
+	);
+}
+
+// Helper component for approval checkbox setting
+function ApprovalCheckbox({
+	isEditing,
+	checked,
+	onCheckedChange,
+	label,
+	description,
+}: {
+	isEditing: boolean;
+	checked: boolean;
+	onCheckedChange: (checked: boolean) => void;
+	label: string;
+	description: string;
+}) {
+	return (
+		<div className="flex items-start space-x-3">
+			{isEditing && (
+				<Checkbox
+					checked={checked}
+					onCheckedChange={(c) => onCheckedChange(c === true)}
+				/>
+			)}
+			{!isEditing && checked && (
+				<CheckmarkCircle02Icon className="h-5 w-5 text-green-600" />
+			)}
+			{!(isEditing || checked) && (
+				<Cancel01Icon className="h-5 w-5 text-muted-foreground" />
+			)}
+			<div>
+				<Label className="font-medium text-sm">{label}</Label>
+				<p className="text-muted-foreground text-xs">{description}</p>
+			</div>
+		</div>
+	);
+}
+
+// Overview Tab Component
+function OverviewTab({
+	department,
+	isEditing,
+	editData,
+	handleFieldChange,
+	navigate,
+}: {
+	// biome-ignore lint/suspicious/noExplicitAny: Complex query result type from orpc with nested relations
+	department: any;
+	isEditing: boolean;
+	editData: Record<string, unknown>;
+	handleFieldChange: (key: string, value: string) => void;
+	navigate: ReturnType<typeof useNavigate>;
+}) {
+	return (
+		<TabsContent className="space-y-6" value="overview">
+			<Card className="p-6">
+				<h2 className="mb-4 font-semibold text-xl">Basic Information</h2>
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+					<EditableField
+						fieldKey="name"
+						isEditing={isEditing}
+						label="Department Name"
+						onChange={handleFieldChange}
+						value={(editData.name as string) ?? department.name}
+					/>
+
+					<EditableField
+						fieldKey="code"
+						isEditing={isEditing}
+						label="Department Code"
+						onChange={handleFieldChange}
+						value={(editData.code as string) ?? department.code}
+					/>
+
+					<div className="md:col-span-2">
+						<Label className="text-muted-foreground text-sm">Description</Label>
+						{isEditing ? (
+							<Textarea
+								className="mt-1"
+								onChange={(e) =>
+									handleFieldChange("description", e.target.value)
+								}
+								rows={3}
+								value={
+									(editData.description as string) ??
+									department.description ??
+									""
+								}
+							/>
+						) : (
+							<p className="mt-1">
+								{department.description || "No description"}
+							</p>
+						)}
+					</div>
+				</div>
+			</Card>
+
+			{department.location && (
+				<Card className="p-6">
+					<h2 className="mb-4 font-semibold text-xl">Location</h2>
+					<EditableField
+						fieldKey="location"
+						isEditing={isEditing}
+						label="Office Location"
+						onChange={handleFieldChange}
+						value={(editData.location as string) ?? department.location}
+					/>
+				</Card>
+			)}
+
+			<Card className="p-6">
+				<h2 className="mb-4 font-semibold text-xl">Organizational Hierarchy</h2>
+				<div className="space-y-4">
+					{department.parentDepartment && (
+						<div>
+							<Label className="text-muted-foreground text-sm">
+								Parent Department
+							</Label>
+							<div className="mt-2">
+								<Button
+									onClick={() =>
+										navigate({
+											to: "/departments/$departmentId",
+											params: {
+												departmentId: department.parentDepartment?.id ?? "",
+											},
+										})
+									}
+									variant="outline"
+								>
+									<Building03Icon className="mr-2 h-4 w-4" />
+									{department.parentDepartment?.name} (
+									{department.parentDepartment?.code})
+								</Button>
+							</div>
+						</div>
+					)}
+
+					{department.subDepartments &&
+						department.subDepartments.length > 0 && (
+							<div>
+								<Label className="text-muted-foreground text-sm">
+									Sub-Departments ({department.subDepartments.length})
+								</Label>
+								<div className="mt-2 flex flex-wrap gap-2">
+									{/* biome-ignore lint/suspicious/noExplicitAny: Type inference from map callback */}
+									{department.subDepartments.map((subDept: any) => (
+										<Button
+											key={subDept.id}
+											onClick={() =>
+												navigate({
+													to: "/departments/$departmentId",
+													params: { departmentId: subDept.id },
+												})
+											}
+											variant="outline"
+										>
+											<Building03Icon className="mr-2 h-4 w-4" />
+											{subDept.name} ({subDept.code})
+										</Button>
+									))}
+								</div>
+							</div>
+						)}
+
+					{!department.parentDepartment &&
+						(!department.subDepartments ||
+							department.subDepartments.length === 0) && (
+							<p className="text-muted-foreground">
+								This is a standalone department with no parent or
+								sub-departments.
+							</p>
+						)}
+				</div>
+			</Card>
+		</TabsContent>
+	);
+}
+
+// Budget & Settings Tab Component
+function BudgetSettingsTab({
+	department,
+	isEditing,
+	editData,
+	handleSettingChange,
+}: {
+	// biome-ignore lint/suspicious/noExplicitAny: Complex query result type from orpc with nested relations
+	department: any;
+	isEditing: boolean;
+	editData: Record<string, unknown>;
+	handleSettingChange: (key: string, value: unknown) => void;
+}) {
+	return (
+		<TabsContent className="space-y-6" value="budget">
+			<Card className="p-6">
+				<h2 className="mb-4 font-semibold text-xl">Budget</h2>
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+					<div>
+						<Label className="text-muted-foreground text-sm">
+							Annual Budget
+						</Label>
+						{isEditing ? (
+							<Input
+								className="mt-1"
+								min="0"
+								onChange={(e) =>
+									handleSettingChange(
+										"annualBudget",
+										Number.parseFloat(e.target.value)
+									)
+								}
+								step="0.01"
+								type="number"
+								value={(
+									(editData.settings as { annualBudget?: number })
+										?.annualBudget ??
+									department.settings?.annualBudget ??
+									""
+								).toString()}
+							/>
+						) : (
+							<p className="mt-1 font-medium">
+								{department.settings?.annualBudget
+									? `${department.settings.budgetCurrency ?? "GYD"} ${department.settings.annualBudget.toLocaleString()}`
+									: "Not set"}
+							</p>
+						)}
+					</div>
+
+					<div>
+						<Label className="text-muted-foreground text-sm">Currency</Label>
+						{isEditing ? (
+							<Select
+								onValueChange={(value) =>
+									handleSettingChange("budgetCurrency", value)
+								}
+								value={
+									(editData.settings as { budgetCurrency?: string })
+										?.budgetCurrency ??
+									department.settings?.budgetCurrency ??
+									"GYD"
+								}
+							>
+								<SelectTrigger className="mt-1">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="GYD">GYD - Guyanese Dollar</SelectItem>
+									<SelectItem value="USD">USD - US Dollar</SelectItem>
+									<SelectItem value="EUR">EUR - Euro</SelectItem>
+									<SelectItem value="GBP">GBP - British Pound</SelectItem>
+								</SelectContent>
+							</Select>
+						) : (
+							<p className="mt-1 font-medium">
+								{department.settings?.budgetCurrency ?? "GYD"}
+							</p>
+						)}
+					</div>
+				</div>
+			</Card>
+
+			<Card className="p-6">
+				<h2 className="mb-4 font-semibold text-xl">Approval Settings</h2>
+				<div className="space-y-4">
+					<ApprovalCheckbox
+						checked={
+							(
+								editData.settings as {
+									requiresApprovalForLeave?: boolean;
+								}
+							)?.requiresApprovalForLeave ??
+							department.settings?.requiresApprovalForLeave ??
+							false
+						}
+						description="Employees must get approval before taking leave"
+						isEditing={isEditing}
+						label="Require approval for leave requests"
+						onCheckedChange={(checked) =>
+							handleSettingChange("requiresApprovalForLeave", checked)
+						}
+					/>
+
+					<Separator />
+
+					<ApprovalCheckbox
+						checked={
+							(
+								editData.settings as {
+									requiresApprovalForExpenses?: boolean;
+								}
+							)?.requiresApprovalForExpenses ??
+							department.settings?.requiresApprovalForExpenses ??
+							false
+						}
+						description="Expenses must be approved before reimbursement"
+						isEditing={isEditing}
+						label="Require approval for expenses"
+						onCheckedChange={(checked) =>
+							handleSettingChange("requiresApprovalForExpenses", checked)
+						}
+					/>
+
+					<Separator />
+
+					<ApprovalCheckbox
+						checked={
+							(
+								editData.settings as {
+									notifyHeadOnNewEmployee?: boolean;
+								}
+							)?.notifyHeadOnNewEmployee ??
+							department.settings?.notifyHeadOnNewEmployee ??
+							false
+						}
+						description="Send notification when a new employee joins"
+						isEditing={isEditing}
+						label="Notify department head on new employee"
+						onCheckedChange={(checked) =>
+							handleSettingChange("notifyHeadOnNewEmployee", checked)
+						}
+					/>
+				</div>
+			</Card>
+		</TabsContent>
+	);
+}
+
+// Positions Tab Component
+// biome-ignore lint/suspicious/noExplicitAny: Complex query result type from orpc with nested relations
+function PositionsTab({ department }: { department: any }) {
+	return (
+		<TabsContent className="space-y-6" value="positions">
+			<Card className="p-6">
+				<div className="mb-4 flex items-center justify-between">
+					<h2 className="font-semibold text-xl">Positions</h2>
+					<Button
+						onClick={() =>
+							toast.info("Position management feature coming soon!")
+						}
+					>
+						Add Position
+					</Button>
+				</div>
+
+				{department.positions && department.positions.length > 0 ? (
+					<div className="space-y-3">
+						{/* biome-ignore lint/suspicious/noExplicitAny: Type inference from map callback */}
+						{department.positions.map((position: any) => (
+							<Card className="p-4" key={position.id}>
+								<div className="flex items-start justify-between">
+									<div>
+										<div className="flex items-center gap-2">
+											<h3 className="font-semibold">{position.title}</h3>
+											{getStatusBadge(position.isActive)}
+										</div>
+										<p className="mt-1 text-muted-foreground text-sm">
+											Code: {position.code}
+										</p>
+										{position.description && (
+											<p className="mt-2 text-sm">{position.description}</p>
+										)}
+										{position.level && (
+											<p className="mt-2 text-muted-foreground text-xs">
+												Level: {position.level}
+												{position.grade && ` • Grade: ${position.grade}`}
+											</p>
+										)}
+									</div>
+									<Button
+										onClick={() =>
+											toast.info("Position details feature coming soon!")
+										}
+										size="sm"
+										variant="outline"
+									>
+										View Details
+									</Button>
+								</div>
+							</Card>
+						))}
+					</div>
+				) : (
+					<div className="py-12 text-center">
+						<p className="text-muted-foreground">
+							No positions in this department yet.
+						</p>
+						<Button
+							className="mt-4"
+							onClick={() =>
+								toast.info("Position management feature coming soon!")
+							}
+							variant="outline"
+						>
+							Add First Position
+						</Button>
+					</div>
+				)}
+			</Card>
+		</TabsContent>
+	);
+}
+
+// Employees Tab Component
+function EmployeesTab({
+	department,
+	navigate,
+}: {
+	// biome-ignore lint/suspicious/noExplicitAny: Complex query result type from orpc with nested relations
+	department: any;
+	navigate: ReturnType<typeof useNavigate>;
+}) {
+	return (
+		<TabsContent className="space-y-6" value="employees">
+			<Card className="p-6">
+				<div className="mb-4 flex items-center justify-between">
+					<h2 className="font-semibold text-xl">Employees</h2>
+					<Button
+						onClick={() =>
+							navigate({
+								to: "/employees/new",
+								search: { departmentId: department.id },
+							})
+						}
+					>
+						<UserMultiple02Icon className="mr-2 h-4 w-4" />
+						Add Employee
+					</Button>
+				</div>
+
+				<div className="py-12 text-center">
+					<p className="text-muted-foreground">
+						Employee list will be displayed here.
+					</p>
+					<p className="mt-2 text-muted-foreground text-xs">
+						This requires the employees relation to be added to the departments
+						schema.
+					</p>
+				</div>
+			</Card>
+		</TabsContent>
+	);
+}
+
+// Main component
 function DepartmentRoute() {
 	const { departmentId } = Route.useParams();
 	const navigate = useNavigate();
@@ -86,46 +600,31 @@ function DepartmentRoute() {
 	};
 
 	const handleDeactivate = () => {
-		if (
-			confirm(
-				"Are you sure you want to deactivate this department? This will affect all employees and positions in this department."
-			)
-		) {
-			deleteMutation.mutate({ id: departmentId });
-		}
+		deleteMutation.mutate({ id: departmentId });
 	};
 
-	const getStatusBadge = (isActive: boolean) => {
-		return isActive ? (
-			<Badge className="bg-green-100 text-green-700">Active</Badge>
-		) : (
-			<Badge variant="destructive">Inactive</Badge>
-		);
+	const handleFieldChange = (key: string, value: string) => {
+		setEditData((prev) => ({ ...prev, [key]: value }));
+	};
+
+	const handleSettingChange = (key: string, value: unknown) => {
+		setEditData((prev) => ({
+			...prev,
+			settings: {
+				...(typeof prev.settings === "object" && prev.settings !== null
+					? prev.settings
+					: {}),
+				[key]: value,
+			},
+		}));
 	};
 
 	if (isLoading) {
-		return (
-			<div className="container mx-auto max-w-6xl space-y-6 p-6">
-				<Skeleton className="h-32 w-full" />
-				<Skeleton className="h-96 w-full" />
-			</div>
-		);
+		return <LoadingState />;
 	}
 
 	if (!department) {
-		return (
-			<div className="container mx-auto max-w-6xl p-6">
-				<Card className="p-12 text-center">
-					<h2 className="font-semibold text-xl">Department not found</h2>
-					<Button
-						className="mt-4"
-						onClick={() => navigate({ to: "/departments" })}
-					>
-						Back to Departments
-					</Button>
-				</Card>
-			</div>
-		);
+		return <NotFoundState onBack={() => navigate({ to: "/departments" })} />;
 	}
 
 	return (
@@ -206,490 +705,24 @@ function DepartmentRoute() {
 					<TabsTrigger value="employees">Employees</TabsTrigger>
 				</TabsList>
 
-				{/* Overview Tab */}
-				<TabsContent className="space-y-6" value="overview">
-					<Card className="p-6">
-						<h2 className="mb-4 font-semibold text-xl">Basic Information</h2>
-						<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-							<div>
-								<Label className="text-muted-foreground text-sm">
-									Department Name
-								</Label>
-								{isEditing ? (
-									<Input
-										className="mt-1"
-										onChange={(e) =>
-											setEditData((prev) => ({ ...prev, name: e.target.value }))
-										}
-										value={(editData.name as string) ?? department.name}
-									/>
-								) : (
-									<p className="mt-1 font-medium">{department.name}</p>
-								)}
-							</div>
+				<OverviewTab
+					department={department}
+					editData={editData}
+					handleFieldChange={handleFieldChange}
+					isEditing={isEditing}
+					navigate={navigate}
+				/>
 
-							<div>
-								<Label className="text-muted-foreground text-sm">
-									Department Code
-								</Label>
-								{isEditing ? (
-									<Input
-										className="mt-1"
-										onChange={(e) =>
-											setEditData((prev) => ({ ...prev, code: e.target.value }))
-										}
-										value={(editData.code as string) ?? department.code}
-									/>
-								) : (
-									<p className="mt-1 font-medium">{department.code}</p>
-								)}
-							</div>
+				<BudgetSettingsTab
+					department={department}
+					editData={editData}
+					handleSettingChange={handleSettingChange}
+					isEditing={isEditing}
+				/>
 
-							<div className="md:col-span-2">
-								<Label className="text-muted-foreground text-sm">
-									Description
-								</Label>
-								{isEditing ? (
-									<Textarea
-										className="mt-1"
-										onChange={(e) =>
-											setEditData((prev) => ({
-												...prev,
-												description: e.target.value,
-											}))
-										}
-										rows={3}
-										value={
-											(editData.description as string) ??
-											department.description ??
-											""
-										}
-									/>
-								) : (
-									<p className="mt-1">
-										{department.description || "No description"}
-									</p>
-								)}
-							</div>
-						</div>
-					</Card>
+				<PositionsTab department={department} />
 
-					{department.location && (
-						<Card className="p-6">
-							<h2 className="mb-4 font-semibold text-xl">Location</h2>
-							<div>
-								<Label className="text-muted-foreground text-sm">
-									Office Location
-								</Label>
-								{isEditing ? (
-									<Input
-										className="mt-1"
-										onChange={(e) =>
-											setEditData((prev) => ({
-												...prev,
-												location: e.target.value,
-											}))
-										}
-										value={
-											(editData.location as string) ?? department.location ?? ""
-										}
-									/>
-								) : (
-									<p className="mt-1">{department.location}</p>
-								)}
-							</div>
-						</Card>
-					)}
-
-					<Card className="p-6">
-						<h2 className="mb-4 font-semibold text-xl">
-							Organizational Hierarchy
-						</h2>
-						<div className="space-y-4">
-							{department.parentDepartment && (
-								<div>
-									<Label className="text-muted-foreground text-sm">
-										Parent Department
-									</Label>
-									<div className="mt-2">
-										<Button
-											onClick={() =>
-												navigate({
-													to: "/departments/$departmentId",
-													params: {
-														departmentId: department.parentDepartment?.id ?? "",
-													},
-												})
-											}
-											variant="outline"
-										>
-											<Building03Icon className="mr-2 h-4 w-4" />
-											{department.parentDepartment?.name} (
-											{department.parentDepartment?.code})
-										</Button>
-									</div>
-								</div>
-							)}
-
-							{department.subDepartments &&
-								department.subDepartments.length > 0 && (
-									<div>
-										<Label className="text-muted-foreground text-sm">
-											Sub-Departments ({department.subDepartments.length})
-										</Label>
-										<div className="mt-2 flex flex-wrap gap-2">
-											{department.subDepartments.map((subDept) => (
-												<Button
-													key={subDept.id}
-													onClick={() =>
-														navigate({
-															to: "/departments/$departmentId",
-															params: { departmentId: subDept.id },
-														})
-													}
-													variant="outline"
-												>
-													<Building03Icon className="mr-2 h-4 w-4" />
-													{subDept.name} ({subDept.code})
-												</Button>
-											))}
-										</div>
-									</div>
-								)}
-
-							{!department.parentDepartment &&
-								(!department.subDepartments ||
-									department.subDepartments.length === 0) && (
-									<p className="text-muted-foreground">
-										This is a standalone department with no parent or
-										sub-departments.
-									</p>
-								)}
-						</div>
-					</Card>
-				</TabsContent>
-
-				{/* Budget & Settings Tab */}
-				<TabsContent className="space-y-6" value="budget">
-					<Card className="p-6">
-						<h2 className="mb-4 font-semibold text-xl">Budget</h2>
-						<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-							<div>
-								<Label className="text-muted-foreground text-sm">
-									Annual Budget
-								</Label>
-								{isEditing ? (
-									<Input
-										className="mt-1"
-										min="0"
-										onChange={(e) =>
-											setEditData((prev) => ({
-												...prev,
-												settings: {
-													...(typeof prev.settings === "object" &&
-													prev.settings !== null
-														? prev.settings
-														: {}),
-													annualBudget: Number.parseFloat(e.target.value),
-												},
-											}))
-										}
-										step="0.01"
-										type="number"
-										value={(
-											(editData.settings as { annualBudget?: number })
-												?.annualBudget ??
-											department.settings?.annualBudget ??
-											""
-										).toString()}
-									/>
-								) : (
-									<p className="mt-1 font-medium">
-										{department.settings?.annualBudget
-											? `${department.settings.budgetCurrency ?? "GYD"} ${department.settings.annualBudget.toLocaleString()}`
-											: "Not set"}
-									</p>
-								)}
-							</div>
-
-							<div>
-								<Label className="text-muted-foreground text-sm">
-									Currency
-								</Label>
-								{isEditing ? (
-									<Select
-										onValueChange={(value) =>
-											setEditData((prev) => ({
-												...prev,
-												settings: {
-													...(typeof prev.settings === "object" &&
-													prev.settings !== null
-														? prev.settings
-														: {}),
-													budgetCurrency: value,
-												},
-											}))
-										}
-										value={
-											(editData.settings as { budgetCurrency?: string })
-												?.budgetCurrency ??
-											department.settings?.budgetCurrency ??
-											"GYD"
-										}
-									>
-										<SelectTrigger className="mt-1">
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="GYD">GYD - Guyanese Dollar</SelectItem>
-											<SelectItem value="USD">USD - US Dollar</SelectItem>
-											<SelectItem value="EUR">EUR - Euro</SelectItem>
-											<SelectItem value="GBP">GBP - British Pound</SelectItem>
-										</SelectContent>
-									</Select>
-								) : (
-									<p className="mt-1 font-medium">
-										{department.settings?.budgetCurrency ?? "GYD"}
-									</p>
-								)}
-							</div>
-						</div>
-					</Card>
-
-					<Card className="p-6">
-						<h2 className="mb-4 font-semibold text-xl">Approval Settings</h2>
-						<div className="space-y-4">
-							<div className="flex items-start space-x-3">
-								{isEditing ? (
-									<Checkbox
-										checked={
-											(
-												editData.settings as {
-													requiresApprovalForLeave?: boolean;
-												}
-											)?.requiresApprovalForLeave ??
-											department.settings?.requiresApprovalForLeave ??
-											false
-										}
-										onCheckedChange={(checked) =>
-											setEditData((prev) => ({
-												...prev,
-												settings: {
-													...(typeof prev.settings === "object" &&
-													prev.settings !== null
-														? prev.settings
-														: {}),
-													requiresApprovalForLeave: checked === true,
-												},
-											}))
-										}
-									/>
-								) : department.settings?.requiresApprovalForLeave ? (
-									<CheckmarkCircle02Icon className="h-5 w-5 text-green-600" />
-								) : (
-									<Cancel01Icon className="h-5 w-5 text-muted-foreground" />
-								)}
-								<div>
-									<Label className="font-medium text-sm">
-										Require approval for leave requests
-									</Label>
-									<p className="text-muted-foreground text-xs">
-										Employees must get approval before taking leave
-									</p>
-								</div>
-							</div>
-
-							<Separator />
-
-							<div className="flex items-start space-x-3">
-								{isEditing ? (
-									<Checkbox
-										checked={
-											(
-												editData.settings as {
-													requiresApprovalForExpenses?: boolean;
-												}
-											)?.requiresApprovalForExpenses ??
-											department.settings?.requiresApprovalForExpenses ??
-											false
-										}
-										onCheckedChange={(checked) =>
-											setEditData((prev) => ({
-												...prev,
-												settings: {
-													...(typeof prev.settings === "object" &&
-													prev.settings !== null
-														? prev.settings
-														: {}),
-													requiresApprovalForExpenses: checked === true,
-												},
-											}))
-										}
-									/>
-								) : department.settings?.requiresApprovalForExpenses ? (
-									<CheckmarkCircle02Icon className="h-5 w-5 text-green-600" />
-								) : (
-									<Cancel01Icon className="h-5 w-5 text-muted-foreground" />
-								)}
-								<div>
-									<Label className="font-medium text-sm">
-										Require approval for expenses
-									</Label>
-									<p className="text-muted-foreground text-xs">
-										Expenses must be approved before reimbursement
-									</p>
-								</div>
-							</div>
-
-							<Separator />
-
-							<div className="flex items-start space-x-3">
-								{isEditing ? (
-									<Checkbox
-										checked={
-											(
-												editData.settings as {
-													notifyHeadOnNewEmployee?: boolean;
-												}
-											)?.notifyHeadOnNewEmployee ??
-											department.settings?.notifyHeadOnNewEmployee ??
-											false
-										}
-										onCheckedChange={(checked) =>
-											setEditData((prev) => ({
-												...prev,
-												settings: {
-													...(typeof prev.settings === "object" &&
-													prev.settings !== null
-														? prev.settings
-														: {}),
-													notifyHeadOnNewEmployee: checked === true,
-												},
-											}))
-										}
-									/>
-								) : department.settings?.notifyHeadOnNewEmployee ? (
-									<CheckmarkCircle02Icon className="h-5 w-5 text-green-600" />
-								) : (
-									<Cancel01Icon className="h-5 w-5 text-muted-foreground" />
-								)}
-								<div>
-									<Label className="font-medium text-sm">
-										Notify department head on new employee
-									</Label>
-									<p className="text-muted-foreground text-xs">
-										Send notification when a new employee joins
-									</p>
-								</div>
-							</div>
-						</div>
-					</Card>
-				</TabsContent>
-
-				{/* Positions Tab */}
-				<TabsContent className="space-y-6" value="positions">
-					<Card className="p-6">
-						<div className="mb-4 flex items-center justify-between">
-							<h2 className="font-semibold text-xl">Positions</h2>
-							<Button
-								onClick={() =>
-									toast.info("Position management feature coming soon!")
-								}
-							>
-								Add Position
-							</Button>
-						</div>
-
-						{department.positions && department.positions.length > 0 ? (
-							<div className="space-y-3">
-								{department.positions.map((position) => (
-									<Card className="p-4" key={position.id}>
-										<div className="flex items-start justify-between">
-											<div>
-												<div className="flex items-center gap-2">
-													<h3 className="font-semibold">{position.title}</h3>
-													{position.isActive ? (
-														<Badge className="bg-green-100 text-green-700">
-															Active
-														</Badge>
-													) : (
-														<Badge variant="secondary">Inactive</Badge>
-													)}
-												</div>
-												<p className="mt-1 text-muted-foreground text-sm">
-													Code: {position.code}
-												</p>
-												{position.description && (
-													<p className="mt-2 text-sm">{position.description}</p>
-												)}
-												{position.level && (
-													<p className="mt-2 text-muted-foreground text-xs">
-														Level: {position.level}
-														{position.grade && ` • Grade: ${position.grade}`}
-													</p>
-												)}
-											</div>
-											<Button
-												onClick={() =>
-													toast.info("Position details feature coming soon!")
-												}
-												size="sm"
-												variant="outline"
-											>
-												View Details
-											</Button>
-										</div>
-									</Card>
-								))}
-							</div>
-						) : (
-							<div className="py-12 text-center">
-								<p className="text-muted-foreground">
-									No positions in this department yet.
-								</p>
-								<Button
-									className="mt-4"
-									onClick={() =>
-										toast.info("Position management feature coming soon!")
-									}
-									variant="outline"
-								>
-									Add First Position
-								</Button>
-							</div>
-						)}
-					</Card>
-				</TabsContent>
-
-				{/* Employees Tab */}
-				<TabsContent className="space-y-6" value="employees">
-					<Card className="p-6">
-						<div className="mb-4 flex items-center justify-between">
-							<h2 className="font-semibold text-xl">Employees</h2>
-							<Button
-								onClick={() =>
-									navigate({
-										to: "/employees/new",
-										search: { departmentId: department.id },
-									})
-								}
-							>
-								<UserMultiple02Icon className="mr-2 h-4 w-4" />
-								Add Employee
-							</Button>
-						</div>
-
-						<div className="py-12 text-center">
-							<p className="text-muted-foreground">
-								Employee list will be displayed here.
-							</p>
-							<p className="mt-2 text-muted-foreground text-xs">
-								This requires the employees relation to be added to the
-								departments schema.
-							</p>
-						</div>
-					</Card>
-				</TabsContent>
+				<EmployeesTab department={department} navigate={navigate} />
 			</Tabs>
 		</div>
 	);

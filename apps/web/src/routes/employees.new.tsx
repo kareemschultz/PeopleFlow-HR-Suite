@@ -43,6 +43,153 @@ interface WorkSchedule {
 	workFromHome?: boolean;
 }
 
+// Helper function to validate employee form data
+function validateRequiredFields(formData: Record<string, string>): boolean {
+	return !!(
+		formData.firstName &&
+		formData.lastName &&
+		formData.email &&
+		formData.employeeNumber &&
+		formData.departmentId &&
+		formData.positionId &&
+		formData.hireDate &&
+		formData.startDate &&
+		formData.baseSalary
+	);
+}
+
+// Helper to build emergency contact object
+function buildEmergencyContact(emergencyContact: EmergencyContact) {
+	if (
+		emergencyContact.name &&
+		emergencyContact.relationship &&
+		emergencyContact.phone
+	) {
+		return {
+			name: emergencyContact.name,
+			relationship: emergencyContact.relationship,
+			phone: emergencyContact.phone,
+			email: emergencyContact.email || undefined,
+		};
+	}
+	return undefined;
+}
+
+// Helper to build address object
+function buildAddress(address: Address) {
+	if (
+		address.street ||
+		address.city ||
+		address.region ||
+		address.postalCode ||
+		address.country
+	) {
+		return {
+			street: address.street || undefined,
+			city: address.city || undefined,
+			region: address.region || undefined,
+			postalCode: address.postalCode || undefined,
+			country: address.country || undefined,
+		};
+	}
+	return undefined;
+}
+
+// Helper to build work schedule object
+function buildWorkSchedule(workSchedule: WorkSchedule) {
+	if (workSchedule.hoursPerWeek || workSchedule.daysPerWeek) {
+		return {
+			hoursPerWeek: workSchedule.hoursPerWeek || undefined,
+			daysPerWeek: workSchedule.daysPerWeek || undefined,
+			shiftType: workSchedule.shiftType || undefined,
+			workFromHome: workSchedule.workFromHome || undefined,
+		};
+	}
+	return undefined;
+}
+
+// Helper function to build employee data object
+function buildEmployeeData(
+	formData: Record<string, string>,
+	emergencyContact: EmergencyContact,
+	address: Address,
+	workSchedule: WorkSchedule,
+	organizationId: string
+) {
+	return {
+		organizationId,
+		firstName: formData.firstName,
+		middleName: formData.middleName || undefined,
+		lastName: formData.lastName,
+		preferredName: formData.preferredName || undefined,
+		email: formData.email,
+		phone: formData.phone || undefined,
+		employeeNumber: formData.employeeNumber,
+		departmentId: formData.departmentId,
+		positionId: formData.positionId,
+		managerId: formData.managerId || undefined,
+
+		// Personal Details
+		dateOfBirth: formData.dateOfBirth || undefined,
+		gender: (formData.gender || undefined) as
+			| "male"
+			| "female"
+			| "other"
+			| "prefer_not_to_say"
+			| undefined,
+		nationality: formData.nationality || undefined,
+
+		// Emergency Contact (only include if name is provided)
+		emergencyContact: buildEmergencyContact(emergencyContact),
+
+		// Address (only include if at least one field is provided)
+		address: buildAddress(address),
+
+		// Identification
+		taxId: formData.taxId || undefined,
+		nisNumber: formData.nisNumber || undefined,
+		passportNumber: formData.passportNumber || undefined,
+		nationalIdNumber: formData.nationalIdNumber || undefined,
+
+		// Employment Details
+		hireDate: formData.hireDate,
+		startDate: formData.startDate,
+		probationEndDate: formData.probationEndDate || undefined,
+		employmentType: formData.employmentType as
+			| "full_time"
+			| "part_time"
+			| "contract"
+			| "temporary"
+			| "intern",
+		employmentStatus: formData.employmentStatus as
+			| "active"
+			| "on_leave"
+			| "suspended"
+			| "terminated"
+			| "retired",
+
+		// Work Schedule
+		workSchedule: buildWorkSchedule(workSchedule),
+
+		// Compensation
+		baseSalary: Number.parseInt(formData.baseSalary, 10) * 100, // Convert to cents
+		salaryCurrency: formData.salaryCurrency,
+		salaryFrequency: formData.salaryFrequency as
+			| "weekly"
+			| "biweekly"
+			| "monthly"
+			| "annual",
+
+		// Leave Balances
+		annualLeaveBalance: Number.parseInt(formData.annualLeaveBalance, 10) || 0,
+		sickLeaveBalance: Number.parseInt(formData.sickLeaveBalance, 10) || 0,
+		otherLeaveBalance: Number.parseInt(formData.otherLeaveBalance, 10) || 0,
+
+		// Notes
+		notes: formData.notes || undefined,
+	};
+}
+
 function NewEmployeePage() {
 	const navigate = useNavigate();
 	const { organizationId, hasOrganization } = useOrganization();
@@ -160,108 +307,19 @@ function NewEmployeePage() {
 		e.preventDefault();
 
 		// Validate required fields
-		if (
-			!(
-				formData.firstName &&
-				formData.lastName &&
-				formData.email &&
-				formData.employeeNumber &&
-				formData.departmentId &&
-				formData.positionId &&
-				formData.hireDate &&
-				formData.startDate &&
-				formData.baseSalary
-			)
-		) {
+		if (!validateRequiredFields(formData)) {
 			toast.error("Please fill in all required fields");
 			return;
 		}
 
-		// Build employee data
-		const employeeData = {
-			organizationId,
-			firstName: formData.firstName,
-			middleName: formData.middleName || undefined,
-			lastName: formData.lastName,
-			preferredName: formData.preferredName || undefined,
-			email: formData.email,
-			phone: formData.phone || undefined,
-			employeeNumber: formData.employeeNumber,
-			departmentId: formData.departmentId,
-			positionId: formData.positionId,
-			managerId: formData.managerId || undefined,
-
-			// Personal Details
-			dateOfBirth: formData.dateOfBirth || undefined,
-			gender: formData.gender || undefined,
-			nationality: formData.nationality || undefined,
-
-			// Emergency Contact (only include if name is provided)
-			emergencyContact:
-				emergencyContact.name &&
-				emergencyContact.relationship &&
-				emergencyContact.phone
-					? {
-							name: emergencyContact.name,
-							relationship: emergencyContact.relationship,
-							phone: emergencyContact.phone,
-							email: emergencyContact.email || undefined,
-						}
-					: undefined,
-
-			// Address (only include if at least one field is provided)
-			address:
-				address.street ||
-				address.city ||
-				address.region ||
-				address.postalCode ||
-				address.country
-					? {
-							street: address.street || undefined,
-							city: address.city || undefined,
-							region: address.region || undefined,
-							postalCode: address.postalCode || undefined,
-							country: address.country || undefined,
-						}
-					: undefined,
-
-			// Identification
-			taxId: formData.taxId || undefined,
-			nisNumber: formData.nisNumber || undefined,
-			passportNumber: formData.passportNumber || undefined,
-			nationalIdNumber: formData.nationalIdNumber || undefined,
-
-			// Employment Details
-			hireDate: formData.hireDate,
-			startDate: formData.startDate,
-			probationEndDate: formData.probationEndDate || undefined,
-			employmentType: formData.employmentType,
-			employmentStatus: formData.employmentStatus,
-
-			// Work Schedule
-			workSchedule:
-				workSchedule.hoursPerWeek || workSchedule.daysPerWeek
-					? {
-							hoursPerWeek: workSchedule.hoursPerWeek || undefined,
-							daysPerWeek: workSchedule.daysPerWeek || undefined,
-							shiftType: workSchedule.shiftType || undefined,
-							workFromHome: workSchedule.workFromHome || undefined,
-						}
-					: undefined,
-
-			// Compensation
-			baseSalary: Number.parseInt(formData.baseSalary, 10) * 100, // Convert to cents
-			salaryCurrency: formData.salaryCurrency,
-			salaryFrequency: formData.salaryFrequency,
-
-			// Leave Balances
-			annualLeaveBalance: Number.parseInt(formData.annualLeaveBalance, 10) || 0,
-			sickLeaveBalance: Number.parseInt(formData.sickLeaveBalance, 10) || 0,
-			otherLeaveBalance: Number.parseInt(formData.otherLeaveBalance, 10) || 0,
-
-			// Notes
-			notes: formData.notes || undefined,
-		};
+		// Build and submit employee data
+		const employeeData = buildEmployeeData(
+			formData,
+			emergencyContact,
+			address,
+			workSchedule,
+			organizationId
+		);
 
 		createEmployee.mutate(employeeData);
 	};

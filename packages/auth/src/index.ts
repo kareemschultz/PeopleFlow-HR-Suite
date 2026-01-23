@@ -1,4 +1,5 @@
 import { db } from "@PeopleFlow-HR-Suite/db";
+// biome-ignore lint/performance/noNamespaceImport: drizzleAdapter requires the full schema object
 import * as schema from "@PeopleFlow-HR-Suite/db/schema/auth";
 import { env } from "@PeopleFlow-HR-Suite/env/server";
 import { expo } from "@better-auth/expo";

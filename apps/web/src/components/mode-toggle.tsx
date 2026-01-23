@@ -1,6 +1,6 @@
 import { Moon02Icon as Moon, Sun03Icon as Sun } from "hugeicons-react";
+import { useTheme } from "next-themes";
 
-import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,

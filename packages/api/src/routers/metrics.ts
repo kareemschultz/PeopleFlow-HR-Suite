@@ -7,7 +7,7 @@ import {
 	type NewMetricDependency,
 	type NewMetricValue,
 } from "@PeopleFlow-HR-Suite/db";
-import { and, desc, eq, gte, lte } from "drizzle-orm";
+import { and, desc, eq, gte, lte, type SQL } from "drizzle-orm";
 import { z } from "zod";
 import { authedProcedure, publicProcedure } from "..";
 
@@ -154,7 +154,7 @@ export const createMetricDependency = authedProcedure
 export const listMetricDependencies = publicProcedure
 	.input(listMetricDependenciesSchema)
 	.handler(async ({ input }) => {
-		const filters = [];
+		const filters: SQL[] = [];
 
 		if (input?.metricKey) {
 			filters.push(eq(metricDependencies.metricKey, input.metricKey));
@@ -213,6 +213,51 @@ export const getMetricDependencyTree = publicProcedure
 // DATA FRESHNESS PROCEDURES
 // ============================================================================
 
+// Helper function to build update fields for data freshness
+function buildUpdateFreshnessFields(
+	input: z.infer<typeof updateDataFreshnessSchema>,
+	existing: typeof dataFreshness.$inferSelect,
+	userId: string | undefined
+) {
+	return {
+		lastUpdatedAt: new Date(),
+		lastUpdatedBy: userId,
+		status: input.status,
+		isLocked: input.isLocked ?? existing.isLocked,
+		lockedAt:
+			input.isLocked && !existing.isLocked ? new Date() : existing.lockedAt,
+		lockedBy: input.isLocked && !existing.isLocked ? userId : existing.lockedBy,
+		autoRefresh: input.autoRefresh ?? existing.autoRefresh,
+		stalenessThreshold:
+			input.stalenessThreshold?.toString() ?? existing.stalenessThreshold,
+		updateMetadata: input.updateMetadata ?? existing.updateMetadata,
+		updatedAt: new Date(),
+	};
+}
+
+// Helper function to build new data freshness record
+function buildNewFreshnessRecord(
+	input: z.infer<typeof updateDataFreshnessSchema>,
+	userId: string | undefined
+): NewDataFreshness {
+	return {
+		organizationId: input.organizationId,
+		dataType: input.dataType,
+		entityName: input.entityName || null,
+		lastUpdatedAt: new Date(),
+		lastUpdatedBy: userId,
+		status: input.status,
+		isLocked: input.isLocked ?? false,
+		lockedAt: input.isLocked ? new Date() : null,
+		lockedBy: input.isLocked ? userId : null,
+		periodStart: input.periodStart ?? null,
+		periodEnd: input.periodEnd ?? null,
+		autoRefresh: input.autoRefresh ?? false,
+		stalenessThreshold: input.stalenessThreshold?.toString() ?? null,
+		updateMetadata: input.updateMetadata ?? null,
+	};
+}
+
 /**
  * Update data freshness status
  */
@@ -237,51 +282,18 @@ export const updateDataFreshness = authedProcedure
 			// Update existing record
 			const [updated] = await db
 				.update(dataFreshness)
-				.set({
-					lastUpdatedAt: new Date(),
-					lastUpdatedBy: context.session?.user.id,
-					status: input.status,
-					isLocked: input.isLocked ?? existing.isLocked,
-					lockedAt:
-						input.isLocked && !existing.isLocked
-							? new Date()
-							: existing.lockedAt,
-					lockedBy:
-						input.isLocked && !existing.isLocked
-							? context.session?.user.id
-							: existing.lockedBy,
-					autoRefresh: input.autoRefresh ?? existing.autoRefresh,
-					stalenessThreshold:
-						input.stalenessThreshold?.toString() ?? existing.stalenessThreshold,
-					updateMetadata: input.updateMetadata ?? existing.updateMetadata,
-					updatedAt: new Date(),
-				})
+				.set(
+					buildUpdateFreshnessFields(input, existing, context.session?.user.id)
+				)
 				.where(eq(dataFreshness.id, existing.id))
 				.returning();
 
 			return updated;
 		}
 		// Create new record
-		const newFreshness: NewDataFreshness = {
-			organizationId: input.organizationId,
-			dataType: input.dataType,
-			entityName: input.entityName || null,
-			lastUpdatedAt: new Date(),
-			lastUpdatedBy: context.session?.user.id,
-			status: input.status,
-			isLocked: input.isLocked ?? false,
-			lockedAt: input.isLocked ? new Date() : null,
-			lockedBy: input.isLocked ? context.session?.user.id : null,
-			periodStart: input.periodStart ?? null,
-			periodEnd: input.periodEnd ?? null,
-			autoRefresh: input.autoRefresh ?? false,
-			stalenessThreshold: input.stalenessThreshold?.toString() ?? null,
-			updateMetadata: input.updateMetadata ?? null,
-		};
-
 		const [freshness] = await db
 			.insert(dataFreshness)
-			.values(newFreshness)
+			.values(buildNewFreshnessRecord(input, context.session?.user.id))
 			.returning();
 
 		if (!freshness) {
@@ -342,8 +354,8 @@ export const createMetricValue = authedProcedure
 	.input(createMetricValueSchema)
 	.handler(async ({ input, context }) => {
 		// Calculate changes if previous value provided
-		let changeAbsolute = null;
-		let changePercent = null;
+		let changeAbsolute: number | null = null;
+		let changePercent: number | null = null;
 
 		if (input.previousValue !== undefined) {
 			changeAbsolute = input.value - input.previousValue;
@@ -391,7 +403,7 @@ export const createMetricValue = authedProcedure
 export const listMetricValues = publicProcedure
 	.input(listMetricValuesSchema)
 	.handler(async ({ input }) => {
-		const filters = [];
+		const filters: SQL[] = [];
 
 		if (input?.organizationId) {
 			filters.push(eq(metricValues.organizationId, input.organizationId));

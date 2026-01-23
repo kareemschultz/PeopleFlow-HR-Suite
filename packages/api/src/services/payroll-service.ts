@@ -36,6 +36,123 @@ export interface CalculatePayslipResult {
 	warnings: string[];
 }
 
+// Helper function to adjust amount based on frequency
+function adjustForFrequency(amount: number, frequency: string): number {
+	if (frequency === "annual") {
+		return Math.round(amount / 12);
+	}
+	return amount;
+}
+
+// Helper function to process allowances
+function processAllowances(
+	employee: Employee,
+	basePay: number
+): {
+	totalAllowances: number;
+	nisableAllowances: number;
+	earningsBreakdown: Array<{
+		code: string;
+		name: string;
+		amount: number;
+		isTaxable: boolean;
+		isNisable: boolean;
+	}>;
+} {
+	const earningsBreakdown = [
+		{
+			code: "BASE",
+			name: "Base Salary",
+			amount: basePay,
+			isTaxable: true,
+			isNisable: true,
+		},
+	];
+
+	let totalAllowances = 0;
+	let nisableAllowances = 0;
+
+	if (employee.allowances) {
+		for (const allowance of employee.allowances) {
+			const allowanceAmount = adjustForFrequency(
+				allowance.amount,
+				allowance.frequency
+			);
+
+			totalAllowances += allowanceAmount;
+			nisableAllowances += allowanceAmount;
+
+			earningsBreakdown.push({
+				code: allowance.code,
+				name: allowance.name,
+				amount: allowanceAmount,
+				isTaxable: allowance.isTaxable,
+				isNisable: true,
+			});
+		}
+	}
+
+	return { totalAllowances, nisableAllowances, earningsBreakdown };
+}
+
+// Helper function to process deductions
+function processDeductions(employee: Employee): {
+	otherDeductionsTotal: number;
+	deductionsBreakdown: Array<{
+		code: string;
+		name: string;
+		amount: number;
+	}>;
+} {
+	const deductionsBreakdown: Array<{
+		code: string;
+		name: string;
+		amount: number;
+	}> = [];
+
+	let otherDeductionsTotal = 0;
+
+	if (employee.deductions) {
+		for (const deduction of employee.deductions) {
+			const deductionAmount = adjustForFrequency(
+				deduction.amount,
+				deduction.frequency
+			);
+
+			otherDeductionsTotal += deductionAmount;
+
+			deductionsBreakdown.push({
+				code: deduction.code,
+				name: deduction.name,
+				amount: deductionAmount,
+			});
+		}
+	}
+
+	return { otherDeductionsTotal, deductionsBreakdown };
+}
+
+// Helper function to generate warnings
+function generateWarnings(employee: Employee, netPay: number): string[] {
+	const warnings: string[] = [];
+
+	if (netPay < 0) {
+		warnings.push(
+			`Negative net pay (${netPay / 100}) - deductions exceed gross earnings`
+		);
+	}
+
+	if (!employee.taxId) {
+		warnings.push("Employee missing Tax ID (TIN)");
+	}
+
+	if (!employee.nisNumber) {
+		warnings.push("Employee missing NIS Number");
+	}
+
+	return warnings;
+}
+
 /**
  * Calculate a complete payslip for an employee.
  * Includes base pay, allowances, deductions, PAYE, and NIS.
@@ -69,54 +186,9 @@ export function calculatePayslip(
 		basePay = Math.round(employee.baseSalary * 2); // Assuming monthly run
 	}
 
-	// Allowances
-	const earningsBreakdown: {
-		code: string;
-		name: string;
-		amount: number;
-		isTaxable: boolean;
-		isNisable: boolean;
-	}[] = [
-		{
-			code: "BASE",
-			name: "Base Salary",
-			amount: basePay,
-			isTaxable: true,
-			isNisable: true,
-		},
-	];
-
-	let totalAllowances = 0;
-	let _taxableAllowances = 0;
-	let nisableAllowances = 0;
-
-	if (employee.allowances) {
-		for (const allowance of employee.allowances) {
-			let allowanceAmount = allowance.amount;
-
-			// Adjust frequency
-			if (allowance.frequency === "annual") {
-				allowanceAmount = Math.round(allowance.amount / 12);
-			}
-
-			totalAllowances += allowanceAmount;
-
-			if (allowance.isTaxable) {
-				_taxableAllowances += allowanceAmount;
-			}
-
-			// Allowances are typically NIS-able
-			nisableAllowances += allowanceAmount;
-
-			earningsBreakdown.push({
-				code: allowance.code,
-				name: allowance.name,
-				amount: allowanceAmount,
-				isTaxable: allowance.isTaxable,
-				isNisable: true,
-			});
-		}
-	}
+	// Process allowances
+	const { totalAllowances, nisableAllowances, earningsBreakdown } =
+		processAllowances(employee, basePay);
 
 	// Gross earnings
 	const grossEarnings = basePay + totalAllowances;
@@ -158,32 +230,9 @@ export function calculatePayslip(
 	// OTHER DEDUCTIONS
 	// ============================================================================
 
-	const deductionsBreakdown: {
-		code: string;
-		name: string;
-		amount: number;
-	}[] = [];
-
-	let otherDeductionsTotal = 0;
-
-	if (employee.deductions) {
-		for (const deduction of employee.deductions) {
-			let deductionAmount = deduction.amount;
-
-			// Adjust frequency
-			if (deduction.frequency === "annual") {
-				deductionAmount = Math.round(deduction.amount / 12);
-			}
-
-			otherDeductionsTotal += deductionAmount;
-
-			deductionsBreakdown.push({
-				code: deduction.code,
-				name: deduction.name,
-				amount: deductionAmount,
-			});
-		}
-	}
+	// Process deductions
+	const { otherDeductionsTotal, deductionsBreakdown } =
+		processDeductions(employee);
 
 	// ============================================================================
 	// TOTALS
@@ -202,19 +251,8 @@ export function calculatePayslip(
 	// WARNINGS
 	// ============================================================================
 
-	if (netPay < 0) {
-		warnings.push(
-			`Negative net pay (${netPay / 100}) - deductions exceed gross earnings`
-		);
-	}
-
-	if (!employee.taxId) {
-		warnings.push("Employee missing Tax ID (TIN)");
-	}
-
-	if (!employee.nisNumber) {
-		warnings.push("Employee missing NIS Number");
-	}
+	// Generate warnings
+	warnings.push(...generateWarnings(employee, netPay));
 
 	// ============================================================================
 	// BUILD PAYSLIP

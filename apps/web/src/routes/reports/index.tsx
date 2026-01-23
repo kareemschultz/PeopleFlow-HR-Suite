@@ -401,9 +401,8 @@ function ReportsPage() {
 							</Button>
 						</CardHeader>
 						<CardContent>
-							{payrollLoading ? (
-								<Skeleton className="h-64 w-full" />
-							) : payrollSummary ? (
+							{payrollLoading && <Skeleton className="h-64 w-full" />}
+							{!payrollLoading && payrollSummary && (
 								<div className="grid grid-cols-2 gap-6 md:grid-cols-4">
 									<div className="space-y-1">
 										<p className="text-muted-foreground text-sm">
@@ -477,7 +476,8 @@ function ReportsPage() {
 										</p>
 									</div>
 								</div>
-							) : (
+							)}
+							{!(payrollLoading || payrollSummary) && (
 								<p className="text-muted-foreground">
 									No payroll data available.
 								</p>
@@ -501,9 +501,8 @@ function ReportsPage() {
 							</Button>
 						</CardHeader>
 						<CardContent className="space-y-6">
-							{employeeLoading ? (
-								<Skeleton className="h-64 w-full" />
-							) : employeeSummary ? (
+							{employeeLoading && <Skeleton className="h-64 w-full" />}
+							{!employeeLoading && employeeSummary && (
 								<>
 									<div className="grid grid-cols-2 gap-6 md:grid-cols-4">
 										<div className="space-y-1">
@@ -602,7 +601,8 @@ function ReportsPage() {
 										</div>
 									</div>
 								</>
-							) : (
+							)}
+							{!(employeeLoading || employeeSummary) && (
 								<p className="text-muted-foreground">
 									No employee data available.
 								</p>
@@ -626,9 +626,8 @@ function ReportsPage() {
 							</Button>
 						</CardHeader>
 						<CardContent>
-							{taxLoading ? (
-								<Skeleton className="h-64 w-full" />
-							) : ytdTaxReport && ytdTaxReport.length > 0 ? (
+							{taxLoading && <Skeleton className="h-64 w-full" />}
+							{!taxLoading && ytdTaxReport && ytdTaxReport.length > 0 && (
 								<Table>
 									<TableHeader>
 										<TableRow>
@@ -665,7 +664,8 @@ function ReportsPage() {
 										))}
 									</TableBody>
 								</Table>
-							) : (
+							)}
+							{!taxLoading && (!ytdTaxReport || ytdTaxReport.length === 0) && (
 								<div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
 									<FileText className="mb-2 h-10 w-10 opacity-20" />
 									<p>No tax data available for {currentYear}.</p>
