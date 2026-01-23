@@ -14,6 +14,7 @@ import { Route as PricingRouteImport } from "./routes/pricing"
 import { Route as LoginRouteImport } from "./routes/login"
 import { Route as DashboardRouteImport } from "./routes/dashboard"
 import { Route as IndexRouteImport } from "./routes/index"
+import { Route as SettingsIndexRouteImport } from "./routes/settings/index"
 import { Route as ReportsIndexRouteImport } from "./routes/reports/index"
 import { Route as PayrollIndexRouteImport } from "./routes/payroll.index"
 import { Route as EmployeesIndexRouteImport } from "./routes/employees.index"
@@ -52,6 +53,11 @@ const DashboardRoute = DashboardRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: "/",
   path: "/",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: "/settings/",
+  path: "/settings/",
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportsIndexRoute = ReportsIndexRouteImport.update({
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   "/employees/": typeof EmployeesIndexRoute
   "/payroll/": typeof PayrollIndexRoute
   "/reports/": typeof ReportsIndexRoute
+  "/settings/": typeof SettingsIndexRoute
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   "/employees": typeof EmployeesIndexRoute
   "/payroll": typeof PayrollIndexRoute
   "/reports": typeof ReportsIndexRoute
+  "/settings": typeof SettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -188,6 +196,7 @@ export interface FileRoutesById {
   "/employees/": typeof EmployeesIndexRoute
   "/payroll/": typeof PayrollIndexRoute
   "/reports/": typeof ReportsIndexRoute
+  "/settings/": typeof SettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -211,6 +220,7 @@ export interface FileRouteTypes {
     | "/employees/"
     | "/payroll/"
     | "/reports/"
+    | "/settings/"
   fileRoutesByTo: FileRoutesByTo
   to:
     | "/"
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | "/employees"
     | "/payroll"
     | "/reports"
+    | "/settings"
   id:
     | "__root__"
     | "/"
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | "/employees/"
     | "/payroll/"
     | "/reports/"
+    | "/settings/"
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -275,6 +287,7 @@ export interface RootRouteChildren {
   EmployeesIndexRoute: typeof EmployeesIndexRoute
   PayrollIndexRoute: typeof PayrollIndexRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
+  SettingsIndexRoute: typeof SettingsIndexRoute
 }
 
 declare module "@tanstack/react-router" {
@@ -312,6 +325,13 @@ declare module "@tanstack/react-router" {
       path: "/"
       fullPath: "/"
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/settings/": {
+      id: "/settings/"
+      path: "/settings"
+      fullPath: "/settings/"
+      preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/reports/": {
@@ -435,6 +455,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmployeesIndexRoute: EmployeesIndexRoute,
   PayrollIndexRoute: PayrollIndexRoute,
   ReportsIndexRoute: ReportsIndexRoute,
+  SettingsIndexRoute: SettingsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

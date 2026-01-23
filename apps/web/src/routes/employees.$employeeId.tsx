@@ -236,7 +236,7 @@ function EmployeeDetailPage() {
 									Edit
 								</Button>
 								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
+									<DropdownMenuTrigger>
 										<Button size="icon" variant="outline">
 											<MoreVerticalIcon className="h-4 w-4" />
 										</Button>

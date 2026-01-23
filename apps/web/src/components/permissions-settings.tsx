@@ -69,7 +69,7 @@ export function PermissionsSettings() {
 	const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
 	const [newRole, setNewRole] = useState<MemberRole>("member");
 
-	const { organizationId, isLoading: isOrgLoading } = useOrganization();
+	const { organizationId } = useOrganization();
 
 	const queryClient = useQueryClient();
 	const { data: members, isLoading } = useQuery(

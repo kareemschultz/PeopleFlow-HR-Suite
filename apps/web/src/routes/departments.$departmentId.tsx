@@ -174,7 +174,7 @@ function DepartmentRoute() {
 								Edit
 							</Button>
 							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
+								<DropdownMenuTrigger>
 									<Button size="icon" variant="ghost">
 										<MoreVerticalIcon className="h-5 w-5" />
 									</Button>
@@ -317,15 +317,15 @@ function DepartmentRoute() {
 												navigate({
 													to: "/departments/$departmentId",
 													params: {
-														departmentId: department.parentDepartment.id,
+														departmentId: department.parentDepartment?.id ?? "",
 													},
 												})
 											}
 											variant="outline"
 										>
 											<Building03Icon className="mr-2 h-4 w-4" />
-											{department.parentDepartment.name} (
-											{department.parentDepartment.code})
+											{department.parentDepartment?.name} (
+											{department.parentDepartment?.code})
 										</Button>
 									</div>
 								</div>
@@ -593,10 +593,7 @@ function DepartmentRoute() {
 							<h2 className="font-semibold text-xl">Positions</h2>
 							<Button
 								onClick={() =>
-									navigate({
-										to: "/positions/new",
-										search: { departmentId: department.id },
-									})
+									toast.info("Position management feature coming soon!")
 								}
 							>
 								Add Position
@@ -634,10 +631,7 @@ function DepartmentRoute() {
 											</div>
 											<Button
 												onClick={() =>
-													navigate({
-														to: "/positions/$positionId",
-														params: { positionId: position.id },
-													})
+													toast.info("Position details feature coming soon!")
 												}
 												size="sm"
 												variant="outline"
@@ -656,10 +650,7 @@ function DepartmentRoute() {
 								<Button
 									className="mt-4"
 									onClick={() =>
-										navigate({
-											to: "/positions/new",
-											search: { departmentId: department.id },
-										})
+										toast.info("Position management feature coming soon!")
 									}
 									variant="outline"
 								>
