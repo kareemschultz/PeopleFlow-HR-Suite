@@ -68,6 +68,18 @@
       }
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/src/routes/**/*.$*.tsx", "**/src/routes/**/*.$*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "double"

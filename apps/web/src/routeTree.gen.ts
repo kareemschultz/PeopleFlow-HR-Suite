@@ -19,6 +19,8 @@ import { Route as TimeAttendanceIndexRouteImport } from "./routes/time-attendanc
 import { Route as SettingsIndexRouteImport } from "./routes/settings/index"
 import { Route as ReportsIndexRouteImport } from "./routes/reports/index"
 import { Route as PayrollIndexRouteImport } from "./routes/payroll.index"
+import { Route as OnboardingIndexRouteImport } from "./routes/onboarding.index"
+import { Route as LeaveIndexRouteImport } from "./routes/leave.index"
 import { Route as EmployeesIndexRouteImport } from "./routes/employees.index"
 import { Route as DepartmentsIndexRouteImport } from "./routes/departments.index"
 import { Route as TimeAttendanceClockRouteImport } from "./routes/time-attendance.clock"
@@ -29,6 +31,9 @@ import { Route as SettingsLicenseRouteImport } from "./routes/settings/license"
 import { Route as SettingsJurisdictionsRouteImport } from "./routes/settings/jurisdictions"
 import { Route as PayrollNewRouteImport } from "./routes/payroll.new"
 import { Route as PayrollPayrollRunIdRouteImport } from "./routes/payroll.$payrollRunId"
+import { Route as OnboardingNewRouteImport } from "./routes/onboarding.new"
+import { Route as LeaveNewRouteImport } from "./routes/leave.new"
+import { Route as LeaveLeaveIdRouteImport } from "./routes/leave.$leaveId"
 import { Route as EmployeesNewRouteImport } from "./routes/employees.new"
 import { Route as EmployeesEmployeeIdRouteImport } from "./routes/employees.$employeeId"
 import { Route as DepartmentsNewRouteImport } from "./routes/departments.new"
@@ -84,6 +89,16 @@ const PayrollIndexRoute = PayrollIndexRouteImport.update({
   path: "/payroll/",
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingIndexRoute = OnboardingIndexRouteImport.update({
+  id: "/onboarding/",
+  path: "/onboarding/",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaveIndexRoute = LeaveIndexRouteImport.update({
+  id: "/leave/",
+  path: "/leave/",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmployeesIndexRoute = EmployeesIndexRouteImport.update({
   id: "/employees/",
   path: "/employees/",
@@ -134,6 +149,21 @@ const PayrollPayrollRunIdRoute = PayrollPayrollRunIdRouteImport.update({
   path: "/payroll/$payrollRunId",
   getParentRoute: () => rootRouteImport,
 } as any)
+const OnboardingNewRoute = OnboardingNewRouteImport.update({
+  id: "/onboarding/new",
+  path: "/onboarding/new",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaveNewRoute = LeaveNewRouteImport.update({
+  id: "/leave/new",
+  path: "/leave/new",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaveLeaveIdRoute = LeaveLeaveIdRouteImport.update({
+  id: "/leave/$leaveId",
+  path: "/leave/$leaveId",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EmployeesNewRoute = EmployeesNewRouteImport.update({
   id: "/employees/new",
   path: "/employees/new",
@@ -166,6 +196,9 @@ export interface FileRoutesByFullPath {
   "/departments/new": typeof DepartmentsNewRoute
   "/employees/$employeeId": typeof EmployeesEmployeeIdRoute
   "/employees/new": typeof EmployeesNewRoute
+  "/leave/$leaveId": typeof LeaveLeaveIdRoute
+  "/leave/new": typeof LeaveNewRoute
+  "/onboarding/new": typeof OnboardingNewRoute
   "/payroll/$payrollRunId": typeof PayrollPayrollRunIdRoute
   "/payroll/new": typeof PayrollNewRoute
   "/settings/jurisdictions": typeof SettingsJurisdictionsRoute
@@ -176,6 +209,8 @@ export interface FileRoutesByFullPath {
   "/time-attendance/clock": typeof TimeAttendanceClockRoute
   "/departments/": typeof DepartmentsIndexRoute
   "/employees/": typeof EmployeesIndexRoute
+  "/leave/": typeof LeaveIndexRoute
+  "/onboarding/": typeof OnboardingIndexRoute
   "/payroll/": typeof PayrollIndexRoute
   "/reports/": typeof ReportsIndexRoute
   "/settings/": typeof SettingsIndexRoute
@@ -192,6 +227,9 @@ export interface FileRoutesByTo {
   "/departments/new": typeof DepartmentsNewRoute
   "/employees/$employeeId": typeof EmployeesEmployeeIdRoute
   "/employees/new": typeof EmployeesNewRoute
+  "/leave/$leaveId": typeof LeaveLeaveIdRoute
+  "/leave/new": typeof LeaveNewRoute
+  "/onboarding/new": typeof OnboardingNewRoute
   "/payroll/$payrollRunId": typeof PayrollPayrollRunIdRoute
   "/payroll/new": typeof PayrollNewRoute
   "/settings/jurisdictions": typeof SettingsJurisdictionsRoute
@@ -202,6 +240,8 @@ export interface FileRoutesByTo {
   "/time-attendance/clock": typeof TimeAttendanceClockRoute
   "/departments": typeof DepartmentsIndexRoute
   "/employees": typeof EmployeesIndexRoute
+  "/leave": typeof LeaveIndexRoute
+  "/onboarding": typeof OnboardingIndexRoute
   "/payroll": typeof PayrollIndexRoute
   "/reports": typeof ReportsIndexRoute
   "/settings": typeof SettingsIndexRoute
@@ -219,6 +259,9 @@ export interface FileRoutesById {
   "/departments/new": typeof DepartmentsNewRoute
   "/employees/$employeeId": typeof EmployeesEmployeeIdRoute
   "/employees/new": typeof EmployeesNewRoute
+  "/leave/$leaveId": typeof LeaveLeaveIdRoute
+  "/leave/new": typeof LeaveNewRoute
+  "/onboarding/new": typeof OnboardingNewRoute
   "/payroll/$payrollRunId": typeof PayrollPayrollRunIdRoute
   "/payroll/new": typeof PayrollNewRoute
   "/settings/jurisdictions": typeof SettingsJurisdictionsRoute
@@ -229,6 +272,8 @@ export interface FileRoutesById {
   "/time-attendance/clock": typeof TimeAttendanceClockRoute
   "/departments/": typeof DepartmentsIndexRoute
   "/employees/": typeof EmployeesIndexRoute
+  "/leave/": typeof LeaveIndexRoute
+  "/onboarding/": typeof OnboardingIndexRoute
   "/payroll/": typeof PayrollIndexRoute
   "/reports/": typeof ReportsIndexRoute
   "/settings/": typeof SettingsIndexRoute
@@ -247,6 +292,9 @@ export interface FileRouteTypes {
     | "/departments/new"
     | "/employees/$employeeId"
     | "/employees/new"
+    | "/leave/$leaveId"
+    | "/leave/new"
+    | "/onboarding/new"
     | "/payroll/$payrollRunId"
     | "/payroll/new"
     | "/settings/jurisdictions"
@@ -257,6 +305,8 @@ export interface FileRouteTypes {
     | "/time-attendance/clock"
     | "/departments/"
     | "/employees/"
+    | "/leave/"
+    | "/onboarding/"
     | "/payroll/"
     | "/reports/"
     | "/settings/"
@@ -273,6 +323,9 @@ export interface FileRouteTypes {
     | "/departments/new"
     | "/employees/$employeeId"
     | "/employees/new"
+    | "/leave/$leaveId"
+    | "/leave/new"
+    | "/onboarding/new"
     | "/payroll/$payrollRunId"
     | "/payroll/new"
     | "/settings/jurisdictions"
@@ -283,6 +336,8 @@ export interface FileRouteTypes {
     | "/time-attendance/clock"
     | "/departments"
     | "/employees"
+    | "/leave"
+    | "/onboarding"
     | "/payroll"
     | "/reports"
     | "/settings"
@@ -299,6 +354,9 @@ export interface FileRouteTypes {
     | "/departments/new"
     | "/employees/$employeeId"
     | "/employees/new"
+    | "/leave/$leaveId"
+    | "/leave/new"
+    | "/onboarding/new"
     | "/payroll/$payrollRunId"
     | "/payroll/new"
     | "/settings/jurisdictions"
@@ -309,6 +367,8 @@ export interface FileRouteTypes {
     | "/time-attendance/clock"
     | "/departments/"
     | "/employees/"
+    | "/leave/"
+    | "/onboarding/"
     | "/payroll/"
     | "/reports/"
     | "/settings/"
@@ -326,6 +386,9 @@ export interface RootRouteChildren {
   DepartmentsNewRoute: typeof DepartmentsNewRoute
   EmployeesEmployeeIdRoute: typeof EmployeesEmployeeIdRoute
   EmployeesNewRoute: typeof EmployeesNewRoute
+  LeaveLeaveIdRoute: typeof LeaveLeaveIdRoute
+  LeaveNewRoute: typeof LeaveNewRoute
+  OnboardingNewRoute: typeof OnboardingNewRoute
   PayrollPayrollRunIdRoute: typeof PayrollPayrollRunIdRoute
   PayrollNewRoute: typeof PayrollNewRoute
   SettingsJurisdictionsRoute: typeof SettingsJurisdictionsRoute
@@ -336,6 +399,8 @@ export interface RootRouteChildren {
   TimeAttendanceClockRoute: typeof TimeAttendanceClockRoute
   DepartmentsIndexRoute: typeof DepartmentsIndexRoute
   EmployeesIndexRoute: typeof EmployeesIndexRoute
+  LeaveIndexRoute: typeof LeaveIndexRoute
+  OnboardingIndexRoute: typeof OnboardingIndexRoute
   PayrollIndexRoute: typeof PayrollIndexRoute
   ReportsIndexRoute: typeof ReportsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
@@ -414,6 +479,20 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PayrollIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/onboarding/": {
+      id: "/onboarding/"
+      path: "/onboarding"
+      fullPath: "/onboarding/"
+      preLoaderRoute: typeof OnboardingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/leave/": {
+      id: "/leave/"
+      path: "/leave"
+      fullPath: "/leave/"
+      preLoaderRoute: typeof LeaveIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/employees/": {
       id: "/employees/"
       path: "/employees"
@@ -484,6 +563,27 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof PayrollPayrollRunIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/onboarding/new": {
+      id: "/onboarding/new"
+      path: "/onboarding/new"
+      fullPath: "/onboarding/new"
+      preLoaderRoute: typeof OnboardingNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/leave/new": {
+      id: "/leave/new"
+      path: "/leave/new"
+      fullPath: "/leave/new"
+      preLoaderRoute: typeof LeaveNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/leave/$leaveId": {
+      id: "/leave/$leaveId"
+      path: "/leave/$leaveId"
+      fullPath: "/leave/$leaveId"
+      preLoaderRoute: typeof LeaveLeaveIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/employees/new": {
       id: "/employees/new"
       path: "/employees/new"
@@ -526,6 +626,9 @@ const rootRouteChildren: RootRouteChildren = {
   DepartmentsNewRoute: DepartmentsNewRoute,
   EmployeesEmployeeIdRoute: EmployeesEmployeeIdRoute,
   EmployeesNewRoute: EmployeesNewRoute,
+  LeaveLeaveIdRoute: LeaveLeaveIdRoute,
+  LeaveNewRoute: LeaveNewRoute,
+  OnboardingNewRoute: OnboardingNewRoute,
   PayrollPayrollRunIdRoute: PayrollPayrollRunIdRoute,
   PayrollNewRoute: PayrollNewRoute,
   SettingsJurisdictionsRoute: SettingsJurisdictionsRoute,
@@ -536,6 +639,8 @@ const rootRouteChildren: RootRouteChildren = {
   TimeAttendanceClockRoute: TimeAttendanceClockRoute,
   DepartmentsIndexRoute: DepartmentsIndexRoute,
   EmployeesIndexRoute: EmployeesIndexRoute,
+  LeaveIndexRoute: LeaveIndexRoute,
+  OnboardingIndexRoute: OnboardingIndexRoute,
   PayrollIndexRoute: PayrollIndexRoute,
   ReportsIndexRoute: ReportsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
