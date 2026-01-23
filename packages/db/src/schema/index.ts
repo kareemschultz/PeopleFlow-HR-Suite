@@ -7,6 +7,7 @@ export * from "./employees";
 export * from "./leave-management";
 export * from "./licensing";
 export * from "./metrics";
+export * from "./onboarding-offboarding";
 export * from "./organizations";
 export * from "./payroll";
 export * from "./retro-adjustments";

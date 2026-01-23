@@ -6,6 +6,15 @@ import { employeesRouter } from "./employees";
 import { leaveManagementRouter } from "./leave-management";
 import { licensingRouter } from "./licensing";
 import { metricsRouter } from "./metrics";
+import {
+	documentsRouter,
+	equipmentRouter,
+	onboardingOffboardingStatsRouter,
+	trainingSessionsRouter,
+	workflowTasksRouter,
+	workflowTemplatesRouter,
+	workflowsRouter,
+} from "./onboarding-offboarding";
 import { organizationsRouter } from "./organizations";
 import { payrollRouter } from "./payroll";
 import { reportsRouter } from "./reports";
@@ -66,6 +75,15 @@ export const appRouter = {
 
 	// Leave Management
 	leaveManagement: leaveManagementRouter,
+
+	// Onboarding & Offboarding
+	workflowTemplates: workflowTemplatesRouter,
+	workflows: workflowsRouter,
+	workflowTasks: workflowTasksRouter,
+	documents: documentsRouter,
+	equipment: equipmentRouter,
+	trainingSessions: trainingSessionsRouter,
+	onboardingOffboardingStats: onboardingOffboardingStatsRouter,
 };
 
 export type AppRouter = typeof appRouter;
