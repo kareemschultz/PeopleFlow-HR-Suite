@@ -192,8 +192,11 @@ bun run db:generate   # Generate migrations
 ## Authentication
 
 ### Better Auth
-**Documentation**: https://www.better-auth.com/docs
+**Version**: Latest
+**Documentation**: https://www.better-auth.com/
+**Docs**: https://www.better-auth.com/docs
 **GitHub**: https://github.com/better-auth/better-auth
+**Quick Start**: https://www.better-auth.com/docs/introduction
 
 **Key Features**:
 - Framework agnostic
@@ -215,8 +218,10 @@ bun run db:generate   # Generate migrations
 ## API Layer
 
 ### oRPC
-**Documentation**: https://orpc.unnoq.com/docs
+**Version**: 1.0+
+**Documentation**: https://orpc.dev/
 **GitHub**: https://github.com/unnoq/orpc
+**Getting Started**: https://orpc.dev/docs/getting-started
 
 **Key Features**:
 - End-to-end type safety
@@ -295,7 +300,7 @@ import { Icon01, Icon02 } from 'hugeicons-react';
 ## Styling
 
 ### Tailwind CSS
-**Version**: 3.x
+**Version**: 4.x
 **Documentation**: https://tailwindcss.com/docs
 **Configuration**: https://tailwindcss.com/docs/configuration
 

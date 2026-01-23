@@ -17,7 +17,7 @@ export default defineConfig({
 		}),
 		tanstackStart({
 			prerender: {
-				enabled: true,
+				enabled: false,
 			},
 		}),
 		react(),

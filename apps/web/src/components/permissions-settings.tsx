@@ -68,12 +68,13 @@ export function PermissionsSettings() {
 	const [memberToRemove, setMemberToRemove] = useState<string | null>(null);
 	const [newRole, setNewRole] = useState<MemberRole>("member");
 
-	const organizationId = "00000000-0000-0000-0000-000000000000";
+	const { organizationId, isLoading: isOrgLoading } = useOrganization();
 
 	const queryClient = useQueryClient();
 	const { data: members, isLoading } = useQuery(
 		orpc.organizations.listMembers.queryOptions({
 			input: { organizationId },
+			enabled: !!organizationId,
 		})
 	);
 

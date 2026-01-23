@@ -3,6 +3,7 @@ export * from "./audit";
 export * from "./auth";
 export * from "./departments";
 export * from "./employees";
+export * from "./licensing";
 export * from "./metrics";
 export * from "./organizations";
 export * from "./payroll";

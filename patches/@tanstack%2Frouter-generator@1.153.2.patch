@@ -1,0 +1,13 @@
+diff --git a/dist/esm/config.js b/dist/esm/config.js
+index 42868810792776d0027f51b6557e074637884690..392e58a2a75da9ac5650f44b7d523dcabaae92ae 100644
+--- a/dist/esm/config.js
++++ b/dist/esm/config.js
+@@ -38,7 +38,7 @@ const configSchema = baseConfigSchema.extend({
+   enableRouteTreeFormatting: z.boolean().optional().default(true),
+   routeTreeFileFooter: z.union([
+     z.array(z.string()).optional().default([]),
+-    z.function().returns(z.array(z.string()))
++    z.custom((v) => typeof v === 'function', { message: 'Must be a function returning string[]' })
+   ]).optional(),
+   autoCodeSplitting: z.boolean().optional(),
+   customScaffolding: z.object({

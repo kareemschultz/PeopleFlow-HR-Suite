@@ -145,6 +145,17 @@ function PayrollPage() {
 		enabled: hasOrganization,
 	});
 
+	// Fetch YTD summary stats for current year
+	const currentYear = new Date().getFullYear();
+	const { data: ytdStats } = useQuery({
+		...orpc.reports.payrollSummary.queryOptions({
+			organizationId,
+			startDate: `${currentYear}-01-01`,
+			endDate: `${currentYear}-12-31`,
+		}),
+		enabled: hasOrganization,
+	});
+
 	const isLoading = isOrgLoading || isPayrollLoading;
 	const currencySymbol = organization?.currencySymbol ?? "G$";
 	const currency = organization?.currency ?? "GYD";
@@ -202,7 +213,9 @@ function PayrollPage() {
 						</div>
 						<div>
 							<p className="text-muted-foreground text-sm">Total Paid (YTD)</p>
-							<p className="font-semibold text-2xl">{currencySymbol}0</p>
+							<p className="font-semibold text-2xl">
+								{formatCurrency(ytdStats?.totalNetPay ?? 0)}
+							</p>
 						</div>
 					</div>
 				</Card>
@@ -215,7 +228,9 @@ function PayrollPage() {
 							<p className="text-muted-foreground text-sm">
 								Tax Withheld (YTD)
 							</p>
-							<p className="font-semibold text-2xl">{currencySymbol}0</p>
+							<p className="font-semibold text-2xl">
+								{formatCurrency(ytdStats?.totalPaye ?? 0)}
+							</p>
 						</div>
 					</div>
 				</Card>
@@ -228,7 +243,12 @@ function PayrollPage() {
 							<p className="text-muted-foreground text-sm">
 								NIS Contributions (YTD)
 							</p>
-							<p className="font-semibold text-2xl">{currencySymbol}0</p>
+							<p className="font-semibold text-2xl">
+								{formatCurrency(
+									(ytdStats?.totalNisEmployee ?? 0) +
+										(ytdStats?.totalNisEmployer ?? 0)
+								)}
+							</p>
 						</div>
 					</div>
 				</Card>

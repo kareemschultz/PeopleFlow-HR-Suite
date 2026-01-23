@@ -843,21 +843,28 @@ This is especially useful for packages like `zod`, `typescript`, `react`, or oth
 
 ## TanStack Router with Zod v4
 
-### Using TanStack Router Without the Plugin
+### Router Generation
 
-TanStack Router itself fully supports Zod v4 via Standard Schema. However, `@tanstack/router-plugin` (for automatic route generation) still requires Zod v3.
+TanStack Router's generator (`tsr generate`) has a known incompatibility with Zod v4 (used in this project).
 
-**Our Setup**:
-- ✅ TanStack Router v1.153.1 with Zod v4.3.5
-- ❌ Router plugin disabled (incompatible with Zod v4)
-- ✅ Manual route management using `createFileRoute()`
+**Current Setup**:
+- ✅ TanStack Router v1.154+
+- ✅ Zod v4.x
+- ⚠️ Generator requires patching (replaced `.returns()` with `.custom()`)
+
+**Workflow**:
+To generate routes after creating files in `apps/web/src/routes/`:
+```bash
+cd apps/web && bun x tsr generate
+```
+*Note: If this fails with a Zod error, the generator package in `node_modules` needs to be patched.*
 
 **Route Definition Pattern**:
 ```typescript
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-export const Route = createFileRoute("/employees/")(({
+export const Route = createFileRoute("/employees/")({
   component: EmployeesPage,
   validateSearch: z.object({
     search: z.string().optional(),
@@ -865,19 +872,6 @@ export const Route = createFileRoute("/employees/")(({
   }),
 });
 ```
-
-**What We Lose Without Plugin**:
-- Automatic route tree generation
-- Auto-discovery of route files
-- Generated route type definitions
-
-**What Still Works**:
-- All TanStack Router features (navigation, params, search validation)
-- Type-safe routes with manual definitions
-- Zod v4 validation in routes
-- File-based routing structure
-
-**Trade-off**: Manual route tree management is acceptable for development. When `@tanstack/router-plugin` adds Zod v4 support, re-enable it in `vite.config.ts`.
 
 ---
 

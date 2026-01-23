@@ -3,6 +3,7 @@ import type { RouterClient } from "@orpc/server";
 import { protectedProcedure, publicProcedure } from "../index";
 import { departmentsRouter } from "./departments";
 import { employeesRouter } from "./employees";
+import { licensingRouter } from "./licensing";
 import { metricsRouter } from "./metrics";
 import { organizationsRouter } from "./organizations";
 import { payrollRouter } from "./payroll";
@@ -54,6 +55,9 @@ export const appRouter = {
 
 	// Reports & Compliance
 	reports: reportsRouter,
+
+	// Licensing & Subscriptions
+	licensing: licensingRouter,
 };
 
 export type AppRouter = typeof appRouter;

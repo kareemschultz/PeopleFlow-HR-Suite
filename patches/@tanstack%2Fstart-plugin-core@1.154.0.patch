@@ -1,0 +1,85 @@
+diff --git a/node_modules/@tanstack/start-plugin-core/.bun-tag-26bbcc2afc7c8784 b/.bun-tag-26bbcc2afc7c8784
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/node_modules/@tanstack/start-plugin-core/.bun-tag-e0c2cd24ae79e33b b/.bun-tag-e0c2cd24ae79e33b
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
+diff --git a/dist/esm/plugin.js b/dist/esm/plugin.js
+index b83077fb609549e37aa626e181a10e9deb95bc5d..cf33e53836faba3edd29ecd186b009e5aa5eef16 100644
+--- a/dist/esm/plugin.js
++++ b/dist/esm/plugin.js
+@@ -101,7 +101,7 @@ function TanStackStartVitePluginCore(corePluginOpts, startPluginOpts) {
+         const TSS_SERVER_FN_BASE = joinPaths([
+           "/",
+           startConfig2.router.basepath,
+-          startConfig2.serverFns.base,
++          startConfig2.serverFns?.base ?? "/_serverFn",
+           "/"
+         ]);
+         const resolvedSrcDirectory = join(root, startConfig2.srcDirectory);
+@@ -238,7 +238,7 @@ function TanStackStartVitePluginCore(corePluginOpts, startPluginOpts) {
+             ...command === "serve" ? defineReplaceEnv("TSS_SHELL", startConfig2.spa?.enabled ? "true" : "false") : {},
+             ...defineReplaceEnv("TSS_DEV_SERVER", command === "serve" ? "true" : "false"),
+             // Replace NODE_ENV during build (unless opted out) for dead code elimination in server bundles
+-            ...command === "build" && startConfig2.server.build.staticNodeEnv ? {
++            ...command === "build" && startConfig2.server?.build?.staticNodeEnv ? {
+               "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV || viteConfig.mode || "production")
+             } : {}
+           },
+diff --git a/dist/esm/schema.js b/dist/esm/schema.js
+index a662e9855bc44e7532d00110b0dea44c311e940a..dace87e51d7bd466657f0321b918c07eff600e5e 100644
+--- a/dist/esm/schema.js
++++ b/dist/esm/schema.js
+@@ -70,12 +70,15 @@ const pagePrerenderOptionsSchema = z.object({
+   crawlLinks: z.boolean().optional(),
+   retryCount: z.number().optional(),
+   retryDelay: z.number().optional(),
+-  onSuccess: z.function().args(
+-    z.object({
+-      page: pageBaseSchema,
+-      html: z.string()
+-    })
+-  ).returns(z.any()).optional(),
++  onSuccess: z.function(
++    z.tuple([
++      z.object({
++        page: pageBaseSchema,
++        html: z.string()
++      })
++    ]),
++    z.any()
++  ).optional(),
+   headers: z.record(z.string(), z.string()).optional()
+ });
+ const spaSchema = z.object({
+@@ -113,12 +116,15 @@ const tanstackStartOptionsSchema = z.object({
+   }).optional().default({}),
+   serverFns: z.object({
+     base: z.string().optional().default("/_serverFn"),
+-    generateFunctionId: z.function().args(
+-      z.object({
+-        filename: z.string(),
+-        functionName: z.string()
+-      })
+-    ).returns(z.string().optional()).optional()
++    generateFunctionId: z.function(
++      z.tuple([
++        z.object({
++          filename: z.string(),
++          functionName: z.string()
++        })
++      ]),
++      z.string().optional()
++    ).optional()
+   }).optional().default({}),
+   pages: z.array(pageSchema).optional().default([]),
+   sitemap: z.object({
+@@ -129,7 +135,7 @@ const tanstackStartOptionsSchema = z.object({
+   prerender: z.object({
+     enabled: z.boolean().optional(),
+     concurrency: z.number().optional(),
+-    filter: z.function().args(pageSchema).returns(z.any()).optional(),
++    filter: z.function(z.tuple([pageSchema]), z.any()).optional(),
+     failOnError: z.boolean().optional(),
+     autoStaticPathsDiscovery: z.boolean().optional(),
+     maxRedirects: z.number().min(0).optional()
