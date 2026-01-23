@@ -2,10 +2,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
 	Calendar03Icon,
+	Call02Icon,
 	Mail01Icon,
 	MoreVerticalIcon,
 	PencilEdit01Icon,
-	Phone01Icon,
 	UserIcon,
 } from "hugeicons-react";
 import { useState } from "react";
@@ -42,7 +42,7 @@ function EmployeeDetailPage() {
 		isLoading,
 		refetch,
 	} = useQuery({
-		...orpc.employees.get.queryOptions({ id: employeeId }),
+		...orpc.employees.get.queryOptions({ input: { id: employeeId } }),
 	});
 
 	// Update employee mutation
@@ -196,7 +196,7 @@ function EmployeeDetailPage() {
 								</div>
 								{employee.phone && (
 									<div className="flex items-center gap-2">
-										<Phone01Icon className="h-4 w-4 text-muted-foreground" />
+										<Call02Icon className="h-4 w-4 text-muted-foreground" />
 										<a
 											className="text-primary hover:underline"
 											href={`tel:${employee.phone}`}

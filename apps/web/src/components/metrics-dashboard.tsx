@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import {
 	ArrowDown01Icon,
 	ArrowUp01Icon,
+	ChartIcon,
 	Loading03Icon,
-	TrendUp02Icon,
 } from "hugeicons-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -174,12 +174,14 @@ export function MetricsDashboard({
 
 	const { data: metrics, isLoading } = useQuery({
 		...orpc.metrics.listValues.queryOptions({
-			organizationId,
-			periodStart,
-			periodEnd,
-			category,
-			status: "current",
-			limit,
+			input: {
+				organizationId,
+				periodStart,
+				periodEnd,
+				category,
+				status: "current",
+				limit,
+			},
 		}),
 		enabled: hasOrganization,
 		select: (data) => {
@@ -241,7 +243,7 @@ export function MetricsDashboard({
 	if (!metrics || metrics.length === 0) {
 		return (
 			<Card className={cn("p-12 text-center", className)}>
-				<TrendUp02Icon className="mx-auto h-12 w-12 text-muted-foreground" />
+				<ChartIcon className="mx-auto h-12 w-12 text-muted-foreground" />
 				<h3 className="mt-4 font-semibold text-lg">No Metrics Available</h3>
 				<p className="mt-2 text-muted-foreground text-sm">
 					Metrics will appear here once data is calculated
@@ -283,7 +285,7 @@ export function MetricsDashboard({
 								? Number.parseFloat(metric.confidence)
 								: undefined
 						}
-						isEstimated={metric.isEstimated}
+						isEstimated={metric.isEstimated ?? undefined}
 						key={metric.id}
 						title={metric.metricName}
 						unit={
@@ -312,7 +314,7 @@ export function MetricsDashboard({
 
 					<div className="rounded-lg bg-muted/50 p-4">
 						<div className="flex items-center gap-3">
-							<TrendUp02Icon className="h-5 w-5 text-green-600" />
+							<ChartIcon className="h-5 w-5 text-green-600" />
 							<div>
 								<p className="font-medium text-sm">Improving Metrics</p>
 								<p className="mt-1 font-bold text-2xl">

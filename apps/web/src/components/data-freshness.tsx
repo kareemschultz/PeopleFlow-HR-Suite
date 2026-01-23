@@ -5,7 +5,7 @@ import {
 	Clock01Icon,
 	InformationCircleIcon,
 	Loading03Icon,
-	Lock01Icon,
+	LockIcon,
 } from "hugeicons-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -52,9 +52,11 @@ export function DataFreshness({
 
 	const { data: freshnessRecords, isLoading } = useQuery({
 		...orpc.metrics.getFreshness.queryOptions({
-			organizationId,
-			dataType,
-			entityName,
+			input: {
+				organizationId,
+				dataType,
+				entityName,
+			},
 		}),
 		enabled: hasOrganization,
 		refetchInterval: 30_000, // Refresh every 30 seconds
@@ -96,7 +98,7 @@ export function DataFreshness({
 				return {
 					variant: "secondary",
 					label: "Locked",
-					icon: Lock01Icon,
+					icon: LockIcon,
 					color: "text-gray-600",
 				};
 			case "error":
@@ -202,7 +204,7 @@ export function DataFreshness({
 						<div className="col-span-2">
 							<p className="text-muted-foreground text-xs">Locked</p>
 							<div className="mt-1 flex items-center gap-1">
-								<Lock01Icon className="h-3 w-3 text-muted-foreground" />
+								<LockIcon className="h-3 w-3 text-muted-foreground" />
 								<span>
 									{formatTimestamp(freshness.lockedAt)}
 									{freshness.locker &&
@@ -294,7 +296,7 @@ export function DataFreshness({
 
 							{freshness.isLocked && (
 								<div className="flex items-center gap-1 text-yellow-600">
-									<Lock01Icon className="h-3 w-3" />
+									<LockIcon className="h-3 w-3" />
 									<span>Locked - no updates allowed</span>
 								</div>
 							)}

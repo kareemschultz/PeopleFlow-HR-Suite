@@ -47,7 +47,7 @@ function DepartmentRoute() {
 	const [editData, setEditData] = useState<Record<string, unknown>>({});
 
 	const { data: department, isLoading } = useQuery({
-		...orpc.departments.get.queryOptions({ id: departmentId }),
+		...orpc.departments.get.queryOptions({ input: { id: departmentId } }),
 	});
 
 	const updateMutation = useMutation({

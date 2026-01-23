@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
 	CheckmarkCircle02Icon as Check,
-	MailCheck01Icon as Mail,
+	Mail01Icon as Mail,
 } from "hugeicons-react";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -17,14 +17,18 @@ function LicenseSettingsPage() {
 
 	const { data: license, isLoading: isLicenseLoading } = useQuery({
 		...orpc.licensing.getCurrentLicense.queryOptions({
-			organizationId,
+			input: {
+				organizationId,
+			},
 		}),
 		enabled: hasOrganization,
 	});
 
 	const { data: subscription, isLoading: isSubLoading } = useQuery({
 		...orpc.licensing.getActiveSubscription.queryOptions({
-			organizationId,
+			input: {
+				organizationId,
+			},
 		}),
 		enabled: hasOrganization,
 	});

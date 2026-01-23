@@ -46,7 +46,9 @@ function RouteComponent() {
 	// Fetch employee summary
 	const { data: employeeSummary, isLoading: isEmployeeLoading } = useQuery({
 		...orpc.reports.employeeSummary.queryOptions({
-			organizationId,
+			input: {
+				organizationId,
+			},
 		}),
 		enabled: hasOrganization,
 	});
@@ -54,8 +56,10 @@ function RouteComponent() {
 	// Fetch recent payroll runs
 	const { data: recentPayrollRuns, isLoading: isPayrollLoading } = useQuery({
 		...orpc.reports.recentPayrollRuns.queryOptions({
-			organizationId,
-			limit: 5,
+			input: {
+				organizationId,
+				limit: 5,
+			},
 		}),
 		enabled: hasOrganization,
 	});

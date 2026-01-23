@@ -28,6 +28,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useOrganization } from "@/hooks/use-organization";
 import { orpc } from "@/utils/orpc";
 
 function getInitials(name?: string) {

@@ -149,9 +149,11 @@ function PayrollPage() {
 	const currentYear = new Date().getFullYear();
 	const { data: ytdStats } = useQuery({
 		...orpc.reports.payrollSummary.queryOptions({
-			organizationId,
-			startDate: `${currentYear}-01-01`,
-			endDate: `${currentYear}-12-31`,
+			input: {
+				organizationId,
+				startDate: `${currentYear}-01-01`,
+				endDate: `${currentYear}-12-31`,
+			},
 		}),
 		enabled: hasOrganization,
 	});
