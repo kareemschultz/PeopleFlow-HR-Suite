@@ -1,31 +1,120 @@
 ---
-title: Hello World
-description: Your favourite docs framework.
-icon: Rocket
+title: Welcome to PeopleFlow HR Suite
+description: Complete HR & Payroll management system built with modern web technologies
+icon: Home
 ---
 
-Hey there! Fumadocs is the docs framework that also works on Tanstack Start!
+# PeopleFlow HR Suite Documentation
 
-## Heading
+Welcome to the official documentation for PeopleFlow HR Suite - a comprehensive, modern HR and Payroll management system designed for businesses of all sizes.
 
-Hello World!
+## What is PeopleFlow?
+
+PeopleFlow HR Suite is an all-in-one human resources and payroll management platform that streamlines every aspect of workforce management, from hiring to retirement. Built with cutting-edge technologies and designed for compliance, scalability, and ease of use.
+
+## Key Features
+
+### 🏢 Employee Management
+Complete employee lifecycle management with organizational hierarchy, departments, positions, and comprehensive employee profiles.
+
+### 💰 Advanced Payroll Processing
+Automated payroll with multi-jurisdiction tax support (PAYE, NIS), retroactive adjustments, and year-to-date tracking.
+
+### 📊 Tax Compliance
+Built-in progressive tax calculations with support for multiple countries and tax jurisdictions. Configurable tax bands, thresholds, and filing requirements.
+
+### 📅 Leave Management
+Track leave balances, manage requests, and handle multiple leave types (annual, sick, custom) with approval workflows.
+
+### ⏰ Time & Attendance
+Clock-in/out tracking, shift management, overtime calculations, and geofencing support for accurate time tracking.
+
+### 📝 Onboarding & Offboarding
+Streamline new hire onboarding and employee offboarding with customizable workflow templates and task tracking.
+
+### 📈 Analytics & Reports
+Comprehensive metrics dashboard with data freshness indicators, customizable reports, and business intelligence.
+
+### 🔒 Audit & Compliance
+Complete audit trails, permission snapshots, and compliance-ready data retention policies.
+
+## Quick Start
 
 <Cards>
-  <Card title="Learn more about Tanstack Start" href="https://tanstack.com/start" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
+  <Card title="Getting Started" href="/docs/getting-started" icon="Rocket" />
+  <Card title="Installation" href="/docs/installation" icon="Download" />
+  <Card title="Configuration" href="/docs/configuration" icon="Settings" />
+  <Card title="API Reference" href="/docs/api" icon="Code" />
 </Cards>
 
-### CodeBlock
+## Technology Stack
 
-```ts
-console.log("Hello World");
+PeopleFlow HR Suite is built with modern, production-ready technologies:
+
+- **Runtime**: Bun (fast JavaScript runtime)
+- **Language**: TypeScript (type-safe development)
+- **Frontend**: React 19 with TanStack Router
+- **Backend**: Hono (ultra-fast web framework)
+- **Database**: PostgreSQL with Drizzle ORM
+- **API**: oRPC (type-safe RPC)
+- **Authentication**: Better Auth
+- **UI**: shadcn/ui with Tailwind CSS v4
+- **Code Quality**: Ultracite/Biome
+- **Build System**: Turborepo (monorepo management)
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│             Frontend (React 19)                 │
+│   TanStack Router + TanStack Query + oRPC       │
+└───────────────────┬─────────────────────────────┘
+                    │
+                    ↓ (oRPC - Type-Safe API)
+┌─────────────────────────────────────────────────┐
+│            Backend (Hono Server)                │
+│    Business Logic + Service Layer + API        │
+└───────────────────┬─────────────────────────────┘
+                    │
+                    ↓ (Drizzle ORM)
+┌─────────────────────────────────────────────────┐
+│           Database (PostgreSQL)                 │
+│    Multi-tenant + JSONB for tax rules          │
+└─────────────────────────────────────────────────┘
 ```
 
-#### Table
+## Core Principles
 
-| Head                            | Description                         |
-| ------------------------------- | ----------------------------------- |
-| `hello`                         | Hello World                         |
-| very **important**              | Hey                                 |
-| _Surprisingly_                  | Fumadocs                            |
-| very long text that looks weird | hello world hello world hello world |
+- **Type Safety First**: End-to-end type safety from database to UI
+- **Multi-tenant by Design**: Complete data isolation between organizations
+- **Compliance Ready**: Built-in audit trails and tax compliance
+- **Developer Experience**: Fast builds, hot reload, excellent tooling
+- **Production Ready**: Optimized for performance and scalability
+
+## License Options
+
+PeopleFlow HR Suite is available in multiple licensing models:
+
+- **SaaS Monthly/Yearly**: Cloud-hosted with automatic updates
+- **On-Premise Perpetual**: Self-hosted with full data control
+- **14-Day Free Trial**: No credit card required
+
+<Callout type="info">
+  All plans include the complete feature set. Choose the deployment model that works best for your organization.
+</Callout>
+
+## Support & Community
+
+- 📧 Email: support@peopleflow.com
+- 💬 Discord: [Join our community](https://discord.gg/peopleflow)
+- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/peopleflow)
+- 📚 Docs: You're already here!
+
+## Next Steps
+
+<Cards>
+  <Card title="Installation Guide" href="/docs/installation" description="Get PeopleFlow up and running in minutes" />
+  <Card title="Employee Management" href="/docs/features/employees" description="Learn about employee management features" />
+  <Card title="Payroll Processing" href="/docs/features/payroll" description="Master payroll and tax calculations" />
+  <Card title="API Documentation" href="/docs/api" description="Explore the complete API reference" />
+</Cards>
