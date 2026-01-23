@@ -12,6 +12,16 @@ export const Route = createFileRoute("/settings/license")({
 	component: LicenseSettingsPage,
 });
 
+function getSubscriptionStatusBadge(status: string) {
+	if (status === "trialing") {
+		return <Badge className="bg-blue-100 text-blue-700">Free Trial</Badge>;
+	}
+	if (status === "active") {
+		return <Badge className="bg-green-100 text-green-700">Active</Badge>;
+	}
+	return status;
+}
+
 function LicenseSettingsPage() {
 	const { organizationId, hasOrganization } = useOrganization();
 
@@ -116,6 +126,23 @@ function LicenseSettingsPage() {
 			{subscription && (
 				<Card className="p-6">
 					<h2 className="mb-4 font-semibold text-xl">Subscription Details</h2>
+
+					{/* Trial Period Notice */}
+					{subscription.status === "trialing" &&
+						subscription.trialEnd &&
+						new Date(subscription.trialEnd) > new Date() && (
+							<div className="mb-6 rounded-lg bg-blue-50 p-4 dark:bg-blue-950">
+								<p className="font-medium text-blue-900 text-sm dark:text-blue-100">
+									Free Trial Active
+								</p>
+								<p className="mt-1 text-blue-700 text-sm dark:text-blue-300">
+									Your trial expires on{" "}
+									{new Date(subscription.trialEnd).toLocaleDateString()}. Add a
+									payment method to continue after the trial.
+								</p>
+							</div>
+						)}
+
 					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div>
 							<p className="text-muted-foreground text-sm">Plan</p>
@@ -126,7 +153,7 @@ function LicenseSettingsPage() {
 						<div>
 							<p className="text-muted-foreground text-sm">Status</p>
 							<p className="mt-1 font-medium capitalize">
-								{subscription.status}
+								{getSubscriptionStatusBadge(subscription.status)}
 							</p>
 						</div>
 						<div>
@@ -136,15 +163,27 @@ function LicenseSettingsPage() {
 							</p>
 						</div>
 						<div>
-							<p className="text-muted-foreground text-sm">Next Billing Date</p>
+							<p className="text-muted-foreground text-sm">
+								{subscription.status === "trialing"
+									? "Trial Ends"
+									: "Next Billing Date"}
+							</p>
 							<p className="mt-1 font-medium">
-								{new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+								{subscription.status === "trialing" && subscription.trialEnd
+									? new Date(subscription.trialEnd).toLocaleDateString()
+									: new Date(
+											subscription.currentPeriodEnd
+										).toLocaleDateString()}
 							</p>
 						</div>
 					</div>
 
 					<div className="mt-6 flex gap-3">
-						<Button variant="outline">Manage Billing</Button>
+						{subscription.status === "trialing" ? (
+							<Button>Add Payment Method</Button>
+						) : (
+							<Button variant="outline">Manage Billing</Button>
+						)}
 						<Button variant="outline">Cancel Subscription</Button>
 					</div>
 				</Card>

@@ -1,5 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
 	CheckmarkCircle02Icon as Check,
 	Mail01Icon as Mail,
@@ -26,6 +26,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useOrganization } from "@/hooks/use-organization";
 import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/pricing")({
@@ -99,6 +100,10 @@ const pricingTiers: PricingTier[] = [
 ];
 
 function PricingPage() {
+	const navigate = useNavigate();
+	const { organizationId } = useOrganization();
+	const queryClient = useQueryClient();
+
 	const [isContactOpen, setIsContactOpen] = useState(false);
 	const [formData, setFormData] = useState({
 		name: "",
@@ -112,6 +117,21 @@ function PricingPage() {
 			| "partner",
 		employeeCount: "",
 		message: "",
+	});
+
+	// Mutation for starting a trial
+	const startTrialMutation = useMutation({
+		...orpc.licensing.createSubscription.mutationOptions(),
+		onSuccess: () => {
+			toast.success(
+				"Trial started! You have 14 days of free access to all features."
+			);
+			queryClient.invalidateQueries({ queryKey: ["licensing"] });
+			navigate({ to: "/dashboard" });
+		},
+		onError: (error: Error) => {
+			toast.error(`Failed to start trial: ${error.message}`);
+		},
 	});
 
 	const submitInquiry = useMutation({
@@ -153,9 +173,19 @@ function PricingPage() {
 		if (tier.name === "Enterprise") {
 			setFormData((prev) => ({ ...prev, inquiryType: "enterprise" }));
 			setIsContactOpen(true);
-		} else {
-			// Handle subscription signup
-			toast.info("Subscription signup coming soon!");
+		} else if (tier.plan) {
+			// Start 14-day trial
+			if (!organizationId) {
+				toast.error("Please create an organization first");
+				return;
+			}
+
+			startTrialMutation.mutate({
+				organizationId,
+				plan: tier.plan,
+				stripeSubscriptionId: undefined,
+				stripeCustomerId: undefined,
+			});
 		}
 	};
 
@@ -264,7 +294,10 @@ function PricingPage() {
 						<div className="flex flex-col justify-center">
 							<Button
 								onClick={() => {
-									setFormData((prev) => ({ ...prev, inquiryType: "on_prem" }));
+									setFormData((prev) => ({
+										...prev,
+										inquiryType: "on_prem",
+									}));
 									setIsContactOpen(true);
 								}}
 								size="lg"
@@ -342,7 +375,10 @@ function PricingPage() {
 								<Input
 									id="name"
 									onChange={(e) =>
-										setFormData((prev) => ({ ...prev, name: e.target.value }))
+										setFormData((prev) => ({
+											...prev,
+											name: e.target.value,
+										}))
 									}
 									required
 									value={formData.name}
