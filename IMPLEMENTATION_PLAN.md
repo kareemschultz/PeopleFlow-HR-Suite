@@ -214,26 +214,32 @@ apps/web/src/routes/
 
 ---
 
-## Phase 9: Licensing & Monetization ⬜
+## Phase 9: Licensing & Monetization ✅
 
 ### 9.1 Database Schema
 **File:** `packages/db/src/schema/licensing.ts`
-- [ ] licenses table (id, organizationId, type, tier, seats, expiresAt, contactedAt)
-- [ ] subscriptions table (id, organizationId, plan, status, billingCycle)
-- [ ] licenseInquiries table (id, name, email, company, inquiryType, status)
+- [x] licenses table (id, organizationId, type, tier, seats, expiresAt, settings)
+- [x] subscriptions table (id, organizationId, plan, status, billingCycle, Stripe integration)
+- [x] licenseInquiries table (id, name, email, company, inquiryType, status, conversion tracking)
+- [x] paymentHistory table (id, organizationId, amount, status, payment provider details)
 
 ### 9.2 API Router
 **File:** `packages/api/src/routers/licensing.ts`
-- [ ] `submitInquiry()` - One-time license pricing inquiries
-- [ ] `getCurrentLicense()` - Get organization's current license
-- [ ] `validateLicense()` - Validate license key for on-prem
-- [ ] `upgradePlan()` - Handle SaaS plan upgrades
+- [x] `submitInquiry()` - One-time license pricing inquiries (public endpoint)
+- [x] `getCurrentLicense()` - Get organization's current license
+- [x] `validateLicense()` - Validate license key for on-prem
+- [x] `updateLicense()` - Admin license management
+- [x] `createLicense()` - Create new licenses (admin/sales)
+- [x] `getActiveSubscription()` - Get active SaaS subscription
+- [x] `createSubscription()` - Create new subscription
+- [x] `cancelSubscription()` - Cancel subscription
+- [x] `listInquiries()` - Admin view of sales leads
 
 ### 9.3 UI Implementation
-**Files to create:**
-- [ ] `apps/web/src/routes/pricing.tsx` - Pricing page with tiers
-- [ ] `apps/web/src/routes/settings/license.tsx` - License management
-- [ ] `apps/web/src/components/pricing-card.tsx` - Pricing tier display
+**Files created:**
+- [x] `apps/web/src/routes/pricing.tsx` - Comprehensive pricing page with SaaS tiers and on-premise section
+- [x] `apps/web/src/routes/settings/license.tsx` - License management dashboard
+- [x] Contact form dialog integrated in pricing page
 
 ### 9.4 License Types
 **SaaS Subscriptions:**
