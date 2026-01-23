@@ -158,7 +158,7 @@ bunx --bun shadcn@latest add button card input label --overwrite
 
 ---
 
-## Phase 7: UI Components & Pages 🚧
+## Phase 7: UI Components & Pages ✅
 
 ### 7.1 Add shadcn Components ✅
 ```bash
@@ -169,11 +169,11 @@ bunx --bun shadcn@latest add sidebar navigation-menu breadcrumb alert progress c
 
 ### 7.2 Custom Components (from spec.md)
 **Files to create:**
-- [ ] `apps/web/src/components/data-freshness.tsx` - Real-time freshness indicator
+- [x] `apps/web/src/components/data-freshness.tsx` - Real-time freshness indicator
 - [x] `apps/web/src/components/jurisdiction-settings.tsx` - Tax jurisdiction management
-- [ ] `apps/web/src/components/tax-band-editor.tsx` - Visual tax rules editor
-- [ ] `apps/web/src/components/payslip-viewer.tsx` - Detailed payslip display
-- [ ] `apps/web/src/components/metrics-dashboard.tsx` - Analytics dashboard
+- [x] `apps/web/src/components/tax-band-editor.tsx` - Visual tax rules editor
+- [x] `apps/web/src/components/payslip-viewer.tsx` - Detailed payslip display
+- [x] `apps/web/src/components/metrics-dashboard.tsx` - Analytics dashboard
 - [x] `apps/web/src/components/anomaly-alerts.tsx` - Anomaly detection UI
 
 ### 7.3 Route Structure ✅
@@ -182,12 +182,12 @@ apps/web/src/routes/
 ├── dashboard.tsx           # Metrics dashboard ✅
 ├── employees/
 │   ├── index.tsx          # List employees ✅
-│   ├── $employeeId.tsx    # View employee (partial)
-│   └── new.tsx            # Add employee (partial)
-├── departments/           # Department management (partial)
+│   ├── $employeeId.tsx    # View employee ✅
+│   └── new.tsx            # Add employee ✅
+├── departments/
 │   ├── index.tsx          # List departments ✅
-│   ├── $departmentId.tsx  # View department (partial)
-│   └── new.tsx            # Add department (partial)
+│   ├── $departmentId.tsx  # View department ✅
+│   └── new.tsx            # Add department ✅
 ├── payroll/
 │   ├── index.tsx          # Payroll dashboard ✅
 │   ├── runs/              # Payroll runs ✅
