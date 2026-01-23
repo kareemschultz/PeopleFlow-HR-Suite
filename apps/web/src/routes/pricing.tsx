@@ -143,7 +143,7 @@ function PricingPage() {
 			phone: formData.phone || undefined,
 			inquiryType: formData.inquiryType,
 			employeeCount: formData.employeeCount
-				? Number.parseInt(formData.employeeCount)
+				? Number.parseInt(formData.employeeCount, 10)
 				: undefined,
 			message: formData.message || undefined,
 		});

@@ -37,7 +37,9 @@ function MetricCard({
 	className,
 }: MetricCardProps) {
 	const getTrendIcon = () => {
-		if (!change) return null;
+		if (!change) {
+			return null;
+		}
 
 		if (change.percent > 0) {
 			return <ArrowUp01Icon className="h-4 w-4 text-green-600" />;
@@ -49,7 +51,9 @@ function MetricCard({
 	};
 
 	const getTrendColor = () => {
-		if (!change) return "";
+		if (!change) {
+			return "";
+		}
 
 		if (change.percent > 0) {
 			return "text-green-600";

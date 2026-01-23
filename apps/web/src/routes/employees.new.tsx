@@ -250,14 +250,14 @@ function NewEmployeePage() {
 					: undefined,
 
 			// Compensation
-			baseSalary: Number.parseInt(formData.baseSalary) * 100, // Convert to cents
+			baseSalary: Number.parseInt(formData.baseSalary, 10) * 100, // Convert to cents
 			salaryCurrency: formData.salaryCurrency,
 			salaryFrequency: formData.salaryFrequency,
 
 			// Leave Balances
-			annualLeaveBalance: Number.parseInt(formData.annualLeaveBalance) || 0,
-			sickLeaveBalance: Number.parseInt(formData.sickLeaveBalance) || 0,
-			otherLeaveBalance: Number.parseInt(formData.otherLeaveBalance) || 0,
+			annualLeaveBalance: Number.parseInt(formData.annualLeaveBalance, 10) || 0,
+			sickLeaveBalance: Number.parseInt(formData.sickLeaveBalance, 10) || 0,
+			otherLeaveBalance: Number.parseInt(formData.otherLeaveBalance, 10) || 0,
 
 			// Notes
 			notes: formData.notes || undefined,
@@ -816,7 +816,7 @@ function NewEmployeePage() {
 										setWorkSchedule((prev) => ({
 											...prev,
 											hoursPerWeek:
-												Number.parseInt(e.target.value) || undefined,
+												Number.parseInt(e.target.value, 10) || undefined,
 										}))
 									}
 									type="number"
@@ -832,7 +832,8 @@ function NewEmployeePage() {
 									onChange={(e) =>
 										setWorkSchedule((prev) => ({
 											...prev,
-											daysPerWeek: Number.parseInt(e.target.value) || undefined,
+											daysPerWeek:
+												Number.parseInt(e.target.value, 10) || undefined,
 										}))
 									}
 									type="number"

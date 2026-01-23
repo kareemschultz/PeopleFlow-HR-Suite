@@ -41,7 +41,7 @@ function RouteComponent() {
 
 	const { organizationId, organization, hasOrganization } = useOrganization();
 
-	const privateData = useQuery(orpc.privateData.queryOptions());
+	const _privateData = useQuery(orpc.privateData.queryOptions());
 
 	// Fetch employee summary
 	const { data: employeeSummary, isLoading: isEmployeeLoading } = useQuery({

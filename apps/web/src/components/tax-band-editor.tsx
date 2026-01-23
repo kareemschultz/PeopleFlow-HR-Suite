@@ -66,7 +66,7 @@ export function TaxBandEditor({
 	};
 
 	const addBand = () => {
-		const lastBand = bands[bands.length - 1];
+		const lastBand = bands.at(-1);
 		const newOrder =
 			bands.length > 0 ? Math.max(...bands.map((b) => b.order)) + 1 : 1;
 		const newMinAmount =
@@ -97,7 +97,9 @@ export function TaxBandEditor({
 	};
 
 	const moveBandUp = (index: number) => {
-		if (index === 0) return;
+		if (index === 0) {
+			return;
+		}
 
 		const newBands = [...bands];
 		[newBands[index - 1], newBands[index]] = [
@@ -114,7 +116,9 @@ export function TaxBandEditor({
 	};
 
 	const moveBandDown = (index: number) => {
-		if (index === bands.length - 1) return;
+		if (index === bands.length - 1) {
+			return;
+		}
 
 		const newBands = [...bands];
 		[newBands[index], newBands[index + 1]] = [
@@ -131,7 +135,9 @@ export function TaxBandEditor({
 	};
 
 	const formatCurrency = (amount: number | null) => {
-		if (amount === null) return "Unlimited";
+		if (amount === null) {
+			return "Unlimited";
+		}
 		return `${currencySymbol}${amount.toLocaleString()}`;
 	};
 
@@ -139,7 +145,9 @@ export function TaxBandEditor({
 		let totalTax = 0;
 
 		for (const band of bands) {
-			if (income <= band.minAmount) break;
+			if (income <= band.minAmount) {
+				break;
+			}
 
 			const taxableInThisBand =
 				band.maxAmount === null

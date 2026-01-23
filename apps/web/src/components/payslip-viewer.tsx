@@ -122,7 +122,9 @@ export function PayslipViewer({
 	className,
 }: PayslipViewerProps) {
 	const formatCurrency = (amount: number | null | undefined) => {
-		if (amount === null || amount === undefined) return "—";
+		if (amount === null || amount === undefined) {
+			return "—";
+		}
 		const value = amount / 100; // Convert cents to dollars
 		return new Intl.NumberFormat("en-GY", {
 			style: "currency",

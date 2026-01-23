@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from "./routes/__root"
 import { Route as SuccessRouteImport } from "./routes/success"
+import { Route as PricingRouteImport } from "./routes/pricing"
 import { Route as LoginRouteImport } from "./routes/login"
 import { Route as DashboardRouteImport } from "./routes/dashboard"
 import { Route as IndexRouteImport } from "./routes/index"
@@ -19,6 +20,7 @@ import { Route as EmployeesIndexRouteImport } from "./routes/employees.index"
 import { Route as DepartmentsIndexRouteImport } from "./routes/departments.index"
 import { Route as SettingsPermissionsRouteImport } from "./routes/settings/permissions"
 import { Route as SettingsOrganizationRouteImport } from "./routes/settings/organization"
+import { Route as SettingsLicenseRouteImport } from "./routes/settings/license"
 import { Route as SettingsJurisdictionsRouteImport } from "./routes/settings/jurisdictions"
 import { Route as PayrollNewRouteImport } from "./routes/payroll.new"
 import { Route as PayrollPayrollRunIdRouteImport } from "./routes/payroll.$payrollRunId"
@@ -30,6 +32,11 @@ import { Route as DepartmentsDepartmentIdRouteImport } from "./routes/department
 const SuccessRoute = SuccessRouteImport.update({
   id: "/success",
   path: "/success",
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: "/pricing",
+  path: "/pricing",
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -77,6 +84,11 @@ const SettingsOrganizationRoute = SettingsOrganizationRouteImport.update({
   path: "/settings/organization",
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsLicenseRoute = SettingsLicenseRouteImport.update({
+  id: "/settings/license",
+  path: "/settings/license",
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsJurisdictionsRoute = SettingsJurisdictionsRouteImport.update({
   id: "/settings/jurisdictions",
   path: "/settings/jurisdictions",
@@ -117,6 +129,7 @@ export interface FileRoutesByFullPath {
   "/": typeof IndexRoute
   "/dashboard": typeof DashboardRoute
   "/login": typeof LoginRoute
+  "/pricing": typeof PricingRoute
   "/success": typeof SuccessRoute
   "/departments/$departmentId": typeof DepartmentsDepartmentIdRoute
   "/departments/new": typeof DepartmentsNewRoute
@@ -125,6 +138,7 @@ export interface FileRoutesByFullPath {
   "/payroll/$payrollRunId": typeof PayrollPayrollRunIdRoute
   "/payroll/new": typeof PayrollNewRoute
   "/settings/jurisdictions": typeof SettingsJurisdictionsRoute
+  "/settings/license": typeof SettingsLicenseRoute
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
   "/departments/": typeof DepartmentsIndexRoute
@@ -136,6 +150,7 @@ export interface FileRoutesByTo {
   "/": typeof IndexRoute
   "/dashboard": typeof DashboardRoute
   "/login": typeof LoginRoute
+  "/pricing": typeof PricingRoute
   "/success": typeof SuccessRoute
   "/departments/$departmentId": typeof DepartmentsDepartmentIdRoute
   "/departments/new": typeof DepartmentsNewRoute
@@ -144,6 +159,7 @@ export interface FileRoutesByTo {
   "/payroll/$payrollRunId": typeof PayrollPayrollRunIdRoute
   "/payroll/new": typeof PayrollNewRoute
   "/settings/jurisdictions": typeof SettingsJurisdictionsRoute
+  "/settings/license": typeof SettingsLicenseRoute
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
   "/departments": typeof DepartmentsIndexRoute
@@ -156,6 +172,7 @@ export interface FileRoutesById {
   "/": typeof IndexRoute
   "/dashboard": typeof DashboardRoute
   "/login": typeof LoginRoute
+  "/pricing": typeof PricingRoute
   "/success": typeof SuccessRoute
   "/departments/$departmentId": typeof DepartmentsDepartmentIdRoute
   "/departments/new": typeof DepartmentsNewRoute
@@ -164,6 +181,7 @@ export interface FileRoutesById {
   "/payroll/$payrollRunId": typeof PayrollPayrollRunIdRoute
   "/payroll/new": typeof PayrollNewRoute
   "/settings/jurisdictions": typeof SettingsJurisdictionsRoute
+  "/settings/license": typeof SettingsLicenseRoute
   "/settings/organization": typeof SettingsOrganizationRoute
   "/settings/permissions": typeof SettingsPermissionsRoute
   "/departments/": typeof DepartmentsIndexRoute
@@ -177,6 +195,7 @@ export interface FileRouteTypes {
     | "/"
     | "/dashboard"
     | "/login"
+    | "/pricing"
     | "/success"
     | "/departments/$departmentId"
     | "/departments/new"
@@ -185,6 +204,7 @@ export interface FileRouteTypes {
     | "/payroll/$payrollRunId"
     | "/payroll/new"
     | "/settings/jurisdictions"
+    | "/settings/license"
     | "/settings/organization"
     | "/settings/permissions"
     | "/departments/"
@@ -196,6 +216,7 @@ export interface FileRouteTypes {
     | "/"
     | "/dashboard"
     | "/login"
+    | "/pricing"
     | "/success"
     | "/departments/$departmentId"
     | "/departments/new"
@@ -204,6 +225,7 @@ export interface FileRouteTypes {
     | "/payroll/$payrollRunId"
     | "/payroll/new"
     | "/settings/jurisdictions"
+    | "/settings/license"
     | "/settings/organization"
     | "/settings/permissions"
     | "/departments"
@@ -215,6 +237,7 @@ export interface FileRouteTypes {
     | "/"
     | "/dashboard"
     | "/login"
+    | "/pricing"
     | "/success"
     | "/departments/$departmentId"
     | "/departments/new"
@@ -223,6 +246,7 @@ export interface FileRouteTypes {
     | "/payroll/$payrollRunId"
     | "/payroll/new"
     | "/settings/jurisdictions"
+    | "/settings/license"
     | "/settings/organization"
     | "/settings/permissions"
     | "/departments/"
@@ -235,6 +259,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
+  PricingRoute: typeof PricingRoute
   SuccessRoute: typeof SuccessRoute
   DepartmentsDepartmentIdRoute: typeof DepartmentsDepartmentIdRoute
   DepartmentsNewRoute: typeof DepartmentsNewRoute
@@ -243,6 +268,7 @@ export interface RootRouteChildren {
   PayrollPayrollRunIdRoute: typeof PayrollPayrollRunIdRoute
   PayrollNewRoute: typeof PayrollNewRoute
   SettingsJurisdictionsRoute: typeof SettingsJurisdictionsRoute
+  SettingsLicenseRoute: typeof SettingsLicenseRoute
   SettingsOrganizationRoute: typeof SettingsOrganizationRoute
   SettingsPermissionsRoute: typeof SettingsPermissionsRoute
   DepartmentsIndexRoute: typeof DepartmentsIndexRoute
@@ -258,6 +284,13 @@ declare module "@tanstack/react-router" {
       path: "/success"
       fullPath: "/success"
       preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    "/pricing": {
+      id: "/pricing"
+      path: "/pricing"
+      fullPath: "/pricing"
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     "/login": {
@@ -323,6 +356,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof SettingsOrganizationRouteImport
       parentRoute: typeof rootRouteImport
     }
+    "/settings/license": {
+      id: "/settings/license"
+      path: "/settings/license"
+      fullPath: "/settings/license"
+      preLoaderRoute: typeof SettingsLicenseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     "/settings/jurisdictions": {
       id: "/settings/jurisdictions"
       path: "/settings/jurisdictions"
@@ -379,6 +419,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
+  PricingRoute: PricingRoute,
   SuccessRoute: SuccessRoute,
   DepartmentsDepartmentIdRoute: DepartmentsDepartmentIdRoute,
   DepartmentsNewRoute: DepartmentsNewRoute,
@@ -387,6 +428,7 @@ const rootRouteChildren: RootRouteChildren = {
   PayrollPayrollRunIdRoute: PayrollPayrollRunIdRoute,
   PayrollNewRoute: PayrollNewRoute,
   SettingsJurisdictionsRoute: SettingsJurisdictionsRoute,
+  SettingsLicenseRoute: SettingsLicenseRoute,
   SettingsOrganizationRoute: SettingsOrganizationRoute,
   SettingsPermissionsRoute: SettingsPermissionsRoute,
   DepartmentsIndexRoute: DepartmentsIndexRoute,

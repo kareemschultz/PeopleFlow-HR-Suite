@@ -88,7 +88,9 @@ function EmployeeDetailPage() {
 	};
 
 	const formatCurrency = (amount: number | null | undefined) => {
-		if (!amount) return "$0.00";
+		if (!amount) {
+			return "$0.00";
+		}
 		return new Intl.NumberFormat("en-GY", {
 			style: "currency",
 			currency: "GYD",
@@ -96,7 +98,9 @@ function EmployeeDetailPage() {
 	};
 
 	const formatDate = (date: string | null | undefined) => {
-		if (!date) return "N/A";
+		if (!date) {
+			return "N/A";
+		}
 		return new Date(date).toLocaleDateString();
 	};
 
