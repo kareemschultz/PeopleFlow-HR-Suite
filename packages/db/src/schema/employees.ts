@@ -234,6 +234,19 @@ export const employees = pgTable(
 		index("employees_manager_id_idx").on(table.managerId),
 		index("employees_email_idx").on(table.email),
 		index("employees_employee_number_idx").on(table.employeeNumber),
+		index("employees_org_status_idx").on(
+			table.organizationId,
+			table.employmentStatus
+		),
+		index("employees_org_dept_idx").on(
+			table.organizationId,
+			table.departmentId
+		),
+		index("employees_org_type_idx").on(
+			table.organizationId,
+			table.employmentType
+		),
+		index("employees_hire_date_idx").on(table.hireDate),
 	]
 );
 

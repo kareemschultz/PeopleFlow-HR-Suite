@@ -8,12 +8,15 @@ import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { type Context, Hono, type Next } from "hono";
+import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
 const app = new Hono();
 
+// Performance middleware
 app.use(logger());
+app.use(compress()); // gzip/deflate compression for responses
 app.use(
 	"/*",
 	cors({
