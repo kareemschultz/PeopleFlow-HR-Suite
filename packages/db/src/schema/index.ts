@@ -2,6 +2,7 @@
 export * from "./anomalies";
 export * from "./audit";
 export * from "./auth";
+export * from "./backups";
 export * from "./departments";
 export * from "./employees";
 export * from "./leave-management";

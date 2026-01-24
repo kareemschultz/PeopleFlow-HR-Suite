@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { Cancel01Icon, Menu01Icon } from "hugeicons-react";
 import { useState } from "react";
 
@@ -8,9 +8,28 @@ import UserMenu from "./user-menu";
 
 export default function Header() {
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const routerState = useRouterState();
 
-	const links = [
+	// Determine if we're on a marketing/public page
+	const isMarketingPage =
+		routerState.location.pathname === "/" ||
+		routerState.location.pathname === "/pricing" ||
+		routerState.location.pathname === "/login" ||
+		routerState.location.pathname === "/features" ||
+		routerState.location.pathname === "/about" ||
+		routerState.location.pathname === "/contact";
+
+	// Marketing pages show minimal navigation
+	const marketingLinks = [
 		{ to: "/", label: "Home" },
+		{ to: "/features", label: "Features" },
+		{ to: "/pricing", label: "Pricing" },
+		{ to: "/about", label: "About" },
+		{ to: "/contact", label: "Contact" },
+	] as const;
+
+	// App pages show full navigation
+	const appLinks = [
 		{ to: "/dashboard", label: "Dashboard" },
 		{ to: "/employees", label: "Employees" },
 		{ to: "/departments", label: "Departments" },
@@ -18,6 +37,8 @@ export default function Header() {
 		{ to: "/reports", label: "Reports" },
 		{ to: "/settings", label: "Settings" },
 	] as const;
+
+	const links = isMarketingPage ? marketingLinks : appLinks;
 
 	return (
 		<header className="border-border border-b bg-background">
@@ -55,7 +76,14 @@ export default function Header() {
 				{/* Right side controls */}
 				<div className="flex items-center gap-2">
 					<ModeToggle />
-					<UserMenu />
+					{!isMarketingPage && <UserMenu />}
+					{isMarketingPage && (
+						<Link to="/login">
+							<Button size="sm" variant="default">
+								Get Started
+							</Button>
+						</Link>
+					)}
 					{/* Mobile Menu Button - Only visible on mobile */}
 					<Button
 						aria-controls="mobile-menu"

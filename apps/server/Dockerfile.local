@@ -1,0 +1,52 @@
+# =============================================================================
+# PeopleFlow HR Suite Server - Local Development Dockerfile
+# Uses standard public images instead of DHI
+# =============================================================================
+
+FROM oven/bun:1-alpine AS pruner
+WORKDIR /app
+ENV HUSKY=0
+COPY . .
+RUN bunx turbo prune --scope=server --docker
+
+FROM oven/bun:1-alpine AS builder
+WORKDIR /app
+ENV HUSKY=0
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/bun.lock ./bun.lock
+RUN --mount=type=cache,target=/root/.bun bun install --frozen-lockfile
+COPY --from=pruner /app/out/full/ .
+ENV NODE_ENV=production
+RUN --mount=type=cache,target=/root/.cache/turbo bunx turbo build --filter=server...
+RUN mkdir -p dist && \
+    bun build apps/server/src/index.ts \
+    --target=bun \
+    --outdir=dist \
+    --entry-naming=server.bundled.js \
+    --minify \
+    --external hono \
+    --external '@hono/*' \
+    --external '@orpc/*' \
+    --external better-auth \
+    --external drizzle-orm \
+    --external postgres \
+    --external pg
+RUN mkdir -p /app/externals && \
+    cd /app/externals && \
+    echo '{"name":"externals","type":"module"}' > package.json && \
+    bun add hono@^4 better-auth drizzle-orm postgres pg @orpc/server @orpc/client @orpc/openapi @orpc/zod @hono/node-server --production
+
+FROM oven/bun:1-alpine AS runner
+WORKDIR /app
+COPY --from=builder --chown=bun:bun /app/dist/server.bundled.js ./server.bundled.js
+COPY --from=builder --chown=bun:bun /app/externals/node_modules ./node_modules
+COPY --from=builder --chown=bun:bun /app/packages/db/src/schema ./packages/db/src/schema
+COPY --from=builder --chown=bun:bun /app/packages/db/drizzle.config.ts ./packages/db/drizzle.config.ts
+COPY --chown=bun:bun apps/server/healthcheck.js /app/healthcheck.js
+USER bun
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME="0.0.0.0"
+EXPOSE 3000
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 CMD ["bun", "run", "/app/healthcheck.js"]
+CMD ["bun", "run", "/app/server.bundled.js"]

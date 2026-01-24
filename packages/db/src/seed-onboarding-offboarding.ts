@@ -535,28 +535,47 @@ export const seedTaskTemplatesOffboardingStandard: NewTaskTemplate[] = [
 /**
  * Seed function - Onboarding & Offboarding
  */
-export async function seedOnboardingOffboarding() {
+export async function seedOnboardingOffboarding(organizationId: string) {
 	console.log("Seeding onboarding & offboarding workflows...");
+
+	// Update organization IDs in workflow templates
+	const templatesWithOrgId = seedWorkflowTemplates.map((template) => ({
+		...template,
+		organizationId,
+	}));
+
+	// Update organization IDs in task templates
+	const onboardingTasksWithOrgId = seedTaskTemplatesOnboardingStandard.map(
+		(task) => ({
+			...task,
+			organizationId,
+		})
+	);
+
+	const offboardingTasksWithOrgId = seedTaskTemplatesOffboardingStandard.map(
+		(task) => ({
+			...task,
+			organizationId,
+		})
+	);
 
 	// Insert workflow templates
 	console.log("  • Creating workflow templates...");
-	await db.insert(workflowTemplates).values(seedWorkflowTemplates);
-	console.log(
-		`    ✓ Created ${seedWorkflowTemplates.length} workflow templates`
-	);
+	await db.insert(workflowTemplates).values(templatesWithOrgId);
+	console.log(`    ✓ Created ${templatesWithOrgId.length} workflow templates`);
 
 	// Insert task templates for standard onboarding
 	console.log("  • Creating task templates for standard onboarding...");
-	await db.insert(taskTemplates).values(seedTaskTemplatesOnboardingStandard);
+	await db.insert(taskTemplates).values(onboardingTasksWithOrgId);
 	console.log(
-		`    ✓ Created ${seedTaskTemplatesOnboardingStandard.length} onboarding task templates`
+		`    ✓ Created ${onboardingTasksWithOrgId.length} onboarding task templates`
 	);
 
 	// Insert task templates for standard offboarding
 	console.log("  • Creating task templates for standard offboarding...");
-	await db.insert(taskTemplates).values(seedTaskTemplatesOffboardingStandard);
+	await db.insert(taskTemplates).values(offboardingTasksWithOrgId);
 	console.log(
-		`    ✓ Created ${seedTaskTemplatesOffboardingStandard.length} offboarding task templates`
+		`    ✓ Created ${offboardingTasksWithOrgId.length} offboarding task templates`
 	);
 
 	console.log("✓ Onboarding & offboarding seed data complete!\n");

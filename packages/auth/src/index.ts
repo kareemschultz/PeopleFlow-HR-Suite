@@ -21,12 +21,16 @@ export const auth = betterAuth({
 		enabled: true,
 	},
 	socialProviders: {
-		google: {
-			clientId: env.GOOGLE_CLIENT_ID,
-			clientSecret: env.GOOGLE_CLIENT_SECRET,
-			accessType: "offline", // Always get refresh token
-			prompt: "select_account consent", // Allow account selection
-		},
+		...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+			? {
+					google: {
+						clientId: env.GOOGLE_CLIENT_ID,
+						clientSecret: env.GOOGLE_CLIENT_SECRET,
+						accessType: "offline", // Always get refresh token
+						prompt: "select_account consent", // Allow account selection
+					},
+				}
+			: {}),
 	},
 	advanced: {
 		defaultCookieAttributes: {

@@ -73,127 +73,146 @@ export default function SignUpForm({
 	}
 
 	return (
-		<div className="mx-auto mt-10 w-full max-w-md p-6">
-			<h1 className="mb-6 text-center font-bold text-3xl">Create Account</h1>
-
-			<Button
-				className="mb-4 w-full"
-				onClick={handleGoogleSignUp}
-				type="button"
-				variant="outline"
-			>
-				<GoogleIcon className="mr-2 h-5 w-5" />
-				Sign up with Google
-			</Button>
-
-			<div className="relative mb-4">
-				<div className="absolute inset-0 flex items-center">
-					<Separator />
-				</div>
-				<div className="relative flex justify-center text-xs uppercase">
-					<span className="bg-background px-2 text-muted-foreground">
-						Or continue with email
-					</span>
-				</div>
-			</div>
-
-			<form
-				className="space-y-4"
-				onSubmit={(e) => {
-					e.preventDefault();
-					e.stopPropagation();
-					form.handleSubmit();
-				}}
-			>
-				<div>
-					<form.Field name="name">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor={field.name}>Name</Label>
-								<Input
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									value={field.state.value}
-								/>
-								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
-										{error?.message}
-									</p>
-								))}
-							</div>
-						)}
-					</form.Field>
+		<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-950">
+			<div className="w-full max-w-md space-y-8 rounded-2xl border-2 bg-background p-8 shadow-xl">
+				{/* Logo & Branding */}
+				<div className="text-center">
+					<h2 className="font-bold text-3xl">
+						<span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-cyan-400 dark:to-blue-400">
+							PeopleFlow
+						</span>
+					</h2>
+					<p className="mt-2 text-muted-foreground text-sm">
+						HR & Payroll Management Suite
+					</p>
 				</div>
 
 				<div>
-					<form.Field name="email">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor={field.name}>Email</Label>
-								<Input
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									type="email"
-									value={field.state.value}
-								/>
-								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
-										{error?.message}
-									</p>
-								))}
-							</div>
-						)}
-					</form.Field>
+					<h1 className="text-center font-bold text-2xl">Create Account</h1>
+					<p className="mt-2 text-center text-muted-foreground text-sm">
+						Start your 14-day free trial today
+					</p>
 				</div>
 
-				<div>
-					<form.Field name="password">
-						{(field) => (
-							<div className="space-y-2">
-								<Label htmlFor={field.name}>Password</Label>
-								<Input
-									id={field.name}
-									name={field.name}
-									onBlur={field.handleBlur}
-									onChange={(e) => field.handleChange(e.target.value)}
-									type="password"
-									value={field.state.value}
-								/>
-								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
-										{error?.message}
-									</p>
-								))}
-							</div>
-						)}
-					</form.Field>
-				</div>
-
-				<form.Subscribe>
-					{(state) => (
-						<Button
-							className="w-full"
-							disabled={!state.canSubmit || state.isSubmitting}
-							type="submit"
-						>
-							{state.isSubmitting ? "Submitting..." : "Sign Up"}
-						</Button>
-					)}
-				</form.Subscribe>
-			</form>
-
-			<div className="mt-4 text-center">
 				<Button
-					className="text-indigo-600 hover:text-indigo-800"
-					onClick={onSwitchToSignIn}
-					variant="link"
+					className="mb-4 w-full"
+					onClick={handleGoogleSignUp}
+					type="button"
+					variant="outline"
 				>
-					Already have an account? Sign In
+					<GoogleIcon className="mr-2 h-5 w-5" />
+					Sign up with Google
 				</Button>
+
+				<div className="relative mb-4">
+					<div className="absolute inset-0 flex items-center">
+						<Separator />
+					</div>
+					<div className="relative flex justify-center text-xs uppercase">
+						<span className="bg-background px-2 text-muted-foreground">
+							Or continue with email
+						</span>
+					</div>
+				</div>
+
+				<form
+					className="space-y-4"
+					onSubmit={(e) => {
+						e.preventDefault();
+						e.stopPropagation();
+						form.handleSubmit();
+					}}
+				>
+					<div>
+						<form.Field name="name">
+							{(field) => (
+								<div className="space-y-2">
+									<Label htmlFor={field.name}>Name</Label>
+									<Input
+										id={field.name}
+										name={field.name}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										value={field.state.value}
+									/>
+									{field.state.meta.errors.map((error) => (
+										<p className="text-red-500" key={error?.message}>
+											{error?.message}
+										</p>
+									))}
+								</div>
+							)}
+						</form.Field>
+					</div>
+
+					<div>
+						<form.Field name="email">
+							{(field) => (
+								<div className="space-y-2">
+									<Label htmlFor={field.name}>Email</Label>
+									<Input
+										id={field.name}
+										name={field.name}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										type="email"
+										value={field.state.value}
+									/>
+									{field.state.meta.errors.map((error) => (
+										<p className="text-red-500" key={error?.message}>
+											{error?.message}
+										</p>
+									))}
+								</div>
+							)}
+						</form.Field>
+					</div>
+
+					<div>
+						<form.Field name="password">
+							{(field) => (
+								<div className="space-y-2">
+									<Label htmlFor={field.name}>Password</Label>
+									<Input
+										id={field.name}
+										name={field.name}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										type="password"
+										value={field.state.value}
+									/>
+									{field.state.meta.errors.map((error) => (
+										<p className="text-red-500" key={error?.message}>
+											{error?.message}
+										</p>
+									))}
+								</div>
+							)}
+						</form.Field>
+					</div>
+
+					<form.Subscribe>
+						{(state) => (
+							<Button
+								className="w-full"
+								disabled={!state.canSubmit || state.isSubmitting}
+								type="submit"
+							>
+								{state.isSubmitting ? "Submitting..." : "Sign Up"}
+							</Button>
+						)}
+					</form.Subscribe>
+				</form>
+
+				<div className="mt-6 text-center">
+					<Button
+						className="text-primary hover:text-primary/80"
+						onClick={onSwitchToSignIn}
+						variant="link"
+					>
+						Already have an account? Sign In
+					</Button>
+				</div>
 			</div>
 		</div>
 	);

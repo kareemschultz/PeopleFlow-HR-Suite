@@ -1,6 +1,7 @@
 import type { RouterClient } from "@orpc/server";
 
 import { protectedProcedure, publicProcedure } from "../index";
+import { backupsRouter } from "./backups";
 import { departmentsRouter } from "./departments";
 import { employeesRouter } from "./employees";
 import { leaveManagementRouter } from "./leave-management";
@@ -69,6 +70,9 @@ export const appRouter = {
 
 	// Licensing & Subscriptions
 	licensing: licensingRouter,
+
+	// Backups
+	backups: backupsRouter,
 
 	// Time & Attendance
 	timeAttendance: timeAttendanceRouter,

@@ -93,4 +93,8 @@ app.get("/", (c: Context) => {
 	return c.text("OK");
 });
 
+app.get("/health", (c: Context) => {
+	return c.json({ status: "healthy", timestamp: new Date().toISOString() });
+});
+
 export default app;

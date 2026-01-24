@@ -1,0 +1,173 @@
+# =============================================================================
+# PeopleFlow HR Suite - Production Docker Compose
+# =============================================================================
+# Production deployment with security hardening
+#
+# Security:
+#   - Docker Hardened Images (DHI) for database services (zero known CVEs)
+#   - Non-root user execution in application containers
+#   - Read-only root filesystem where possible
+#   - Security-opt: no-new-privileges
+#   - Dropped capabilities
+#   - Resource limits
+#
+# DHI Images: https://docs.docker.com/dhi/
+# =============================================================================
+
+name: peopleflow-hr-suite
+
+services:
+  # ===========================================
+  # PostgreSQL Database (DHI Hardened)
+  # Zero known CVEs, SLSA Build Level 3
+  # ===========================================
+  postgres:
+    image: dhi.io/postgres:16-alpine3.22
+    container_name: peopleflow-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-peopleflow}
+      POSTGRES_USER: ${POSTGRES_USER:-peopleflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"  # Expose for local development/seeding
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-peopleflow}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - peopleflow-network
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ===========================================
+  # Backend API Server (Hono on Bun) - Bundled (~200MB)
+  # Uses DHI Bun Alpine in runner stage
+  # ===========================================
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    container_name: peopleflow-server
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-peopleflow}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-peopleflow}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET is required}
+      - BETTER_AUTH_URL=${BETTER_AUTH_URL:?BETTER_AUTH_URL is required}
+      - CORS_ORIGIN=${CORS_ORIGIN:?CORS_ORIGIN is required}
+      - BACKUP_DIR=/backups
+    ports:
+      - "${API_PORT:-3000}:3000"
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - peopleflow-network
+    # Security hardening
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=100m
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ===========================================
+  # Frontend Web App (React + Vite + Nginx)
+  # Uses DHI Bun for build stages, nginx:alpine for runner
+  # Note: VITE_* vars are baked in at build time
+  # ===========================================
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost/rpc}
+        - VITE_BETTER_AUTH_URL=${VITE_BETTER_AUTH_URL:-http://localhost/api/auth}
+    container_name: peopleflow-web
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks:
+      - peopleflow-network
+    # Security hardening
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=50m
+      - /var/cache/nginx:rw,noexec,nosuid,size=50m
+      - /var/run:rw,noexec,nosuid,size=10m
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+      - CHOWN
+      - SETGID
+      - SETUID
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ===========================================
+  # Nginx Reverse Proxy
+  # Routes requests to web and server containers
+  # ===========================================
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: peopleflow-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    depends_on:
+      - web
+      - server
+    restart: unless-stopped
+    networks:
+      - peopleflow-network
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+networks:
+  peopleflow-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

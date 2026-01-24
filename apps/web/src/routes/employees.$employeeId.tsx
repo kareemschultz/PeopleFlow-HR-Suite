@@ -1,4 +1,3 @@
-// biome-ignore lint/style/useFilenamingConvention: TanStack Router requires $param syntax for dynamic routes
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {

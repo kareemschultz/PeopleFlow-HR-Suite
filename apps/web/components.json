@@ -10,6 +10,7 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "radius": 0.75,
   "iconLibrary": "hugeicons",
   "aliases": {
     "components": "@/components",

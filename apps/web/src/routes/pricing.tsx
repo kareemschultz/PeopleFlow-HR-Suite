@@ -190,19 +190,32 @@ function PricingPage() {
 	};
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+		<div className="min-h-screen bg-background">
 			{/* Header */}
-			<div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-				<div className="mx-auto max-w-2xl text-center">
-					<h1 className="font-bold text-4xl tracking-tight sm:text-5xl">
-						Simple, Transparent Pricing
+			<section className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 px-6 py-24 lg:px-8 dark:from-slate-900 dark:via-slate-800 dark:to-blue-950">
+				<div className="mx-auto max-w-4xl text-center">
+					<div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 font-medium text-blue-700 text-sm dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300">
+						✨ 14-day free trial on all plans
+					</div>
+					<h1 className="font-bold text-4xl tracking-tight sm:text-6xl">
+						<span className="text-gray-900 dark:text-white">
+							Simple, Transparent
+						</span>
+						<br />
+						<span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-600 bg-clip-text text-transparent dark:from-blue-400 dark:via-cyan-400 dark:to-blue-400">
+							Pricing
+						</span>
 					</h1>
-					<p className="mt-6 text-lg text-muted-foreground leading-8">
-						Choose the plan that's right for your organization. All plans
-						include a 14-day free trial.
+					<p className="mt-6 text-gray-600 text-lg leading-8 dark:text-gray-300">
+						Choose the plan that's right for your organization.
+						<br />
+						No credit card required to start your trial.
 					</p>
 				</div>
+			</section>
 
+			{/* Pricing Cards */}
+			<div className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
 				{/* Pricing Cards */}
 				<div className="mx-auto mt-16 grid max-w-5xl grid-cols-1 gap-8 lg:grid-cols-3">
 					{pricingTiers.map((tier) => (

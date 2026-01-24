@@ -1,7 +1,5 @@
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
-// TanStack Router plugin is incompatible with Zod v4 (expects v3.24.2)
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
 
@@ -11,7 +9,7 @@ export default defineConfig({
 		// Disabled: @tanstack/router-plugin requires zod v3, but project uses zod v4
 		// Zod v4 has breaking changes (.returns() removed) that break the plugin
 		// TODO: Re-enable when plugin adds zod v4 support
-		tanstackRouter({}),
+		// tanstackRouter({}),
 		react(),
 		// Disabled: VitePWA causes Babel corruption issues with Bun
 		// TODO: Re-enable when Bun package installation is more stable

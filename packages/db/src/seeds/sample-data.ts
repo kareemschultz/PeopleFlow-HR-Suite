@@ -647,7 +647,7 @@ export async function seedSampleData(): Promise<void> {
 
 	// 6. Seed Onboarding & Offboarding Workflows
 	console.log("\n📝 Seeding onboarding & offboarding workflows...");
-	await seedOnboardingOffboarding();
+	await seedOnboardingOffboarding(org1.id);
 
 	// Summary
 	console.log("\n✨ Sample data seed completed successfully!");
