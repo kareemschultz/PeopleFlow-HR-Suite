@@ -11,8 +11,21 @@ import { type Context, Hono, type Next } from "hono";
 import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { secureHeaders } from "hono/secure-headers";
+import { rateLimiter } from "hono-rate-limiter";
 
 const app = new Hono();
+
+// Security middleware
+app.use(secureHeaders()); // Security headers (CSP, X-Frame-Options, etc.)
+app.use(
+	rateLimiter({
+		windowMs: 15 * 60 * 1000, // 15 minutes
+		limit: 100, // Limit each IP to 100 requests per window
+		standardHeaders: "draft-7",
+		keyGenerator: (c: Context) => c.req.header("x-forwarded-for") || "unknown",
+	})
+);
 
 // Performance middleware
 app.use(logger());
