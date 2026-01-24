@@ -28,6 +28,10 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "check-types": "turbo check-types",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "dev:native": "turbo -F native dev",
     "dev:web": "turbo -F web dev",
     "dev:server": "turbo -F server dev",
@@ -55,12 +59,18 @@
   "devDependencies": {
     "@PeopleFlow-HR-Suite/config": "workspace:*",
     "@biomejs/biome": "2.3.11",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/bun": "catalog:",
+    "@vitest/ui": "^4.0.18",
+    "happy-dom": "^20.3.7",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.11",
     "turbo": "^2.6.3",
     "typescript": "catalog:",
-    "ultracite": "7.0.11"
+    "ultracite": "7.0.11",
+    "vitest": "^4.0.18"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
